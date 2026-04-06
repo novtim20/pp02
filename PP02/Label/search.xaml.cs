@@ -15,7 +15,7 @@ namespace PP02.Label
     public partial class search : Page
     {
         // 🔹 Строка подключения к вашей БД
-        private readonly string _connectionString = "server=127.0.0.1;uid=root;pwd=root;database=pp02;port=3306;";
+        private readonly string _connectionString = "server=127.0.0.1;uid=root;pwd=root;database=vipusk;port=3306;";
 
         // 🔹 Результаты поиска
         private ObservableCollection<PersonViewModel> _searchResults;
@@ -25,6 +25,23 @@ namespace PP02.Label
             InitializeComponent();
             InitializeScrollLogic();
             LoadDictionaries();
+            LoadAllPeople(); // 🔹 Загружаем всю БД при открытии
+        }
+
+        // === 🔹 ЗАГРУЗКА ВСЕЙ БАЗЫ ДАННЫХ ПРИ ОТКРЫТИИ ===
+        private void LoadAllPeople()
+        {
+            try
+            {
+                var db = new DataProvider();
+                db.DataPeople(_connectionString);
+                DisplayResults(DataProvider.PeopleVMList);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка загрузки данных: {ex.Message}",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         // === 🔹 ЗАГРУЗКА СПРАВОЧНИКОВ ИЗ БД ===
@@ -85,17 +102,13 @@ namespace PP02.Label
         {
             try
             {
-                // 1. Загружаем людей из БД (если ещё не загружены)
-                var db = new DataProvider();
-                db.DataPeople(_connectionString);
-
-                // 2. Получаем критерии поиска
+                // 1. Получаем критерии поиска
                 var criteria = GetSearchCriteria();
 
-                // 3. Фильтруем список
+                // 2. Фильтруем уже загруженный список
                 var filtered = FilterPeople(DataProvider.PeopleVMList, criteria);
 
-                // 4. Отображаем результаты в PersonItem
+                // 3. Отображаем результаты в PersonItem
                 DisplayResults(filtered);
             }
             catch (Exception ex)

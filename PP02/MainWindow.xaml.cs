@@ -185,15 +185,15 @@ namespace PP02
             PeopleVMList.Clear();
 
             // Порядок колонок в запросе (важно не менять его):
-            // 0-19: Основные данные человека (ID, ФИО, даты, ссылки)
-            // 20-25: Названия из справочников (Education, Origin, Status, Party, Specialty, CurrentSpecialty)
+            // 0-17: Основные данные человека (ID, ФИО, даты, ссылки)
+            // 18-23: Названия из справочников (Education, Origin, Status, Party, Specialty, CurrentSpecialty)
             string sql = @"
         SELECT 
             p.id, p.full_name, p.role, p.specialty_id, p.education_id,
             p.social_origin_id, p.social_status_id, p.party_id,
             p.graduation_year, p.group_name, p.gender, p.nationality,
             p.birth_year, p.birth_place, p.address, p.diploma_date,
-            p.work_after, p.source, p.photo_path, p.diploma_number,
+            p.work_after, p.source,
             edu.name, orig.name, stat.name, party.name,
             spec.name, new_spec.name
         FROM people p
@@ -212,7 +212,7 @@ namespace PP02
             {
                 PeopleVMList.Add(new PersonViewModel
                 {
-                    // --- Блок 1: Основные данные (Индексы 0-19) ---
+                    // --- Блок 1: Основные данные (Индексы 0-17) ---
                     Id = query.GetInt32(0),
                     FullName = query.GetString(1),
                     Role = query.GetString(2),
@@ -224,7 +224,7 @@ namespace PP02
                     SocialStatusId = query.GetInt32(6),
                     PartyId = query.GetInt32(7),
 
-                    // Данные (индексы 8-19)
+                    // Данные (индексы 8-17)
                     GraduationYear = query.GetInt32(8),
                     GroupName = query.GetString(9),
                     Gender = query.GetString(10),
@@ -235,20 +235,18 @@ namespace PP02
                     DiplomaDate = query.GetDateTime(15),
                     WorkAfter = query.GetString(16),
                     Source = query.GetString(17),
-                    PhotoPath = query.GetString(18),
-                    DiplomaNumber = query.GetInt32(19),
 
-                    // --- Блок 2: Названия справочников (Индексы 20-25) ---
+                    // --- Блок 2: Названия справочников (Индексы 18-23) ---
                     // Обратите внимание: индексы идут в порядке SELECT, а не в порядке свойств класса
 
-                    EducationName = query.GetString(20),           // edu.name
-                    SocialOriginName = query.GetString(21),        // orig.name
-                    SocialStatusName = query.GetString(22),        // stat.name
-                    PartyName = query.GetString(23),               // party.name
-                    SpecialtyName = query.GetString(24),           // spec.name (как в дипломе)
+                    EducationName = query.GetString(18),           // edu.name
+                    SocialOriginName = query.GetString(19),        // orig.name
+                    SocialStatusName = query.GetString(20),        // stat.name
+                    PartyName = query.GetString(21),               // party.name
+                    SpecialtyName = query.GetString(22),           // spec.name (как в дипломе)
 
-                    // CurrentSpecialtyName: если есть новая (25), берем её, иначе старую (24)
-                    CurrentSpecialtyName = query.IsDBNull(25) ? query.GetString(24) : query.GetString(25)
+                    // CurrentSpecialtyName: если есть новая (23), берем её, иначе старую (22)
+                    CurrentSpecialtyName = query.IsDBNull(23) ? query.GetString(22) : query.GetString(23)
                 });
             }
             query.Close();

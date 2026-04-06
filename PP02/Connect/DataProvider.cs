@@ -370,6 +370,54 @@ ORDER BY p.full_name";
         }
 
         /// <summary>
+        /// Возвращает список специальностей
+        /// </summary>
+        public List<Specialty> GetSpecialties()
+        {
+            return SpecialtyList;
+        }
+
+        /// <summary>
+        /// Возвращает список образований
+        /// </summary>
+        public List<Education> GetEducations()
+        {
+            return EducationList;
+        }
+
+        /// <summary>
+        /// Возвращает список социальных происхождений
+        /// </summary>
+        public List<SocialOrigin> GetSocialOrigins()
+        {
+            return SocialOriginList;
+        }
+
+        /// <summary>
+        /// Возвращает список социальных статусов
+        /// </summary>
+        public List<SocialStatus> GetSocialStatuses()
+        {
+            return SocialStatusList;
+        }
+
+        /// <summary>
+        /// Возвращает список партийностей
+        /// </summary>
+        public List<Party> GetParties()
+        {
+            return PartyList;
+        }
+
+        /// <summary>
+        /// Возвращает список людей
+        /// </summary>
+        public List<PersonViewModel> GetPeople()
+        {
+            return PeopleVMList;
+        }
+
+        /// <summary>
         /// Очищает все загруженные данные (для перезагрузки)
         /// </summary>
         public static void ClearAll()

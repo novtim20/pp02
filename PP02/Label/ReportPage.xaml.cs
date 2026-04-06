@@ -7,10 +7,8 @@ using Microsoft.Win32; // Для SaveFileDialog
 using DocumentFormat.OpenXml; // Основные типы OpenXML
 using DocumentFormat.OpenXml.Packaging; // WordprocessingDocument
 using DocumentFormat.OpenXml.Wordprocessing; // Классы для Word (Paragraph, Table и т.д.)
-using Color = System.Drawing.Color; // Явное указание для System.Drawing.Color
 using PP02.Classes.Person;
 using PP02.Connect;
-using DocumentFormat.OpenXml.Presentation;
 using PP02.Classes.Dictionaries;
 using PP02.Classes.Specialties;
 
@@ -130,7 +128,7 @@ namespace PP02.Label
             }).ToList();
 
             ResultsItemsControl.ItemsSource = _filteredPeople;
-            LbCount.Content = $"Найдено записей: {_filteredPeople.Count}";
+            LbCount.Text = $"Найдено записей: {_filteredPeople.Count}";
         }
 
         private void FilterButton_Click(object sender, RoutedEventArgs e)
@@ -238,10 +236,10 @@ namespace PP02.Label
             if (isBold)
                 rPr.Append(new Bold());
 
-            rPr.Append(new FontSize((fontSizePt * 2).ToString())); // Размер в полупунктах
+            rPr.Append(new FontSize { Val = new StringValue((fontSizePt * 2).ToString()) }); // Размер в полупунктах
 
             run.Append(rPr);
-            run.Append(new Text(text));
+            run.Append(new DocumentFormat.OpenXml.Wordprocessing.Text(text));
             para.Append(run);
             body.Append(para);
         }
@@ -282,10 +280,10 @@ namespace PP02.Label
                 rPr.Append(new Shading { Fill = "D3D3D3" }); // Серый фон для шапки
             }
 
-            rPr.Append(new FontSize("12")); // 12pt
+            rPr.Append(new FontSize { Val = new StringValue("12") }); // 12pt
 
             run.Append(rPr);
-            run.Append(new Text(text));
+            run.Append(new DocumentFormat.OpenXml.Wordprocessing.Text(text));
             para.Append(run);
             cell.Append(para);
 

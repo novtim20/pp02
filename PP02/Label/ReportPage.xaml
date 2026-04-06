@@ -32,53 +32,43 @@
                 <!-- Роль -->
                 <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,15,10">
                     <TextBlock Text="Роль:" FontWeight="Bold" Margin="0,0,0,5"/>
-                    <ComboBox x:Name="RoleFilter" Width="200" HorizontalAlignment="Left">
-                        <ComboBoxItem Content="Все" IsSelected="True"/>
-                        <ComboBoxItem Content="Студент"/>
-                        <ComboBoxItem Content="Преподаватель"/>
-                    </ComboBox>
+                    <ComboBox x:Name="CbRole" Width="200" HorizontalAlignment="Left"/>
                 </StackPanel>
 
                 <!-- Специальность -->
                 <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,10">
                     <TextBlock Text="Специальность:" FontWeight="Bold" Margin="0,0,0,5"/>
-                    <ComboBox x:Name="SpecialtyFilter" Width="200" HorizontalAlignment="Left" DisplayMemberPath="Name"/>
-                </StackPanel>
-
-                <!-- Год выпуска -->
-                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,15,10">
-                    <TextBlock Text="Год выпуска:" FontWeight="Bold" Margin="0,0,0,5"/>
-                    <ComboBox x:Name="GraduationYearFilter" Width="200" HorizontalAlignment="Left">
-                        <ComboBoxItem Content="Все" IsSelected="True"/>
-                    </ComboBox>
-                </StackPanel>
-
-                <!-- Пол -->
-                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,10">
-                    <TextBlock Text="Пол:" FontWeight="Bold" Margin="0,0,0,5"/>
-                    <ComboBox x:Name="GenderFilter" Width="200" HorizontalAlignment="Left">
-                        <ComboBoxItem Content="Все" IsSelected="True"/>
-                        <ComboBoxItem Content="Мужской"/>
-                        <ComboBoxItem Content="Женский"/>
-                    </ComboBox>
+                    <ComboBox x:Name="CbSpecialty" Width="200" HorizontalAlignment="Left"/>
                 </StackPanel>
 
                 <!-- Образование -->
-                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,15,10">
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,15,10">
                     <TextBlock Text="Образование:" FontWeight="Bold" Margin="0,0,0,5"/>
-                    <ComboBox x:Name="EducationFilter" Width="200" HorizontalAlignment="Left" DisplayMemberPath="Name"/>
+                    <ComboBox x:Name="CbEducation" Width="200" HorizontalAlignment="Left"/>
                 </StackPanel>
 
                 <!-- Социальное происхождение -->
-                <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,10">
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,10">
                     <TextBlock Text="Соц. происхождение:" FontWeight="Bold" Margin="0,0,0,5"/>
-                    <ComboBox x:Name="SocialOriginFilter" Width="200" HorizontalAlignment="Left" DisplayMemberPath="Name"/>
+                    <ComboBox x:Name="CbOrigin" Width="200" HorizontalAlignment="Left"/>
+                </StackPanel>
+
+                <!-- Социальный статус -->
+                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,15,10">
+                    <TextBlock Text="Соц. статус:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <ComboBox x:Name="CbStatus" Width="200" HorizontalAlignment="Left"/>
+                </StackPanel>
+
+                <!-- Партийность -->
+                <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,10">
+                    <TextBlock Text="Партийность:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <ComboBox x:Name="CbParty" Width="200" HorizontalAlignment="Left"/>
                 </StackPanel>
 
                 <!-- Поиск по ФИО -->
                 <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,0">
                     <TextBlock Text="Поиск по ФИО:" FontWeight="Bold" Margin="0,0,0,5"/>
-                    <TextBox x:Name="FullNameSearch" Width="400" HorizontalAlignment="Left" TextChanged="FullNameSearch_TextChanged"/>
+                    <TextBox x:Name="TbNameSearch" Width="400" HorizontalAlignment="Left" TextChanged="TbNameSearch_TextChanged"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -92,32 +82,32 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Text="Предпросмотр данных:" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                <TextBlock x:Name="LbCount" Grid.Row="0" Text="Найдено записей: 0" FontWeight="Bold" FontSize="14" Margin="0,0,0,10" HorizontalAlignment="Right"/>
 
-                <DataGrid Grid.Row="1" x:Name="PreviewDataGrid"
-                          AutoGenerateColumns="False"
-                          IsReadOnly="True"
-                          CanUserAddRows="False"
-                          HeadersVisibility="Column">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="ФИО" Binding="{Binding FullName}" Width="200"/>
-                        <DataGridTextColumn Header="Роль" Binding="{Binding Role}" Width="100"/>
-                        <DataGridTextColumn Header="Специальность" Binding="{Binding SpecialtyName}" Width="150"/>
-                        <DataGridTextColumn Header="Группа" Binding="{Binding GroupName}" Width="80"/>
-                        <DataGridTextColumn Header="Год выпуска" Binding="{Binding GraduationYear}" Width="80"/>
-                        <DataGridTextColumn Header="Пол" Binding="{Binding Gender}" Width="80"/>
-                        <DataGridTextColumn Header="Образование" Binding="{Binding EducationName}" Width="120"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                <ItemsControl x:Name="ResultsItemsControl" Grid.Row="1">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="3" Padding="10" Margin="0,0,0,5">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding FullName}" FontWeight="Bold" FontSize="14"/>
+                                    <TextBlock Text="{Binding Role}" FontStyle="Italic"/>
+                                    <TextBlock Text="{Binding SpecialtyName}"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </Grid>
         </Border>
 
         <!-- Кнопки экспорта -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
             <Button Content="📊 Экспорт в Excel" Width="150" Height="40" Margin="0,0,15,0"
-                    Click="ExportToExcel_Click" Background="#217346" Foreground="White" FontWeight="Bold"/>
+                    Click="BtnExportExcel_Click" Background="#217346" Foreground="White" FontWeight="Bold"/>
             <Button Content="📄 Экспорт в Word" Width="150" Height="40" Margin="15,0,0,0"
-                    Click="ExportToWord_Click" Background="#2B579A" Foreground="White" FontWeight="Bold"/>
-            <TextBlock x:Name="StatusMessage" VerticalAlignment="Center" Margin="20,0,0,0" Foreground="Green"/>
+                    Click="BtnExportWord_Click" Background="#2B579A" Foreground="White" FontWeight="Bold"/>
+            <Button Content="Применить фильтры" Width="150" Height="40" Margin="15,0,0,0"
+                    Click="FilterButton_Click" Background="#007ACC" Foreground="White" FontWeight="Bold"/>
         </StackPanel>
     </Grid>
 </Page>

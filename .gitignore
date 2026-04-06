@@ -9,16 +9,25 @@ obj/
 
 # Dependencies
 packages/
+node_modules/
 
 # Logs
 *.log
 
-# User-specific files
-*.user
-*.suo
-.vs/
-.vscode/
+# Environment
+.env
+.env.local
+*.env.*
 
-# Configuration
-App.config
+# Editors
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# OS generated files
+.DS_Store
+Thumbs.db
 ```

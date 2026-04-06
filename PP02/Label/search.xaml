@@ -295,6 +295,9 @@
                     <Button Content="🗑 Очистить" Width="150" Height="45" FontSize="16"
                             Background="#6C757D" Foreground="White" BorderThickness="0"
                             Cursor="Hand" Click="ClearButton_Click"/>
+                    <Button Content="📊 Отчет" Width="150" Height="45" FontSize="16" FontWeight="Bold"
+                            Background="#28A745" Foreground="White" BorderThickness="0"
+                            Margin="20,0,0,0" Cursor="Hand" Click="ReportButton_Click"/>
                 </StackPanel>
 
             </StackPanel>

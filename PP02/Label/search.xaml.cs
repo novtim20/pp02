@@ -15,7 +15,7 @@ namespace PP02.Label
     public partial class search : Page
     {
         // 🔹 Строка подключения к вашей БД
-        private readonly string _connectionString = "server=127.0.0.1;uid=root;pwd=root;database=vipusk;port=3306;";
+        private readonly string _connectionString = "server=127.0.0.1;uid=root;pwd=root;database=pp02;port=3306;";
 
         // 🔹 Результаты поиска
         private ObservableCollection<PersonViewModel> _searchResults;
@@ -279,6 +279,12 @@ namespace PP02.Label
         private void ScrollToTopButton_Click(object sender, RoutedEventArgs e)
         {
             MainScrollViewer.ScrollToTop();
+        }
+
+        // === 🔹 КНОПКА "ОТЧЕТ" ===
+        private void ReportButton_Click(object sender, RoutedEventArgs e)
+        {
+            MainWindow.init.OpenPages(new ReportPage());
         }
     }
 

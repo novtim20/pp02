@@ -236,8 +236,8 @@ namespace PP02.Connect
 
             // 🔹 Порядок колонок в запросе КРИТИЧЕСКИ ВАЖЕН — соответствует индексам в reader
             const string sql = @"
-SELECT 
-    -- Блок 1: Основные данные человека (индексы 0-19)
+SELECT
+    -- Блок 1: Основные данные человека (индексы 0-17)
     p.id,                      -- 0
     p.full_name,               -- 1
     p.role,                    -- 2
@@ -256,16 +256,14 @@ SELECT
     p.diploma_date,            -- 15
     p.work_after,              -- 16
     p.source,                  -- 17
-    p.photo_path,              -- 18
-    p.diploma_number,          -- 19
-    
-    -- Блок 2: Названия из справочников (индексы 20-25)
-    edu.name,                  -- 20: EducationName
-    orig.name,                 -- 21: SocialOriginName
-    stat.name,                 -- 22: SocialStatusName
-    party.name,                -- 23: PartyName
-    spec.name,                 -- 24: SpecialtyName (как в дипломе)
-    new_spec.name              -- 25: CurrentSpecialtyName (актуальная)
+
+    -- Блок 2: Названия из справочников (индексы 18-23)
+    edu.name,                  -- 18: EducationName
+    orig.name,                 -- 19: SocialOriginName
+    stat.name,                 -- 20: SocialStatusName
+    party.name,                -- 21: PartyName
+    spec.name,                 -- 22: SpecialtyName (как в дипломе)
+    new_spec.name              -- 23: CurrentSpecialtyName (актуальная)
 FROM people p
 LEFT JOIN ref_education edu ON p.education_id = edu.id
 LEFT JOIN ref_social_origin orig ON p.social_origin_id = orig.id
@@ -284,7 +282,7 @@ ORDER BY p.full_name";
                 {
                     PeopleVMList.Add(new PersonViewModel
                     {
-                        // === Блок 1: Основные данные (индексы 0-19) ===
+                        // === Блок 1: Основные данные (индексы 0-17) ===
                         Id = reader.GetInt32(0),
                         FullName = reader.GetString(1),
                         Role = GetStringOrNull(reader, 2),
@@ -307,20 +305,18 @@ ORDER BY p.full_name";
                         DiplomaDate = GetDateTimeOrNull(reader, 15),
                         WorkAfter = GetStringOrNull(reader, 16),
                         Source = GetStringOrNull(reader, 17),
-                        PhotoPath = GetStringOrNull(reader, 18),
-                        DiplomaNumber = GetIntOrNull(reader, 19),
 
-                        // === Блок 2: Названия справочников (индексы 20-25) ===
-                        EducationName = GetStringOrNull(reader, 20),
-                        SocialOriginName = GetStringOrNull(reader, 21),
-                        SocialStatusName = GetStringOrNull(reader, 22),
-                        PartyName = GetStringOrNull(reader, 23),
-                        SpecialtyName = GetStringOrNull(reader, 24),
+                        // === Блок 2: Названия справочников (индексы 18-23) ===
+                        EducationName = GetStringOrNull(reader, 18),
+                        SocialOriginName = GetStringOrNull(reader, 19),
+                        SocialStatusName = GetStringOrNull(reader, 20),
+                        PartyName = GetStringOrNull(reader, 21),
+                        SpecialtyName = GetStringOrNull(reader, 22),
 
                         // Актуальная специальность: если есть новая — берём её, иначе старую
-                        CurrentSpecialtyName = reader.IsDBNull(25)
-                            ? GetStringOrNull(reader, 24)
-                            : GetStringOrNull(reader, 25)
+                        CurrentSpecialtyName = reader.IsDBNull(23)
+                            ? GetStringOrNull(reader, 22)
+                            : GetStringOrNull(reader, 23)
                     });
                 }
             }

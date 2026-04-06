@@ -10,7 +10,7 @@ namespace PP02.Classes.Person
     {
         public int Id { get; set; }
         public string FullName { get; set; }
-        public string Role { get; set; } 
+        public string Role { get; set; }
         // "Студент" или "Преподаватель"
 
         // ID связей со справочниками
@@ -32,16 +32,12 @@ namespace PP02.Classes.Person
         public string WorkAfter { get; set; }
         public string Source { get; set; }
 
-        // Фото и документы
-        public string PhotoPath { get; set; }
-        public int? DiplomaNumber { get; set; }
-
         // Конструктор
         public Person(int id, string fullName, string role, int? specialtyId, int? educationId,
             int? socialOriginId, int? socialStatusId, int? partyId, int? graduationYear,
             string groupName, string gender, string nationality, int? birthYear,
             string birthPlace, string address, DateTime? diplomaDate, string workAfter,
-            string source, string photoPath, int? diplomaNumber)
+            string source)
         {
             Id = id;
             FullName = fullName;
@@ -61,8 +57,6 @@ namespace PP02.Classes.Person
             DiplomaDate = diplomaDate;
             WorkAfter = workAfter;
             Source = source;
-            PhotoPath = photoPath;
-            DiplomaNumber = diplomaNumber;
         }
     }
 }

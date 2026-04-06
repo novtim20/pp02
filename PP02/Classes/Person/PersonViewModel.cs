@@ -47,7 +47,5 @@ namespace PP02.Classes.Person
         public DateTime? DiplomaDate { get; set; }
         public string WorkAfter { get; set; }
         public string Source { get; set; }
-        public string PhotoPath { get; set; }
-        public int? DiplomaNumber { get; set; }
     }
 }

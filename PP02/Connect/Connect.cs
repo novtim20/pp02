@@ -20,7 +20,7 @@ namespace PP02.Connect
         public static string GetConnectionString()
         {
             return ConfigurationManager.ConnectionStrings["MySqlConnectionString"]?.ConnectionString
-                ?? "server=127.0.0.1;uid=root;pwd=root;database=vipusk;port=3306;";
+                ?? "server=127.0.0.1;uid=root;pwd=root;database=pp02;port=3306;";
         }
 
         /// <summary>

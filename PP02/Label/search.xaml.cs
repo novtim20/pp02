@@ -280,6 +280,12 @@ namespace PP02.Label
         {
             MainScrollViewer.ScrollToTop();
         }
+
+        // === 🔹 КНОПКА "ОТЧЁТ" (переход на ReportPage) ===
+        private void ReportButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService?.Navigate(new ReportPage());
+        }
     }
 
     // === 🔹 КРИТЕРИИ ПОИСКА ===

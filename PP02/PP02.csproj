@@ -175,6 +175,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Label\AddStudentPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Label\Item\PersonItem.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -207,6 +211,9 @@
     <Compile Include="Connect\DataProvider.cs" />
     <Compile Include="Label\authorization.xaml.cs">
       <DependentUpon>authorization.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Label\AddStudentPage.xaml.cs">
+      <DependentUpon>AddStudentPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Label\Item\PersonItem.xaml.cs">
       <DependentUpon>PersonItem.xaml</DependentUpon>

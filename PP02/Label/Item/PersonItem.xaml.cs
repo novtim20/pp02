@@ -74,13 +74,63 @@ namespace PP02.Label.Item
             CmbParty.DisplayMemberPath = "Name";
             CmbParty.SelectedValuePath = "Id";
 
-            // Специальности
-            CmbSpecialty.ItemsSource = DataProvider.SpecialtyList;
+            // Группы - с поддержкой поиска по short_name (FULLTEXT)
+            var groups = DataProvider.GroupList.ToList();
+            CmbGroup.ItemsSource = groups;
+            CmbGroup.DisplayMemberPath = "ShortName";
+            CmbGroup.SelectedValuePath = "Id";
+            CmbGroup.IsEditable = true;
+            CmbGroup.StaysOpenOnEdit = true;
+
+            // Специальности - основные + исторические алиасы
+            var specialties = DataProvider.SpecialtyList.ToList();
+            CmbSpecialty.ItemsSource = specialties;
             CmbSpecialty.DisplayMemberPath = "Name";
             CmbSpecialty.SelectedValuePath = "Id";
+            CmbSpecialty.IsEditable = true;
+            CmbSpecialty.StaysOpenOnEdit = true;
+
+            // Исторические алиасы (для выпадающего списка при вводе старого кода)
+            // Можно добавить отдельный ComboBox или использовать автодополнение
+
+            // Подписка на изменения группы для авто-определения специальности
+            CmbGroup.SelectionChanged += CmbGroup_SelectionChanged;
+           // CmbGroup.TextChanged += CmbGroup_TextChanged;
 
             // Подписка на изменения полей (для флага _isDirty)
             SubscribeToChanges();
+        }
+
+        // === 🔹 АВТОМАТИЧЕСКОЕ ОПРЕДЕЛЕНИЕ СПЕЦИАЛЬНОСТИ ПО ГРУППЕ ===
+        private void CmbGroup_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CmbGroup.SelectedItem is Group selectedGroup)
+            {
+                // Если группа выбрана - автоматически устанавливаем её специальность
+                var specialty = DataProvider.SpecialtyList.FirstOrDefault(s => s.Id == selectedGroup.SpecialtyId);
+                if (specialty != null)
+                {
+                    CmbSpecialty.SelectedValue = specialty.Id;
+                    _isDirty = true;
+                }
+            }
+        }
+
+        private void CmbGroup_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Если пользователь ввёл текст вручную - пытаемся найти группу
+            if (string.IsNullOrEmpty(CmbGroup.Text))
+                return;
+
+            var foundGroup = DataProvider.GroupList.FirstOrDefault(g =>
+                g.Code.Equals(CmbGroup.Text, StringComparison.OrdinalIgnoreCase) ||
+                g.ShortName.Equals(CmbGroup.Text, StringComparison.OrdinalIgnoreCase));
+
+            if (foundGroup != null)
+            {
+                CmbGroup.SelectedValue = foundGroup.Id;
+                // Специальность установится через SelectionChanged
+            }
         }
 
         // === 🔹 ПОДПИСКА НА ИЗМЕНЕНИЯ ПОЛЕЙ ===
@@ -127,7 +177,7 @@ namespace PP02.Label.Item
                 ?? CmbRole.Items[0] as ComboBoxItem;
 
             TxtEditGradYear.Text = _currentPerson.GraduationYear?.ToString();
-            TxtEditGroup.Text = _currentPerson.GroupName;
+            CmbGroup.SelectedValue = _currentPerson.GroupId;
             CmbSpecialty.SelectedValue = _currentPerson.SpecialtyId;
 
             CmbGender.SelectedItem = CmbGender.Items.Cast<ComboBoxItem>()
@@ -159,8 +209,25 @@ namespace PP02.Label.Item
 
             _currentPerson.Role = (CmbRole.SelectedItem as ComboBoxItem)?.Content?.ToString();
             _currentPerson.GraduationYear = int.TryParse(TxtEditGradYear.Text, out var grad) ? grad : (int?)null;
-            _currentPerson.GroupName = TxtEditGroup.Text;
-            _currentPerson.SpecialtyId = CmbSpecialty.SelectedValue as int? ?? 0;
+
+            // Получаем ID группы из ComboBox
+            _currentPerson.GroupId = CmbGroup.SelectedValue as int?;
+
+            // Получаем ID специальности из ComboBox
+            _currentPerson.SpecialtyId = CmbSpecialty.SelectedValue as int?;
+
+            // Проверка: если группа выбрана, специальность должна соответствовать группе
+            // (триггеры в БД trg_people_spec_check/trg_people_spec_check_upd также проверят это)
+            if (_currentPerson.GroupId.HasValue && _currentPerson.GroupId.Value > 0)
+            {
+                var selectedGroup = DataProvider.GroupList.FirstOrDefault(g => g.Id == _currentPerson.GroupId.Value);
+                if (selectedGroup != null && selectedGroup.SpecialtyId > 0)
+                {
+                    // Если у группы есть специальность - используем её
+                    _currentPerson.SpecialtyId = selectedGroup.SpecialtyId;
+                    CmbSpecialty.SelectedValue = selectedGroup.SpecialtyId;
+                }
+            }
 
             var genderItem = CmbGender.SelectedItem as ComboBoxItem;
             _currentPerson.Gender = genderItem?.Content?.ToString() == "Мужской" ? "М" :
@@ -281,14 +348,35 @@ UPDATE people SET
     birth_place = @birth_place,
     address = @address,
     work_after = @work_after,
-    source = @source
+    source = @source,
+    historical_alias_id = @historical_alias_id
 WHERE id = @id";
+
+                // Если группа выбрана, специальность должна соответствовать группе
+                // (триггеры в БД также проверят это)
+                int? specialtyId = person.SpecialtyId;
+                if (person.GroupId.HasValue && person.GroupId.Value > 0)
+                {
+                    var group = DataProvider.GroupList.FirstOrDefault(g => g.Id == person.GroupId.Value);
+                    if (group != null && group.SpecialtyId > 0)
+                    {
+                        specialtyId = group.SpecialtyId;
+                    }
+                }
+
+                // Поиск исторического алиаса по выбранной специальности (если есть)
+                int? historicalAliasId = null;
+                if (specialtyId.HasValue)
+                {
+                    // Можно добавить логику выбора исторического алиаса
+                    // Например, если пользователь выбрал старый код из ComboBox
+                }
 
                 using (var command = new MySql.Data.MySqlClient.MySqlCommand(sql, connection))
                 {
                     command.Parameters.AddWithValue("@id", person.Id);
                     command.Parameters.AddWithValue("@role", (object)person.Role ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@specialty_id", person.SpecialtyId);
+                    command.Parameters.AddWithValue("@specialty_id", (object)specialtyId ?? DBNull.Value);
                     command.Parameters.AddWithValue("@education_id", (object)person.EducationId ?? DBNull.Value);
                     command.Parameters.AddWithValue("@social_origin_id", (object)person.SocialOriginId ?? DBNull.Value);
                     command.Parameters.AddWithValue("@social_status_id", (object)person.SocialStatusId ?? DBNull.Value);
@@ -302,6 +390,7 @@ WHERE id = @id";
                     command.Parameters.AddWithValue("@address", (object)person.Address ?? DBNull.Value);
                     command.Parameters.AddWithValue("@work_after", (object)person.WorkAfter ?? DBNull.Value);
                     command.Parameters.AddWithValue("@source", (object)person.Source ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@historical_alias_id", (object)historicalAliasId ?? DBNull.Value);
 
                     command.ExecuteNonQuery();
                 }

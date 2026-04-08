@@ -154,7 +154,7 @@ namespace PP02
                 {
                     Id = query.GetInt32(0),
                     Name = query.GetString(1),
-                    IsCurrent = query.GetBoolean(2)
+                    IsActive = query.GetBoolean(2)
                 });
             }
             query.Close();

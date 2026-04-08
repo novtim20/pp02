@@ -41,5 +41,43 @@ namespace PP02.Classes.Specialties
 
         // Название специальности (заполняется при загрузке)
         public string SpecialtyName { get; set; }
+
+        // Код специальности для отображения в списке групп
+        public string SpecialtyCode { get; set; }
+    }
+
+    /// <summary>
+    /// Модель исторического алиаса специальности (таблица specialty_aliases)
+    /// </summary>
+    public class SpecialtyAlias
+    {
+        public int Id { get; set; }
+        public int SpecialtyId { get; set; }       // Ссылка на основную специальность
+        public string OldCode { get; set; }        // Старый код
+        public string OldName { get; set; }        // Старое название
+        public DateTime? ValidFrom { get; set; }   // Дата действия
+        public DateTime? ValidTo { get; set; }     // Дата окончания действия
+
+        public override string ToString()
+        {
+            return $"{OldCode} - {OldName} (архив)";
+        }
+    }
+
+    /// <summary>
+    /// Модель перехода между специальностями (таблица specialty_transitions)
+    /// </summary>
+    public class SpecialtyTransition
+    {
+        public int Id { get; set; }
+        public int FromSpecialtyId { get; set; }   // От какой специальности
+        public int ToSpecialtyId { get; set; }     // К какой специальности
+        public string TransitionType { get; set; } // "split" или "merge"
+        public DateTime? EffectiveDate { get; set; } // Дата перехода
+
+        public override string ToString()
+        {
+            return $"{TransitionType}: {FromSpecialtyId} -> {ToSpecialtyId}";
+        }
     }
 }

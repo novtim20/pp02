@@ -92,8 +92,19 @@ namespace PP02.Label
                 // Пол (статичный список)
                 GenderComboBox.SelectedIndex = 0;
 
-                // 🔹 Инициализация поиска по группам (FULLTEXT)
-                // Обработчик уже подключен в XAML через TextChanged="GroupSearchTextBox_TextChanged"
+                // 🔹 Группа - выпадающий список
+                GroupComboBox.ItemsSource = new List<Group>
+                    { new Group { Id = -1, Code = "Все", ShortName = "", Name = "Все", SpecialtyId = -1, IsActive = true, SpecialtyName = "" } }
+                    .Concat(DataProvider.GroupList)
+                    .ToList();
+                GroupComboBox.SelectedIndex = 0;
+
+                // 🔹 Специальность - выпадающий список
+                SpecialtyComboBox.ItemsSource = new List<Specialty>
+                    { new Specialty { Id = -1, Code = "Все", Name = "Все", IsActive = true } }
+                    .Concat(DataProvider.SpecialtyList)
+                    .ToList();
+                SpecialtyComboBox.SelectedIndex = 0;
             }
             catch (Exception ex)
             {
@@ -102,65 +113,16 @@ namespace PP02.Label
             }
         }
 
-        // === 🔹 ПОИСК ГРУПП С ИСПОЛЬЗОВАНИЕМ FULLTEXT ===
-        private void GroupSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        // === 🔹 ВЫБОР ГРУППЫ ИЗ КОМБОБОКСА ===
+        private void GroupComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            try
-            {
-                var searchText = GroupTextBox.Text.Trim();
-
-                // Показываем/скрываем список результатов
-                if (string.IsNullOrEmpty(searchText))
-                {
-                    GroupResultsListBox.Visibility = Visibility.Collapsed;
-                    GroupResultsListBox.ItemsSource = null;
-                    return;
-                }
-
-                // Поиск с использованием FULLTEXT индекса
-                var db = new DataProvider();
-                var results = db.SearchGroups(_connectionString, searchText);
-
-                if (results.Count > 0)
-                {
-                    GroupResultsListBox.ItemsSource = results;
-                    GroupResultsListBox.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    GroupResultsListBox.Visibility = Visibility.Collapsed;
-                }
-            }
-            catch (Exception ex)
-            {
-                // Fallback на обычный LIKE поиск при ошибке FULLTEXT
-                var filtered = DataProvider.GroupList
-                    .Where(g => g.Code.IndexOf(GroupTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0
-                             || (g.ShortName != null && g.ShortName.IndexOf(GroupTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0)
-                             || (g.Name != null && g.Name.IndexOf(GroupTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0))
-                    .ToList();
-
-                if (filtered.Count > 0)
-                {
-                    GroupResultsListBox.ItemsSource = filtered;
-                    GroupResultsListBox.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    GroupResultsListBox.Visibility = Visibility.Collapsed;
-                }
-            }
+            // Обработка выбора группы
         }
 
-        // === 🔹 ВЫБОР ГРУППЫ ИЗ СПИСКА ===
-        private void GroupResultsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        // === 🔹 ВЫБОР СПЕЦИАЛЬНОСТИ ИЗ КОМБОБОКСА ===
+        private void SpecialtyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (GroupResultsListBox.SelectedItem is Group selectedGroup)
-            {
-                GroupTextBox.Text = selectedGroup.Code;
-                GroupResultsListBox.Visibility = Visibility.Collapsed;
-                GroupResultsListBox.ItemsSource = null; // Скрыть список после выбора
-            }
+            // Обработка выбора специальности
         }
 
         // === 🔹 КНОПКА "НАЙТИ" ===
@@ -187,19 +149,31 @@ namespace PP02.Label
         // === 🔹 ПОЛУЧЕНИЕ КРИТЕРИЕВ ИЗ ПОЛЕЙ ===
         private SearchCriteria GetSearchCriteria()
         {
+            // Получаем выбранную группу из ComboBox
+            var selectedGroup = GroupComboBox.SelectedItem as Group;
+            int? groupId = (selectedGroup != null && selectedGroup.Id != -1) ? selectedGroup.Id : (int?)null;
+            string groupText = (selectedGroup != null && selectedGroup.Id == -1) ? "" : (GroupComboBox.Text ?? "");
+
+            // Получаем выбранную специальность из ComboBox
+            var selectedSpecialty = SpecialtyComboBox.SelectedItem as Specialty;
+            int? specialtyId = (selectedSpecialty != null && selectedSpecialty.Id != -1) ? selectedSpecialty.Id : (int?)null;
+            string specialtyText = (selectedSpecialty != null && selectedSpecialty.Id == -1) ? "" : (SpecialtyComboBox.Text ?? "");
+
             return new SearchCriteria
             {
                 FullName = FullNameTextBox.Text.Trim(),
                 IsStudent = IsStudentComboBox.SelectedIndex > 0
                     ? IsStudentComboBox.SelectedIndex == 1
                     : (bool?)null,
-                Group = GroupTextBox.Text.Trim(),
+                GroupId = groupId,
+                Group = groupText,
                 GraduationYearStart = GraduationYearDatePicker.SelectedDate?.Year,
                 SearchByGraduationPeriod = PeriodCheckBox.IsChecked == true,
                 GraduationYearEnd = PeriodCheckBox.IsChecked == true
                     ? EndDatePicker.SelectedDate?.Year
                     : null,
-                Specialty = SpecialtyTextBox.Text.Trim(),
+                SpecialtyId = specialtyId,
+                Specialty = specialtyText,
                 Gender = GenderComboBox.SelectedIndex > 0
                     ? ((ComboBoxItem)GenderComboBox.SelectedItem)?.Content?.ToString()
                     : null,
@@ -236,18 +210,17 @@ namespace PP02.Label
         // === 🔹 ФИЛЬТРАЦИЯ СПИСКА ===
         private List<PersonViewModel> FilterPeople(List<PersonViewModel> source, SearchCriteria c)
         {
-            // Получаем ID группы по тексту поиска (если указан точный код)
-            var groupIdFilter = GetGroupIdBySearchText(c.Group);
-
             return source.Where(p =>
                 (string.IsNullOrEmpty(c.FullName) || SafeContains(p.FullName, c.FullName)) &&
                 (!c.IsStudent.HasValue || (c.IsStudent.Value && p.Role == "Студент") || (!c.IsStudent.Value && p.Role != "Студент")) &&
-                // Фильтрация по группе: либо точное совпадение ID, либо поиск по подстроке в имени группы
-                (string.IsNullOrEmpty(c.Group) ||
-                    (groupIdFilter.HasValue ? p.GroupId == groupIdFilter : SafeContains(p.GroupName, c.Group))) &&
+                // Фильтрация по группе: по ID из ComboBox или по тексту
+                (c.GroupId.HasValue ? p.GroupId == c.GroupId.Value :
+                    (string.IsNullOrEmpty(c.Group) || SafeContains(p.GroupName, c.Group))) &&
                 (!c.GraduationYearStart.HasValue || (p.GraduationYear.HasValue && p.GraduationYear.Value >= c.GraduationYearStart.Value)) &&
                 (!c.SearchByGraduationPeriod || !c.GraduationYearEnd.HasValue || (p.GraduationYear.HasValue && p.GraduationYear.Value <= c.GraduationYearEnd.Value)) &&
-                (string.IsNullOrEmpty(c.Specialty) || SafeContains(p.SpecialtyName, c.Specialty) || SafeContains(p.CurrentSpecialtyName, c.Specialty)) &&
+                // Фильтрация по специальности: по ID из ComboBox или по тексту
+                (c.SpecialtyId.HasValue ? p.SpecialtyId == c.SpecialtyId.Value :
+                    (string.IsNullOrEmpty(c.Specialty) || SafeContains(p.SpecialtyName, c.Specialty) || SafeContains(p.CurrentSpecialtyName, c.Specialty))) &&
                 (string.IsNullOrEmpty(c.Gender) || p.Gender == c.Gender) &&
                 (string.IsNullOrEmpty(c.Nationality) || SafeContains(p.Nationality, c.Nationality)) &&
                 (string.IsNullOrEmpty(c.BirthYear) || (p.BirthYear.HasValue && p.BirthYear.Value.ToString().Contains(c.BirthYear))) &&
@@ -291,8 +264,6 @@ namespace PP02.Label
         {
             // Очистка текстовых полей
             FullNameTextBox.Clear();
-            GroupTextBox.Clear();
-            SpecialtyTextBox.Clear();
             NationalityTextBox.Clear();
             BirthYearTextBox.Clear();
             BirthPlaceTextBox.Clear();
@@ -303,6 +274,8 @@ namespace PP02.Label
 
             // Сброс ComboBox
             IsStudentComboBox.SelectedIndex = 0;
+            GroupComboBox.SelectedIndex = 0;
+            SpecialtyComboBox.SelectedIndex = 0;
             GenderComboBox.SelectedIndex = 0;
             PartyComboBox.SelectedIndex = 0;
             EducationComboBox.SelectedIndex = 0;
@@ -320,10 +293,6 @@ namespace PP02.Label
             DiplomaPeriodCheckBox.IsChecked = false;
             DiplomaEndDatePicker.IsEnabled = false;
             DiplomaEndDatePicker.Background = (Brush)new BrushConverter().ConvertFromString("#E8E8E8");
-
-            // Сброс результатов поиска групп
-            GroupResultsListBox.ItemsSource = null;
-            GroupResultsListBox.Visibility = Visibility.Collapsed;
 
             // Очистка результатов
             ResultsItemsControl.ItemsSource = null;
@@ -380,11 +349,13 @@ namespace PP02.Label
     {
         public string FullName { get; set; }
         public bool? IsStudent { get; set; }
-        public string Group { get; set; }
+        public int? GroupId { get; set; }      // 🔹 ID группы из ComboBox
+        public string Group { get; set; }       // Текст для поиска по группе
         public int? GraduationYearStart { get; set; }
         public bool SearchByGraduationPeriod { get; set; }
         public int? GraduationYearEnd { get; set; }
-        public string Specialty { get; set; }
+        public int? SpecialtyId { get; set; }   // 🔹 ID специальности из ComboBox
+        public string Specialty { get; set; }   // Текст для поиска по специальности
         public string Gender { get; set; }
         public string Nationality { get; set; }
         public string BirthYear { get; set; }

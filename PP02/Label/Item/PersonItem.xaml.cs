@@ -77,7 +77,6 @@ namespace PP02.Label.Item
             // Группы - с поддержкой поиска по short_name (FULLTEXT)
             var groups = DataProvider.GroupList.ToList();
             CmbGroup.ItemsSource = groups;
-            CmbGroup.DisplayMemberPath = "ShortName";
             CmbGroup.SelectedValuePath = "Id";
             CmbGroup.IsEditable = true;
             CmbGroup.StaysOpenOnEdit = true;
@@ -85,7 +84,6 @@ namespace PP02.Label.Item
             // Специальности - основные + исторические алиасы
             var specialties = DataProvider.SpecialtyList.ToList();
             CmbSpecialty.ItemsSource = specialties;
-            CmbSpecialty.DisplayMemberPath = "Name";
             CmbSpecialty.SelectedValuePath = "Id";
             CmbSpecialty.IsEditable = true;
             CmbSpecialty.StaysOpenOnEdit = true;
@@ -95,7 +93,7 @@ namespace PP02.Label.Item
 
             // Подписка на изменения группы для авто-определения специальности
             CmbGroup.SelectionChanged += CmbGroup_SelectionChanged;
-           // CmbGroup.TextChanged += CmbGroup_TextChanged;
+            CmbGroup.TextChanged += CmbGroup_TextChanged;
 
             // Подписка на изменения полей (для флага _isDirty)
             SubscribeToChanges();

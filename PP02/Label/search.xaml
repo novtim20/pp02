@@ -60,18 +60,14 @@
 
                         <!-- Группа -->
                         <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,15">
-                            <TextBlock Text="Группа (поиск по коду, названию)" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
-                            <TextBox x:Name="GroupTextBox" Height="35" Padding="8,0,0,0"
-                                     BorderBrush="#DDD" BorderThickness="1"
-                                     TextChanged="GroupSearchTextBox_TextChanged"/>
-                            <!-- Выпадающий список результатов поиска групп -->
-                            <ListBox x:Name="GroupResultsListBox"
-                                     MaxHeight="150"
-                                     Visibility="Collapsed"
-                                     SelectionChanged="GroupResultsListBox_SelectionChanged"
-                                     BorderBrush="#DDD" BorderThickness="1"
-                                     Background="White">
-                                <ListBox.ItemTemplate>
+                            <TextBlock Text="Группа" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <ComboBox x:Name="GroupComboBox" Height="35"
+                                      BorderBrush="#DDD" BorderThickness="1"
+                                      IsEditable="True"
+                                      IsTextSearchEnabled="True"
+                                      TextSearch.TextPath="Code"
+                                      SelectionChanged="GroupComboBox_SelectionChanged">
+                                <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock FontWeight="Bold" Text="{Binding Code}"/>
@@ -82,8 +78,8 @@
                                             <TextBlock Text="{Binding SpecialtyName}" FontStyle="Italic"/>
                                         </StackPanel>
                                     </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </StackPanel>
 
                         <!-- Год выпуска + Период -->
@@ -125,8 +121,22 @@
                         <!-- Специальность -->
                         <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,0,0,15">
                             <TextBlock Text="Специальность" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
-                            <TextBox x:Name="SpecialtyTextBox" Height="35" Padding="8,0,0,0"
-                                     BorderBrush="#DDD" BorderThickness="1"/>
+                            <ComboBox x:Name="SpecialtyComboBox" Height="35"
+                                      BorderBrush="#DDD" BorderThickness="1"
+                                      IsEditable="True"
+                                      IsTextSearchEnabled="True"
+                                      TextSearch.TextPath="Code"
+                                      SelectionChanged="SpecialtyComboBox_SelectionChanged">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock FontWeight="Bold" Text="{Binding Code}"/>
+                                            <TextBlock Text=" - " Foreground="#888"/>
+                                            <TextBlock Text="{Binding Name}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </StackPanel>
                     </Grid>
                 </Border>

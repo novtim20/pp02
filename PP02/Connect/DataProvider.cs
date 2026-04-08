@@ -26,6 +26,8 @@ namespace PP02.Connect
         public static List<Specialty> SpecialtyList { get; } = new List<Specialty>();
         public static List<Group> GroupList { get; } = new List<Group>();
         public static List<SpecialtyMapping> SpecialtyMappingList { get; } = new List<SpecialtyMapping>();
+        public static List<SpecialtyAlias> SpecialtyAliasList { get; } = new List<SpecialtyAlias>();
+        public static List<SpecialtyTransition> SpecialtyTransitionList { get; } = new List<SpecialtyTransition>();
 
         #endregion
 
@@ -211,7 +213,7 @@ namespace PP02.Connect
         {
             GroupList.Clear();
 
-            const string sql = @"SELECT g.id, g.code, g.short_name, g.name, g.specialty_id, g.is_active, s.name as specialty_name
+            const string sql = @"SELECT g.id, g.code, g.short_name, g.name, g.specialty_id, g.is_active, s.name as specialty_name, s.code as specialty_code
                                  FROM `groups` g
                                  LEFT JOIN specialties s ON g.specialty_id = s.id
                                  WHERE g.is_active = 1
@@ -231,7 +233,8 @@ namespace PP02.Connect
                         Name = GetStringOrNull(reader, 3),
                         SpecialtyId = reader.GetInt32(4),
                         IsActive = reader.GetBoolean(5),
-                        SpecialtyName = GetStringOrNull(reader, 6)
+                        SpecialtyName = GetStringOrNull(reader, 6),
+                        SpecialtyCode = GetStringOrNull(reader, 7)
                     });
                 }
             }
@@ -250,7 +253,7 @@ namespace PP02.Connect
             }
 
             // Используем FULLTEXT поиск по таблице groups
-            const string sql = @"SELECT g.id, g.code, g.short_name, g.name, g.specialty_id, g.is_active, s.name as specialty_name
+            const string sql = @"SELECT g.id, g.code, g.short_name, g.name, g.specialty_id, g.is_active, s.name as specialty_name, s.code as specialty_code
                                  FROM `groups` g
                                  LEFT JOIN specialties s ON g.specialty_id = s.id
                                  WHERE MATCH(g.code, g.short_name, g.name) AGAINST(@search IN BOOLEAN MODE)
@@ -272,7 +275,8 @@ namespace PP02.Connect
                             Name = GetStringOrNull(reader, 3),
                             SpecialtyId = reader.GetInt32(4),
                             IsActive = reader.GetBoolean(5),
-                            SpecialtyName = GetStringOrNull(reader, 6)
+                            SpecialtyName = GetStringOrNull(reader, 6),
+                            SpecialtyCode = GetStringOrNull(reader, 7)
                         });
                     }
                 }
@@ -288,7 +292,7 @@ namespace PP02.Connect
         {
             SpecialtyMappingList.Clear();
 
-            const string sql = "SELECT id, from_specialty_id, to_specialty_id FROM specialty_transitions";
+            const string sql = "SELECT id, from_specialty_id, to_specialty_id, transition_type, effective_date FROM specialty_transitions";
 
             using (var connection = GetConnection(connectionString))
             using (var command = new MySqlCommand(sql, connection))
@@ -301,6 +305,65 @@ namespace PP02.Connect
                         Id = reader.GetInt32(0),
                         OldSpecialtyId = reader.GetInt32(1),
                         NewSpecialtyId = reader.GetInt32(2)
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Загружает исторические алиасы специальностей (таблица specialty_aliases)
+        /// </summary>
+        public void DataSpecialtyAliases(string connectionString)
+        {
+            SpecialtyAliasList.Clear();
+
+            const string sql = @"SELECT id, specialty_id, old_code, old_name, valid_from, valid_to
+                                 FROM specialty_aliases
+                                 ORDER BY old_code";
+
+            using (var connection = GetConnection(connectionString))
+            using (var command = new MySqlCommand(sql, connection))
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    SpecialtyAliasList.Add(new SpecialtyAlias
+                    {
+                        Id = reader.GetInt32(0),
+                        SpecialtyId = reader.GetInt32(1),
+                        OldCode = GetStringOrNull(reader, 2),
+                        OldName = GetStringOrNull(reader, 3),
+                        ValidFrom = GetDateTimeOrNull(reader, 4),
+                        ValidTo = GetDateTimeOrNull(reader, 5)
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Загружает переходы между специальностями (таблица specialty_transitions)
+        /// </summary>
+        public void DataSpecialtyTransitions(string connectionString)
+        {
+            SpecialtyTransitionList.Clear();
+
+            const string sql = @"SELECT id, from_specialty_id, to_specialty_id, transition_type, effective_date
+                                 FROM specialty_transitions
+                                 ORDER BY effective_date";
+
+            using (var connection = GetConnection(connectionString))
+            using (var command = new MySqlCommand(sql, connection))
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    SpecialtyTransitionList.Add(new SpecialtyTransition
+                    {
+                        Id = reader.GetInt32(0),
+                        FromSpecialtyId = reader.GetInt32(1),
+                        ToSpecialtyId = reader.GetInt32(2),
+                        TransitionType = GetStringOrNull(reader, 3),
+                        EffectiveDate = GetDateTimeOrNull(reader, 4)
                     });
                 }
             }
@@ -434,6 +497,8 @@ ORDER BY p.full_name";
             DataSpecialties(connectionString);
             DataGroups(connectionString);
             DataSpecialtyMapping(connectionString);
+            DataSpecialtyAliases(connectionString);
+            DataSpecialtyTransitions(connectionString);
         }
 
         /// <summary>

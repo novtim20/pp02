@@ -93,7 +93,7 @@ namespace PP02.Label
                 GenderComboBox.SelectedIndex = 0;
 
                 // 🔹 Инициализация поиска по группам (FULLTEXT)
-                GroupSearchTextBox.TextChanged += GroupSearchTextBox_TextChanged;
+                // Обработчик уже подключен в XAML через TextChanged="GroupSearchTextBox_TextChanged"
             }
             catch (Exception ex)
             {

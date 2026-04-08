@@ -20,6 +20,7 @@ namespace PP02.Classes.Person
         // ========================================
         public int? SpecialtyId { get; set; }
         public int? GroupId { get; set; }  // 🔹 Добавлено для связи с таблицей groups
+        public int? HistoricalAliasId { get; set; } // 🔹 Ссылка на исторический код специальности
         public int? EducationId { get; set; }
         public int? SocialOriginId { get; set; }
         public int? SocialStatusId { get; set; }
@@ -28,12 +29,15 @@ namespace PP02.Classes.Person
         // ========================================
         // НАЗВАНИЯ ИЗ СПРАВОЧНИКОВ (для отображения)
         // ========================================
-        public string SpecialtyName { get; set; }          // Как в дипломе
+        public string SpecialtyName { get; set; }          // Как в дипломе (может быть историческим)
         public string CurrentSpecialtyName { get; set; }   // Актуальное название
+        public string HistoricalCode { get; set; }         // Исторический код (из specialty_aliases)
+        public string HistoricalName { get; set; }         // Историческое название
         public string EducationName { get; set; }
         public string SocialOriginName { get; set; }
         public string SocialStatusName { get; set; }
         public string PartyName { get; set; }
+        public string GroupShortName { get; set; }         // 🔹 Краткое название группы (short_name)
 
         // ========================================
         // ДОПОЛНИТЕЛЬНЫЕ ДАННЫЕ

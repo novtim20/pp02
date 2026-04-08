@@ -57,6 +57,8 @@ namespace PP02.Label
                 db.DataSocialStatus(_connectionString);
                 db.DataParty(_connectionString);
                 db.DataSpecialties(_connectionString);
+                db.DataGroups(_connectionString); // 🔹 Загружаем группы
+                // db.DataSpecialtyMapping(_connectionString); // Опционально, если нужно
 
                 // 🔹 Привязка ComboBox к справочникам + пункт "Все"
 
@@ -89,11 +91,75 @@ namespace PP02.Label
 
                 // Пол (статичный список)
                 GenderComboBox.SelectedIndex = 0;
+
+                // 🔹 Инициализация поиска по группам (FULLTEXT)
+                GroupSearchTextBox.TextChanged += GroupSearchTextBox_TextChanged;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка загрузки справочников: {ex.Message}",
                     "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // === 🔹 ПОИСК ГРУПП С ИСПОЛЬЗОВАНИЕМ FULLTEXT ===
+        private void GroupSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                var searchText = GroupTextBox.Text.Trim();
+
+                // Показываем/скрываем список результатов
+                if (string.IsNullOrEmpty(searchText))
+                {
+                    GroupResultsListBox.Visibility = Visibility.Collapsed;
+                    GroupResultsListBox.ItemsSource = null;
+                    return;
+                }
+
+                // Поиск с использованием FULLTEXT индекса
+                var db = new DataProvider();
+                var results = db.SearchGroups(_connectionString, searchText);
+
+                if (results.Count > 0)
+                {
+                    GroupResultsListBox.ItemsSource = results;
+                    GroupResultsListBox.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    GroupResultsListBox.Visibility = Visibility.Collapsed;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Fallback на обычный LIKE поиск при ошибке FULLTEXT
+                var filtered = DataProvider.GroupList
+                    .Where(g => g.Code.IndexOf(GroupTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0
+                             || (g.ShortName != null && g.ShortName.IndexOf(GroupTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0)
+                             || (g.Name != null && g.Name.IndexOf(GroupTextBox.Text, StringComparison.OrdinalIgnoreCase) >= 0))
+                    .ToList();
+
+                if (filtered.Count > 0)
+                {
+                    GroupResultsListBox.ItemsSource = filtered;
+                    GroupResultsListBox.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    GroupResultsListBox.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+        // === 🔹 ВЫБОР ГРУППЫ ИЗ СПИСКА ===
+        private void GroupResultsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (GroupResultsListBox.SelectedItem is Group selectedGroup)
+            {
+                GroupTextBox.Text = selectedGroup.Code;
+                GroupResultsListBox.Visibility = Visibility.Collapsed;
+                GroupResultsListBox.ItemsSource = null; // Скрыть список после выбора
             }
         }
 
@@ -155,16 +221,33 @@ namespace PP02.Label
             };
         }
 
+        // === 🔹 ПОИСК ГРУППЫ ПО КОДУ/НАЗВАНИЮ (для фильтрации) ===
+        private int? GetGroupIdBySearchText(string searchText)
+        {
+            if (string.IsNullOrWhiteSpace(searchText))
+                return null;
+
+            var group = DataProvider.GroupList
+                .FirstOrDefault(g => g.Code.Equals(searchText, StringComparison.OrdinalIgnoreCase));
+
+            return group?.Id;
+        }
+
         // === 🔹 ФИЛЬТРАЦИЯ СПИСКА ===
         private List<PersonViewModel> FilterPeople(List<PersonViewModel> source, SearchCriteria c)
         {
+            // Получаем ID группы по тексту поиска (если указан точный код)
+            var groupIdFilter = GetGroupIdBySearchText(c.Group);
+
             return source.Where(p =>
                 (string.IsNullOrEmpty(c.FullName) || SafeContains(p.FullName, c.FullName)) &&
                 (!c.IsStudent.HasValue || (c.IsStudent.Value && p.Role == "Студент") || (!c.IsStudent.Value && p.Role != "Студент")) &&
-                (string.IsNullOrEmpty(c.Group) || SafeContains(p.GroupName, c.Group)) &&
+                // Фильтрация по группе: либо точное совпадение ID, либо поиск по подстроке в имени группы
+                (string.IsNullOrEmpty(c.Group) ||
+                    (groupIdFilter.HasValue ? p.GroupId == groupIdFilter : SafeContains(p.GroupName, c.Group))) &&
                 (!c.GraduationYearStart.HasValue || (p.GraduationYear.HasValue && p.GraduationYear.Value >= c.GraduationYearStart.Value)) &&
                 (!c.SearchByGraduationPeriod || !c.GraduationYearEnd.HasValue || (p.GraduationYear.HasValue && p.GraduationYear.Value <= c.GraduationYearEnd.Value)) &&
-                (string.IsNullOrEmpty(c.Specialty) || SafeContains(p.SpecialtyName, c.Specialty)) &&
+                (string.IsNullOrEmpty(c.Specialty) || SafeContains(p.SpecialtyName, c.Specialty) || SafeContains(p.CurrentSpecialtyName, c.Specialty)) &&
                 (string.IsNullOrEmpty(c.Gender) || p.Gender == c.Gender) &&
                 (string.IsNullOrEmpty(c.Nationality) || SafeContains(p.Nationality, c.Nationality)) &&
                 (string.IsNullOrEmpty(c.BirthYear) || (p.BirthYear.HasValue && p.BirthYear.Value.ToString().Contains(c.BirthYear))) &&
@@ -237,6 +320,10 @@ namespace PP02.Label
             DiplomaPeriodCheckBox.IsChecked = false;
             DiplomaEndDatePicker.IsEnabled = false;
             DiplomaEndDatePicker.Background = (Brush)new BrushConverter().ConvertFromString("#E8E8E8");
+
+            // Сброс результатов поиска групп
+            GroupResultsListBox.ItemsSource = null;
+            GroupResultsListBox.Visibility = Visibility.Collapsed;
 
             // Очистка результатов
             ResultsItemsControl.ItemsSource = null;

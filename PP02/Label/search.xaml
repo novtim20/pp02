@@ -60,9 +60,30 @@
 
                         <!-- Группа -->
                         <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,15">
-                            <TextBlock Text="Группа" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <TextBlock Text="Группа (поиск по коду, названию)" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                             <TextBox x:Name="GroupTextBox" Height="35" Padding="8,0,0,0"
-                                     BorderBrush="#DDD" BorderThickness="1"/>
+                                     BorderBrush="#DDD" BorderThickness="1"
+                                     TextChanged="GroupSearchTextBox_TextChanged"/>
+                            <!-- Выпадающий список результатов поиска групп -->
+                            <ListBox x:Name="GroupResultsListBox"
+                                     MaxHeight="150"
+                                     Visibility="Collapsed"
+                                     SelectionChanged="GroupResultsListBox_SelectionChanged"
+                                     BorderBrush="#DDD" BorderThickness="1"
+                                     Background="White">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock FontWeight="Bold" Text="{Binding Code}"/>
+                                            <TextBlock Text=" [" Foreground="#888"/>
+                                            <TextBlock Text="{Binding ShortName}" Foreground="#888"/>
+                                            <TextBlock Text="]" Foreground="#888"/>
+                                            <TextBlock Text=" - " Foreground="#888"/>
+                                            <TextBlock Text="{Binding SpecialtyName}" FontStyle="Italic"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
                         </StackPanel>
 
                         <!-- Год выпуска + Период -->

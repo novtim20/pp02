@@ -171,6 +171,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Label\AddStudentPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Label\authorization.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -205,6 +209,9 @@
     <Compile Include="Classes\Specialties\SpecialtyMapping.cs" />
     <Compile Include="Connect\Connect.cs" />
     <Compile Include="Connect\DataProvider.cs" />
+    <Compile Include="Label\AddStudentPage.xaml.cs">
+      <DependentUpon>AddStudentPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Label\authorization.xaml.cs">
       <DependentUpon>authorization.xaml</DependentUpon>
     </Compile>

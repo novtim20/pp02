@@ -1,0 +1,252 @@
+﻿<Page x:Class="PP02.Label.AddStudentPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:PP02.Label"
+      mc:Ignorable="d"
+      d:DesignHeight="900" d:DesignWidth="1100"
+      Background="#F5F5F5"
+      Title="Добавление студента">
+
+    <ScrollViewer x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- ЗАГОЛОВОК -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                <TextBlock Text="📝 Добавление нового студента"
+                           FontSize="24" FontWeight="Bold" Foreground="#333"/>
+                <TextBlock Text="Заполните форму для добавления записи в базу данных"
+                           FontSize="14" Foreground="#666" Margin="0,5,0,0"/>
+            </StackPanel>
+
+            <!-- ФОРМА ДОБАВЛЕНИЯ -->
+            <Border Grid.Row="1" Background="White" CornerRadius="5" Padding="20"
+                    BorderBrush="#DDD" BorderThickness="1">
+                <StackPanel>
+
+                    <!-- 🔹 ОСНОВНЫЕ ДАННЫЕ -->
+                    <TextBlock Text="📋 Основные данные"
+                               FontSize="16" FontWeight="Bold" Margin="0,0,0,15"
+                               Foreground="#333"/>
+
+                    <Grid Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- ФИО -->
+                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,15">
+                            <TextBlock Text="ФИО *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <TextBox x:Name="FullNameTextBox" Height="35" Padding="8,0,0,0"
+                                     BorderBrush="#DDD" BorderThickness="1"/>
+                        </StackPanel>
+
+                        <!-- Роль -->
+                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,10,15">
+                            <TextBlock Text="Роль *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <ComboBox x:Name="RoleComboBox" Height="35"
+                                      BorderBrush="#DDD" BorderThickness="1">
+                                <ComboBoxItem Content="Студент" IsSelected="True"/>
+                                <ComboBoxItem Content="Преподаватель"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Группа -->
+                        <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,15">
+                            <TextBlock Text="Группа" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <ComboBox x:Name="GroupComboBox" Height="35"
+                                      BorderBrush="#DDD" BorderThickness="1"
+                                      IsEditable="True"
+                                      IsTextSearchEnabled="True"
+                                      TextSearch.TextPath="Code"
+                                      SelectionChanged="GroupComboBox_SelectionChanged">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock FontWeight="Bold" Text="{Binding Code}" Width="80"/>
+                                            <TextBlock Text=" [" Foreground="#888"/>
+                                            <TextBlock Text="{Binding ShortName}" Foreground="#888"/>
+                                            <TextBlock Text="]" Foreground="#888"/>
+                                            <TextBlock Text=" - " Foreground="#888"/>
+                                            <TextBlock Text="{Binding SpecialtyName}" FontStyle="Italic"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Специальность -->
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,15">
+                            <TextBlock Text="Специальность *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <ComboBox x:Name="SpecialtyComboBox" Height="35"
+                                      BorderBrush="#DDD" BorderThickness="1"
+                                      IsEditable="True"
+                                      IsTextSearchEnabled="True"
+                                      TextSearch.TextPath="Code">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock FontWeight="Bold" Text="{Binding Code}" Width="80"/>
+                                            <TextBlock Text=" - " Foreground="#888"/>
+                                            <TextBlock Text="{Binding Name}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Год выпуска -->
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,10,15">
+                            <TextBlock Text="Год выпуска" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <TextBox x:Name="GraduationYearTextBox" Height="35" Padding="8,0,0,0"
+                                     BorderBrush="#DDD" BorderThickness="1"
+                                     PreviewTextInput="NumbersOnly_PreviewTextInput"/>
+                        </StackPanel>
+
+                        <!-- Пол -->
+                        <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,15">
+                            <TextBlock Text="Пол *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <ComboBox x:Name="GenderComboBox" Height="35"
+                                      BorderBrush="#DDD" BorderThickness="1">
+                                <ComboBoxItem Content="М"/>
+                                <ComboBoxItem Content="Ж"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- 🔹 ЛИЧНЫЕ ДАННЫЕ -->
+                    <TextBlock Text="👤 Личные данные"
+                               FontSize="16" FontWeight="Bold" Margin="0,0,0,15"
+                               Foreground="#333"/>
+
+                    <Grid Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Год рождения -->
+                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,15">
+                            <TextBlock Text="Год рождения" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <TextBox x:Name="BirthYearTextBox" Height="35" Padding="8,0,0,0"
+                                     BorderBrush="#DDD" BorderThickness="1"
+                                     PreviewTextInput="NumbersOnly_PreviewTextInput"/>
+                        </StackPanel>
+
+                        <!-- Место рождения -->
+                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,10,15">
+                            <TextBlock Text="Место рождения" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <TextBox x:Name="BirthPlaceTextBox" Height="35" Padding="8,0,0,0"
+                                     BorderBrush="#DDD" BorderThickness="1"/>
+                        </StackPanel>
+
+                        <!-- Национальность -->
+                        <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,15">
+                            <TextBlock Text="Национальность" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <TextBox x:Name="NationalityTextBox" Height="35" Padding="8,0,0,0"
+                                     BorderBrush="#DDD" BorderThickness="1"/>
+                        </StackPanel>
+
+                        <!-- Образование -->
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,15">
+                            <TextBlock Text="Образование" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <ComboBox x:Name="EducationComboBox" Height="35"
+                                      BorderBrush="#DDD" BorderThickness="1"
+                                      SelectedValuePath="Id" DisplayMemberPath="Name"/>
+                        </StackPanel>
+
+                        <!-- Партийность -->
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,10,15">
+                            <TextBlock Text="Партийность" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <ComboBox x:Name="PartyComboBox" Height="35"
+                                      BorderBrush="#DDD" BorderThickness="1"
+                                      SelectedValuePath="Id" DisplayMemberPath="Name"/>
+                        </StackPanel>
+
+                        <!-- Соц. происхождение -->
+                        <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,15">
+                            <TextBlock Text="Соц. происхождение" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <ComboBox x:Name="SocialOriginComboBox" Height="35"
+                                      BorderBrush="#DDD" BorderThickness="1"
+                                      SelectedValuePath="Id" DisplayMemberPath="Name"/>
+                        </StackPanel>
+
+                        <!-- Соц. положение -->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,10,15">
+                            <TextBlock Text="Соц. положение" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <ComboBox x:Name="SocialStatusComboBox" Height="35"
+                                      BorderBrush="#DDD" BorderThickness="1"
+                                      SelectedValuePath="Id" DisplayMemberPath="Name"/>
+                        </StackPanel>
+
+                        <!-- Дата диплома -->
+                        <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,10,15">
+                            <TextBlock Text="Дата диплома" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <DatePicker x:Name="DiplomaDatePicker" Height="35"
+                                        BorderBrush="#DDD" BorderThickness="1"
+                                        Background="White" Padding="8,0,0,0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- 🔹 ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ -->
+                    <TextBlock Text="📍 Дополнительная информация"
+                               FontSize="16" FontWeight="Bold" Margin="0,0,0,15"
+                               Foreground="#333"/>
+
+                    <StackPanel Margin="0,0,0,20">
+                        <!-- Адрес -->
+                        <StackPanel Margin="0,0,0,15">
+                            <TextBlock Text="Домашний адрес" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <TextBox x:Name="AddressTextBox" Height="35" Padding="8,0,0,0"
+                                     BorderBrush="#DDD" BorderThickness="1"/>
+                        </StackPanel>
+
+                        <!-- Где работал после -->
+                        <StackPanel Margin="0,0,0,15">
+                            <TextBlock Text="Где работал после выпуска" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <TextBox x:Name="WorkAfterTextBox" Height="35" Padding="8,0,0,0"
+                                     BorderBrush="#DDD" BorderThickness="1"/>
+                        </StackPanel>
+
+                        <!-- Источник -->
+                        <StackPanel Margin="0,0,0,15">
+                            <TextBlock Text="Источник информации" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                            <TextBox x:Name="SourceTextBox" Height="35" Padding="8,0,0,0"
+                                     BorderBrush="#DDD" BorderThickness="1"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- 🔹 КНОПКИ УПРАВЛЕНИЯ -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                        <Button Content="❌ Отмена" Width="120" Height="40"
+                                Background="#E0E0E0" Foreground="#333"
+                                FontWeight="Bold" BorderThickness="0"
+                                Click="CancelButton_Click" Margin="0,0,10,0"/>
+                        <Button Content="💾 Сохранить" Width="150" Height="40"
+                                Background="#4CAF50" Foreground="White"
+                                FontWeight="Bold" BorderThickness="0"
+                                Click="SaveButton_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</Page>

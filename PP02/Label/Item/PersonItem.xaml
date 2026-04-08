@@ -86,13 +86,23 @@
                             <TextBlock Text="Группа:" FontWeight="Bold" FontSize="11"/>
                             <ComboBox x:Name="CmbGroup" Height="25" IsEditable="True" 
                                       DisplayMemberPath="ShortName" SelectedValuePath="Id"
-                                      StaysOpenOnEdit="True" TextSearch.TextPath="Code"/>
+                                      StaysOpenOnEdit="True">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Code}" FontWeight="Bold" Width="80"/>
+                                            <TextBlock Text="{Binding ShortName}" Margin="5,0" Width="150"/>
+                                            <TextBlock Text="{Binding SpecialtyCode}" Foreground="#666" Width="100"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </StackPanel>
 
                         <StackPanel Grid.Column="0" Grid.Row="3" Margin="5">
                             <TextBlock Text="Специальность:" FontWeight="Bold" FontSize="11"/>
                             <ComboBox x:Name="CmbSpecialty" Height="25" DisplayMemberPath="Name" SelectedValuePath="Id"
-                                      IsEditable="True" StaysOpenOnEdit="True" TextSearch.TextPath="Code">
+                                      IsEditable="True" StaysOpenOnEdit="True">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">

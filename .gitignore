@@ -1,7 +1,6 @@
 ```
 # Build artifacts
-bin/
-obj/
+*.obj
 *.exe
 *.dll
 *.pdb
@@ -9,6 +8,8 @@ obj/
 
 # Dependencies
 packages/
+bin/
+obj/
 
 # Logs
 *.log
@@ -16,13 +17,5 @@ packages/
 # User-specific files
 *.user
 *.suo
-*.userosscache
-*.sln.docstates
-
-# Visual Studio Code
-.vscode/
-
-# Temporary files
-*.tmp
-*~
+.vs/
 ```

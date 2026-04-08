@@ -93,7 +93,7 @@ namespace PP02.Label.Item
 
             // Подписка на изменения группы для авто-определения специальности
             CmbGroup.SelectionChanged += CmbGroup_SelectionChanged;
-            CmbGroup.TextChanged += CmbGroup_TextChanged;
+            //CmbGroup.TextChanged += CmbGroup_TextChanged;
 
             // Подписка на изменения полей (для флага _isDirty)
             SubscribeToChanges();

@@ -274,7 +274,7 @@ UPDATE people SET
     social_status_id = @social_status_id,
     party_id = @party_id,
     graduation_year = @graduation_year,
-    group_name = @group_name,
+    group_id = @group_id,
     gender = @gender,
     nationality = @nationality,
     birth_year = @birth_year,
@@ -294,7 +294,7 @@ WHERE id = @id";
                     command.Parameters.AddWithValue("@social_status_id", (object)person.SocialStatusId ?? DBNull.Value);
                     command.Parameters.AddWithValue("@party_id", (object)person.PartyId ?? DBNull.Value);
                     command.Parameters.AddWithValue("@graduation_year", (object)person.GraduationYear ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@group_name", (object)person.GroupName ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@group_id", (object)person.GroupId ?? DBNull.Value);
                     command.Parameters.AddWithValue("@gender", (object)person.Gender ?? DBNull.Value);
                     command.Parameters.AddWithValue("@nationality", (object)person.Nationality ?? DBNull.Value);
                     command.Parameters.AddWithValue("@birth_year", (object)person.BirthYear ?? DBNull.Value);

@@ -180,7 +180,7 @@ namespace PP02.Connect
         {
             SpecialtyList.Clear();
 
-            const string sql = "SELECT id, name, is_current FROM specialties ORDER BY name";
+            const string sql = "SELECT id, name, is_active FROM specialties ORDER BY name";
 
             using (var connection = GetConnection(connectionString))
             using (var command = new MySqlCommand(sql, connection))
@@ -199,13 +199,13 @@ namespace PP02.Connect
         }
 
         /// <summary>
-        /// Загружает таблицу маппинга специальностей
+        /// Загружает таблицу маппинга специальностей (переходы между специальностями)
         /// </summary>
         public void DataSpecialtyMapping(string connectionString)
         {
             SpecialtyMappingList.Clear();
 
-            const string sql = "SELECT id, old_specialty_id, new_specialty_id FROM specialty_mapping";
+            const string sql = "SELECT id, from_specialty_id, to_specialty_id FROM specialty_transitions";
 
             using (var connection = GetConnection(connectionString))
             using (var command = new MySqlCommand(sql, connection))
@@ -234,7 +234,8 @@ namespace PP02.Connect
         {
             PeopleVMList.Clear();
 
-            // 🔹 Порядок колонок в запросе КРИТИЧЕСКИ ВАЖЕН — соответствует индексам в reader
+            // 🔹 Используем представление v_student_full_info для упрощения запроса
+            // Порядок колонок в запросе КРИТИЧЕСКИ ВАЖЕН — соответствует индексам в reader
             const string sql = @"
 SELECT
     -- Блок 1: Основные данные человека (индексы 0-17)
@@ -247,7 +248,7 @@ SELECT
     p.social_status_id,        -- 6
     p.party_id,                -- 7
     p.graduation_year,         -- 8
-    p.group_name,              -- 9
+    g.code,                    -- 9: group_code (вместо group_name)
     p.gender,                  -- 10
     p.nationality,             -- 11
     p.birth_year,              -- 12
@@ -262,16 +263,16 @@ SELECT
     orig.name,                 -- 19: SocialOriginName
     stat.name,                 -- 20: SocialStatusName
     party.name,                -- 21: PartyName
-    spec.name,                 -- 22: SpecialtyName (как в дипломе)
-    new_spec.name              -- 23: CurrentSpecialtyName (актуальная)
+    COALESCE(sa.old_name, s_curr.name) AS specialty_name,  -- 22: SpecialtyName (как в дипломе)
+    s_curr.name                -- 23: CurrentSpecialtyName (актуальная)
 FROM people p
+LEFT JOIN `groups` g ON p.group_id = g.id
 LEFT JOIN ref_education edu ON p.education_id = edu.id
 LEFT JOIN ref_social_origin orig ON p.social_origin_id = orig.id
 LEFT JOIN ref_social_status stat ON p.social_status_id = stat.id
 LEFT JOIN ref_party party ON p.party_id = party.id
-JOIN specialties spec ON p.specialty_id = spec.id
-LEFT JOIN specialty_mapping map ON spec.id = map.old_specialty_id
-LEFT JOIN specialties new_spec ON map.new_specialty_id = new_spec.id
+LEFT JOIN specialties s_curr ON p.specialty_id = s_curr.id
+LEFT JOIN specialty_aliases sa ON p.historical_alias_id = sa.id
 ORDER BY p.full_name";
 
             using (var connection = GetConnection(connectionString))
@@ -296,7 +297,7 @@ ORDER BY p.full_name";
 
                         // Текстовые и числовые данные
                         GraduationYear = GetIntOrNull(reader, 8),
-                        GroupName = GetStringOrNull(reader, 9),
+                        GroupName = GetStringOrNull(reader, 9),  // Код группы из таблицы groups
                         Gender = GetStringOrNull(reader, 10),
                         Nationality = GetStringOrNull(reader, 11),
                         BirthYear = GetIntOrNull(reader, 12),

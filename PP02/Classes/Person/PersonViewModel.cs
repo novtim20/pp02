@@ -19,6 +19,7 @@ namespace PP02.Classes.Person
         // ID СВЯЗЕЙ СО СПРАВОЧНИКАМИ (для редактирования/сохранения)
         // ========================================
         public int? SpecialtyId { get; set; }
+        public int? GroupId { get; set; }  // 🔹 Добавлено для связи с таблицей groups
         public int? EducationId { get; set; }
         public int? SocialOriginId { get; set; }
         public int? SocialStatusId { get; set; }
@@ -38,7 +39,7 @@ namespace PP02.Classes.Person
         // ДОПОЛНИТЕЛЬНЫЕ ДАННЫЕ
         // ========================================
         public int? GraduationYear { get; set; }
-        public string GroupName { get; set; }
+        public string GroupName { get; set; }  // 🔹 Код группы для отображения (из таблицы groups)
         public string Gender { get; set; }
         public string Nationality { get; set; }
         public int? BirthYear { get; set; }

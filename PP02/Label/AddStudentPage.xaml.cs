@@ -110,7 +110,7 @@ namespace PP02.Label
                 var specialty = DataProvider.SpecialtyList.FirstOrDefault(s => s.Id == selectedGroup.SpecialtyId);
                 if (specialty != null)
                 {
-                    SpecialtyComboBox.SelectedValue = specialty.Id;
+                    SpecialtyComboBox.SelectedItem = specialty;
                 }
             }
         }

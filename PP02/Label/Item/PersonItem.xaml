@@ -84,12 +84,25 @@
 
                         <StackPanel Grid.Column="0" Grid.Row="2" Margin="5">
                             <TextBlock Text="Группа:" FontWeight="Bold" FontSize="11"/>
-                            <TextBox x:Name="TxtEditGroup" Height="25"/>
+                            <ComboBox x:Name="CmbGroup" Height="25" IsEditable="True" 
+                                      DisplayMemberPath="ShortName" SelectedValuePath="Id"
+                                      StaysOpenOnEdit="True" TextSearch.TextPath="Code"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="0" Grid.Row="3" Margin="5">
                             <TextBlock Text="Специальность:" FontWeight="Bold" FontSize="11"/>
-                            <ComboBox x:Name="CmbSpecialty" Height="25" DisplayMemberPath="Name" SelectedValuePath="Id"/>
+                            <ComboBox x:Name="CmbSpecialty" Height="25" DisplayMemberPath="Name" SelectedValuePath="Id"
+                                      IsEditable="True" StaysOpenOnEdit="True" TextSearch.TextPath="Code">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Code}" FontWeight="Bold" Width="80"/>
+                                            <TextBlock Text="{Binding ShortName}" Margin="5,0" Width="150"/>
+                                            <TextBlock Text="{Binding Name}" Foreground="#666" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </StackPanel>
 
                         <!-- Центральная колонка -->

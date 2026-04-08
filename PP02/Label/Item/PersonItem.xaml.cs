@@ -74,6 +74,12 @@ namespace PP02.Label.Item
             CmbParty.DisplayMemberPath = "Name";
             CmbParty.SelectedValuePath = "Id";
 
+            // Группы
+            var groups = DataProvider.GroupList.ToList();
+            CmbGroup.ItemsSource = groups;
+            CmbGroup.DisplayMemberPath = "ShortName";
+            CmbGroup.SelectedValuePath = "Id";
+
             // Специальности
             CmbSpecialty.ItemsSource = DataProvider.SpecialtyList;
             CmbSpecialty.DisplayMemberPath = "Name";
@@ -127,7 +133,7 @@ namespace PP02.Label.Item
                 ?? CmbRole.Items[0] as ComboBoxItem;
 
             TxtEditGradYear.Text = _currentPerson.GraduationYear?.ToString();
-            TxtEditGroup.Text = _currentPerson.GroupName;
+            CmbGroup.SelectedValue = _currentPerson.GroupId;
             CmbSpecialty.SelectedValue = _currentPerson.SpecialtyId;
 
             CmbGender.SelectedItem = CmbGender.Items.Cast<ComboBoxItem>()
@@ -159,7 +165,7 @@ namespace PP02.Label.Item
 
             _currentPerson.Role = (CmbRole.SelectedItem as ComboBoxItem)?.Content?.ToString();
             _currentPerson.GraduationYear = int.TryParse(TxtEditGradYear.Text, out var grad) ? grad : (int?)null;
-            _currentPerson.GroupName = TxtEditGroup.Text;
+            _currentPerson.GroupId = CmbGroup.SelectedValue as int? ?? 0;
             _currentPerson.SpecialtyId = CmbSpecialty.SelectedValue as int? ?? 0;
 
             var genderItem = CmbGender.SelectedItem as ComboBoxItem;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,6 +8,7 @@ using PP02.Classes.Dictionaries;
 using PP02.Classes.Specialties;
 using PP02.Classes.Person;
 using System.Windows.Media;
+using PP02.Label.Dialogs;
 
 namespace PP02.Label.Item
 {
@@ -246,6 +248,62 @@ namespace PP02.Label.Item
         }
 
         // === 🔹 ОБРАБОТЧИКИ КНОПОК ===
+
+        // Кнопка "➕" — Добавить группу
+        private void AddGroupButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new AddSpecialtyGroupDialog();
+            
+            // Переключаем на вкладку группы
+            foreach (var item in dialog.MainTabControl.Items)
+            {
+                if (item is System.Windows.Controls.TabItem tab && 
+                    tab.Header?.ToString() == "👥 Группа")
+                {
+                    dialog.MainTabControl.SelectedItem = tab;
+                    break;
+                }
+            }
+            
+            if (dialog.ShowDialog() == true && dialog.NewGroupId.HasValue)
+            {
+                // Обновляем список групп
+                CmbGroup.ItemsSource = null;
+                CmbGroup.ItemsSource = DataProvider.GroupList.ToList();
+                
+                // Выбираем newly созданную группу
+                CmbGroup.SelectedValue = dialog.NewGroupId.Value;
+                _isDirty = true;
+            }
+        }
+
+        // Кнопка "➕" — Добавить специальность
+        private void AddSpecialtyButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new AddSpecialtyGroupDialog();
+            
+            // Переключаем на вкладку специальности
+            foreach (var item in dialog.MainTabControl.Items)
+            {
+                if (item is System.Windows.Controls.TabItem tab && 
+                    tab.Header?.ToString() == "📋 Специальность")
+                {
+                    dialog.MainTabControl.SelectedItem = tab;
+                    break;
+                }
+            }
+            
+            if (dialog.ShowDialog() == true && dialog.NewSpecialtyId.HasValue)
+            {
+                // Обновляем список специальностей
+                CmbSpecialty.ItemsSource = null;
+                CmbSpecialty.ItemsSource = DataProvider.SpecialtyList.ToList();
+                
+                // Выбираем newly созданную специальность
+                CmbSpecialty.SelectedValue = dialog.NewSpecialtyId.Value;
+                _isDirty = true;
+            }
+        }
 
         // Кнопка "▼" — переход в режим редактирования
         private void BtnExpand_Click(object sender, RoutedEventArgs e)

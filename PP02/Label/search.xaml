@@ -60,26 +60,41 @@
 
                         <!-- Группа -->
                         <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,15">
-                            <TextBlock Text="Группа" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
-                            <ComboBox x:Name="GroupComboBox" Height="35"
-                                      BorderBrush="#DDD" BorderThickness="1"
-                                      IsEditable="True"
-                                      IsTextSearchEnabled="True"
-                                      TextSearch.TextPath="Code"
-                                      SelectionChanged="GroupComboBox_SelectionChanged">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock FontWeight="Bold" Text="{Binding Code}"/>
-                                            <TextBlock Text=" [" Foreground="#888"/>
-                                            <TextBlock Text="{Binding ShortName}" Foreground="#888"/>
-                                            <TextBlock Text="]" Foreground="#888"/>
-                                            <TextBlock Text=" - " Foreground="#888"/>
-                                            <TextBlock Text="{Binding SpecialtyName}" FontStyle="Italic"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                    <TextBlock Text="Группа" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                                    <ComboBox x:Name="GroupComboBox" Height="35"
+                                              BorderBrush="#DDD" BorderThickness="1"
+                                              IsEditable="True"
+                                              IsTextSearchEnabled="True"
+                                              TextSearch.TextPath="Code"
+                                              SelectionChanged="GroupComboBox_SelectionChanged">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock FontWeight="Bold" Text="{Binding Code}"/>
+                                                    <TextBlock Text=" [" Foreground="#888"/>
+                                                    <TextBlock Text="{Binding ShortName}" Foreground="#888"/>
+                                                    <TextBlock Text="]" Foreground="#888"/>
+                                                    <TextBlock Text=" - " Foreground="#888"/>
+                                                    <TextBlock Text="{Binding SpecialtyName}" FontStyle="Italic"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Margin="5,0,0,0">
+                                    <Button Content="➕" Width="35" Height="28"
+                                            Background="#2196F3" Foreground="White"
+                                            FontWeight="Bold" BorderThickness="0"
+                                            Click="AddGroupButton_Click"
+                                            ToolTip="Добавить группу"/>
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
 
                         <!-- Год выпуска + Период -->
@@ -120,23 +135,38 @@
 
                         <!-- Специальность -->
                         <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,0,0,15">
-                            <TextBlock Text="Специальность" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
-                            <ComboBox x:Name="SpecialtyComboBox" Height="35"
-                                      BorderBrush="#DDD" BorderThickness="1"
-                                      IsEditable="True"
-                                      IsTextSearchEnabled="True"
-                                      TextSearch.TextPath="Code"
-                                      SelectionChanged="SpecialtyComboBox_SelectionChanged">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock FontWeight="Bold" Text="{Binding Code}"/>
-                                            <TextBlock Text=" - " Foreground="#888"/>
-                                            <TextBlock Text="{Binding Name}"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                    <TextBlock Text="Специальность" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                                    <ComboBox x:Name="SpecialtyComboBox" Height="35"
+                                              BorderBrush="#DDD" BorderThickness="1"
+                                              IsEditable="True"
+                                              IsTextSearchEnabled="True"
+                                              TextSearch.TextPath="Code"
+                                              SelectionChanged="SpecialtyComboBox_SelectionChanged">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock FontWeight="Bold" Text="{Binding Code}"/>
+                                                    <TextBlock Text=" - " Foreground="#888"/>
+                                                    <TextBlock Text="{Binding Name}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Margin="5,0,0,0">
+                                    <Button Content="➕" Width="35" Height="28"
+                                            Background="#9C27B0" Foreground="White"
+                                            FontWeight="Bold" BorderThickness="0"
+                                            Click="AddSpecialtyButton_Click"
+                                            ToolTip="Добавить специальность"/>
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
                     </Grid>
                 </Border>

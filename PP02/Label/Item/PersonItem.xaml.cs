@@ -7,6 +7,7 @@ using PP02.Classes.Dictionaries;
 using PP02.Classes.Specialties;
 using PP02.Classes.Person;
 using System.Windows.Media;
+using PP02.Label.Dialogs;
 
 namespace PP02.Label.Item
 {

@@ -83,36 +83,66 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="0" Grid.Row="2" Margin="5">
-                            <TextBlock Text="Группа:" FontWeight="Bold" FontSize="11"/>
-                            <ComboBox x:Name="CmbGroup" Height="25" IsEditable="True"
-                                      SelectedValuePath="Id"
-                                      StaysOpenOnEdit="True">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding Code}" FontWeight="Bold" Width="80"/>
-                                            <TextBlock Text="{Binding ShortName}" Margin="5,0" Width="150"/>
-                                            <TextBlock Text="{Binding SpecialtyCode}" Foreground="#666" Width="100"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                    <TextBlock Text="Группа:" FontWeight="Bold" FontSize="11"/>
+                                    <ComboBox x:Name="CmbGroup" Height="25" IsEditable="True"
+                                              SelectedValuePath="Id"
+                                              StaysOpenOnEdit="True">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Code}" FontWeight="Bold" Width="80"/>
+                                                    <TextBlock Text="{Binding ShortName}" Margin="5,0" Width="150"/>
+                                                    <TextBlock Text="{Binding SpecialtyCode}" Foreground="#666" Width="100"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="5,0,0,0">
+                                    <Button Content="➕" Width="28" Height="23"
+                                            Background="#2196F3" Foreground="White"
+                                            FontWeight="Bold" BorderThickness="0"
+                                            Click="AddGroupButton_Click"
+                                            ToolTip="Добавить группу"/>
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
 
                         <StackPanel Grid.Column="0" Grid.Row="3" Margin="5">
-                            <TextBlock Text="Специальность:" FontWeight="Bold" FontSize="11"/>
-                            <ComboBox x:Name="CmbSpecialty" Height="25" SelectedValuePath="Id"
-                                      IsEditable="True" StaysOpenOnEdit="True">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding Code}" FontWeight="Bold" Width="80"/>
-                                            <TextBlock Text="{Binding ShortName}" Margin="5,0" Width="150"/>
-                                            <TextBlock Text="{Binding Name}" Foreground="#666" TextWrapping="Wrap"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                    <TextBlock Text="Специальность:" FontWeight="Bold" FontSize="11"/>
+                                    <ComboBox x:Name="CmbSpecialty" Height="25" SelectedValuePath="Id"
+                                              IsEditable="True" StaysOpenOnEdit="True">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Code}" FontWeight="Bold" Width="80"/>
+                                                    <TextBlock Text="{Binding ShortName}" Margin="5,0" Width="150"/>
+                                                    <TextBlock Text="{Binding Name}" Foreground="#666" TextWrapping="Wrap"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="5,0,0,0">
+                                    <Button Content="➕" Width="28" Height="23"
+                                            Background="#9C27B0" Foreground="White"
+                                            FontWeight="Bold" BorderThickness="0"
+                                            Click="AddSpecialtyButton_Click"
+                                            ToolTip="Добавить специальность"/>
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
 
                         <!-- Центральная колонка -->

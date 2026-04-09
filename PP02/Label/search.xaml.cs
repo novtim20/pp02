@@ -342,6 +342,12 @@ namespace PP02.Label
         {
             NavigationService?.Navigate(new ReportPage());
         }
+
+        // === 🔹 КНОПКА "ДОБАВИТЬ СТУДЕНТА" (переход на AddStudentPage) ===
+        private void AddStudentButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService?.Navigate(new AddStudentPage());
+        }
     }
 
     // === 🔹 КРИТЕРИИ ПОИСКА ===

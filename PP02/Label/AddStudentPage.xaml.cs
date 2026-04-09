@@ -82,6 +82,7 @@ namespace PP02.Label
                     { new PP02.Classes.Specialties.Group { Id = 0, Code = "", ShortName = "", Name = "(не выбрано)", SpecialtyId = 0, IsActive = true, SpecialtyName = "" } }
                     .Concat(DataProvider.GroupList)
                     .ToList();
+                GroupComboBox.SelectedValuePath = "Id";
                 GroupComboBox.SelectedIndex = 0;
 
                 // Специальность - выпадающий список

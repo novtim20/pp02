@@ -179,6 +179,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Label\Dialogs\AddSpecialtyGroupDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Label\GroupSpecialtyPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Label\Item\PersonItem.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -214,6 +222,12 @@
     </Compile>
     <Compile Include="Label\authorization.xaml.cs">
       <DependentUpon>authorization.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Label\Dialogs\AddSpecialtyGroupDialog.xaml.cs">
+      <DependentUpon>AddSpecialtyGroupDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Label\GroupSpecialtyPage.xaml.cs">
+      <DependentUpon>GroupSpecialtyPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Label\Item\PersonItem.xaml.cs">
       <DependentUpon>PersonItem.xaml</DependentUpon>

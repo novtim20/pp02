@@ -9,6 +9,7 @@ using PP02.Connect;
 using PP02.Classes.Dictionaries;
 using PP02.Classes.Specialties;
 using PP02.Classes.Person;
+using PP02.Label.Dialogs;
 
 namespace PP02.Label
 {
@@ -347,6 +348,68 @@ namespace PP02.Label
         private void AddStudentButton_Click(object sender, RoutedEventArgs e)
         {
             NavigationService?.Navigate(new AddStudentPage());
+        }
+
+        // === 🔹 КНОПКА "ГРУППЫ/СПЕЦИАЛЬНОСТИ" (переход на GroupSpecialtyPage) ===
+        private void GroupSpecialtyButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService?.Navigate(new GroupSpecialtyPage());
+        }
+
+        // === 🔹 КНОПКА ДОБАВЛЕНИЯ ГРУППЫ ===
+        private void AddGroupButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new AddSpecialtyGroupDialog
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                // Перезагружаем справочник групп
+                var db = new DataProvider();
+                db.DataGroups(_connectionString);
+
+                // Обновляем ComboBox
+                GroupComboBox.ItemsSource = new List<Group>
+                    { new Group { Id = -1, Code = "Все", ShortName = "", Name = "Все", SpecialtyId = -1, IsActive = true, SpecialtyName = "" } }
+                    .Concat(DataProvider.GroupList)
+                    .ToList();
+
+                // Если была добавлена группа - выбираем её
+                if (dialog.NewGroupId.HasValue)
+                {
+                    GroupComboBox.SelectedValue = dialog.NewGroupId.Value;
+                }
+            }
+        }
+
+        // === 🔹 КНОПКА ДОБАВЛЕНИЯ СПЕЦИАЛЬНОСТИ ===
+        private void AddSpecialtyButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new AddSpecialtyGroupDialog
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                // Перезагружаем справочник специальностей
+                var db = new DataProvider();
+                db.DataSpecialties(_connectionString);
+
+                // Обновляем ComboBox
+                SpecialtyComboBox.ItemsSource = new List<Specialty>
+                    { new Specialty { Id = -1, Code = "Все", Name = "Все", IsActive = true } }
+                    .Concat(DataProvider.SpecialtyList)
+                    .ToList();
+
+                // Если была добавлена специальность - выбираем её
+                if (dialog.NewSpecialtyId.HasValue)
+                {
+                    SpecialtyComboBox.SelectedValue = dialog.NewSpecialtyId.Value;
+                }
+            }
         }
     }
 

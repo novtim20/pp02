@@ -10,6 +10,7 @@ using PP02.Classes.Dictionaries;
 using PP02.Classes.Specialties;
 using PP02.Classes.Person;
 using MySql.Data.MySqlClient;
+using PP02.Label.Dialogs;
 
 namespace PP02.Label
 {
@@ -99,6 +100,62 @@ namespace PP02.Label
             {
                 MessageBox.Show($"Ошибка загрузки справочников: {ex.Message}",
                     "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // === 🔹 КНОПКА ДОБАВЛЕНИЯ ГРУППЫ ===
+        private void AddGroupButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new AddSpecialtyGroupDialog
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                // Перезагружаем справочник групп
+                var db = new DataProvider();
+                db.DataGroups(_connectionString);
+
+                // Обновляем ComboBox
+                GroupComboBox.ItemsSource = new List<PP02.Classes.Specialties.Group>
+                    { new PP02.Classes.Specialties.Group { Id = 0, Code = "", ShortName = "", Name = "(не выбрано)", SpecialtyId = 0, IsActive = true, SpecialtyName = "" } }
+                    .Concat(DataProvider.GroupList)
+                    .ToList();
+
+                // Если была добавлена группа - выбираем её
+                if (dialog.NewGroupId.HasValue)
+                {
+                    GroupComboBox.SelectedValue = dialog.NewGroupId.Value;
+                }
+            }
+        }
+
+        // === 🔹 КНОПКА ДОБАВЛЕНИЯ СПЕЦИАЛЬНОСТИ ===
+        private void AddSpecialtyButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new AddSpecialtyGroupDialog
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                // Перезагружаем справочник специальностей
+                var db = new DataProvider();
+                db.DataSpecialties(_connectionString);
+
+                // Обновляем ComboBox
+                SpecialtyComboBox.ItemsSource = new List<Specialty>
+                    { new Specialty { Id = 0, Code = "", Name = "(не выбрано)", IsActive = true } }
+                    .Concat(DataProvider.SpecialtyList)
+                    .ToList();
+
+                // Если была добавлена специальность - выбираем её
+                if (dialog.NewSpecialtyId.HasValue)
+                {
+                    SpecialtyComboBox.SelectedValue = dialog.NewSpecialtyId.Value;
+                }
             }
         }
 

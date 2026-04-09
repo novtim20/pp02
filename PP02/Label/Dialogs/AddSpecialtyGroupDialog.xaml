@@ -1,0 +1,136 @@
+﻿<Window x:Class="PP02.Label.Dialogs.AddSpecialtyGroupDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PP02.Label.Dialogs"
+        mc:Ignorable="d"
+        Title="Добавление специальности и группы"
+        Height="500" Width="450"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#F5F5F5">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ЗАГОЛОВОК -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="➕ Добавить специальность / группу"
+                       FontSize="18" FontWeight="Bold" Foreground="#333"/>
+            <TextBlock Text="Быстрое добавление без перехода на страницу управления"
+                       FontSize="12" Foreground="#666" Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <!-- ОСНОВНАЯ ЧАСТЬ С ТАБАМИ -->
+        <TabControl Grid.Row="1" x:Name="MainTabControl"
+                    Background="White" BorderBrush="#DDD" BorderThickness="1">
+
+            <!-- Вкладка: Специальность -->
+            <TabItem Header="📋 Специальность">
+                <Grid Margin="15">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                        <TextBlock Text="Код *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                        <TextBox x:Name="SpecialtyCodeTextBox" Height="35" Padding="8,0,0,0"
+                                 BorderBrush="#DDD" BorderThickness="1"
+                                 ToolTip="Например: 09.02.01"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Margin="0,0,0,15">
+                        <TextBlock Text="Название *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                        <TextBox x:Name="SpecialtyNameTextBox" Height="35" Padding="8,0,0,0"
+                                 BorderBrush="#DDD" BorderThickness="1"
+                                 ToolTip="Полное название специальности"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Margin="0,0,0,15">
+                        <TextBlock Text="Сокращённое название" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                        <TextBox x:Name="SpecialtyShortNameTextBox" Height="35" Padding="8,0,0,0"
+                                 BorderBrush="#DDD" BorderThickness="1"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="3" Margin="0,0,0,15">
+                        <CheckBox x:Name="SpecialtyIsActiveCheckBox" Content="Активная специальность"
+                                  IsChecked="True" FontSize="12" Foreground="#555"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="4" Text="* Обязательные поля"
+                               FontSize="11" Foreground="#888" FontStyle="Italic"/>
+                </Grid>
+            </TabItem>
+
+            <!-- Вкладка: Группа -->
+            <TabItem Header="👥 Группа">
+                <Grid Margin="15">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                        <TextBlock Text="Код группы *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                        <TextBox x:Name="GroupCodeTextBox" Height="35" Padding="8,0,0,0"
+                                 BorderBrush="#DDD" BorderThickness="1"
+                                 ToolTip="Например: РП-01-1"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Margin="0,0,0,15">
+                        <TextBlock Text="Сокращение *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                        <TextBox x:Name="GroupShortNameTextBox" Height="35" Padding="8,0,0,0"
+                                 BorderBrush="#DDD" BorderThickness="1"
+                                 ToolTip="Например: РП"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Margin="0,0,0,15">
+                        <TextBlock Text="Отображаемое название *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                        <TextBox x:Name="GroupNameTextBox" Height="35" Padding="8,0,0,0"
+                                 BorderBrush="#DDD" BorderThickness="1"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="3" Margin="0,0,0,15">
+                        <TextBlock Text="Специальность *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                        <ComboBox x:Name="GroupSpecialtyComboBox" Height="35"
+                                  BorderBrush="#DDD" BorderThickness="1"
+                                  DisplayMemberPath="Name" SelectedValuePath="Id"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="4" Margin="0,0,0,15">
+                        <CheckBox x:Name="GroupIsActiveCheckBox" Content="Активная группа"
+                                  IsChecked="True" FontSize="12" Foreground="#555"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="5" Text="* Обязательные поля"
+                               FontSize="11" Foreground="#888" FontStyle="Italic"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- КНОПКИ -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="❌ Отмена" Width="120" Height="40"
+                    Background="#E0E0E0" Foreground="#333"
+                    FontWeight="Bold" BorderThickness="0"
+                    Click="CancelButton_Click" Margin="0,0,10,0"/>
+            <Button x:Name="SaveButton" Content="💾 Сохранить" Width="150" Height="40"
+                    Background="#4CAF50" Foreground="White"
+                    FontWeight="Bold" BorderThickness="0"
+                    Click="SaveButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

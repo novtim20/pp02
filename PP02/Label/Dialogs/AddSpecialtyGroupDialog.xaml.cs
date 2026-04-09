@@ -105,16 +105,14 @@ namespace PP02.Label.Dialogs
                 connection.Open();
 
                 const string sql = @"
-INSERT INTO specialties (code, name, short_name, is_active)
-VALUES (@code, @name, @short_name, @is_active);
+INSERT INTO `specialties` (code, name, is_active)
+VALUES (@code, @name, @is_active);
 SELECT LAST_INSERT_ID();";
 
                 using (var command = new MySqlCommand(sql, connection))
                 {
                     command.Parameters.AddWithValue("@code", SpecialtyCodeTextBox.Text.Trim());
                     command.Parameters.AddWithValue("@name", SpecialtyNameTextBox.Text.Trim());
-                    command.Parameters.AddWithValue("@short_name",
-                        (object)SpecialtyShortNameTextBox.Text.Trim() ?? DBNull.Value);
                     command.Parameters.AddWithValue("@is_active", SpecialtyIsActiveCheckBox.IsChecked == true);
 
                     var result = command.ExecuteScalar();
@@ -174,7 +172,7 @@ SELECT LAST_INSERT_ID();";
                 connection.Open();
 
                 const string sql = @"
-INSERT INTO groups (code, short_name, name, specialty_id, is_active)
+INSERT INTO `groups` (code, short_name, name, specialty_id, is_active)
 VALUES (@code, @short_name, @name, @specialty_id, @is_active);
 SELECT LAST_INSERT_ID();";
 

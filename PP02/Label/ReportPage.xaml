@@ -11,12 +11,18 @@
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <!-- Кнопка Назад -->
+        <Button Grid.Row="0" Content="← Назад" Width="100" Height="35" HorizontalAlignment="Left"
+                Click="BtnBack_Click" Background="#6C757D" Foreground="White" FontWeight="Bold"/>
+
         <!-- Фильтры -->
-        <Border Grid.Row="0" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="5" Padding="15" Margin="0,0,0,15">
+        <Border Grid.Row="1" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="5" Padding="15" Margin="0,0,0,15">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -74,7 +80,7 @@
         </Border>
 
         <!-- Предпросмотр данных -->
-        <Border Grid.Row="1" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="5" Padding="15" Margin="0,0,0,15">
+        <Border Grid.Row="2" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="5" Padding="15" Margin="0,0,0,15">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -101,7 +107,7 @@
         </Border>
 
         <!-- Кнопки экспорта -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
             <Button Content="📊 Экспорт в Excel" Width="150" Height="40" Margin="0,0,15,0"
                     Click="BtnExportExcel_Click" Background="#217346" Foreground="White" FontWeight="Bold"/>
             <Button Content="📄 Экспорт в Word" Width="150" Height="40" Margin="15,0,0,0"

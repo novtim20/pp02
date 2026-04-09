@@ -17,6 +17,11 @@
 
         <!-- ЗАГОЛОВОК -->
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <Button Content="← Назад" Width="120" Height="35"
+                    Background="#607D8B" Foreground="White" FontWeight="Bold" BorderThickness="0"
+                    HorizontalAlignment="Left" Margin="0,0,0,15"
+                    Click="BackButton_Click"/>
+
             <TextBlock Text="📚 Управление группами и специальностями"
                        FontSize="20" FontWeight="Bold" Foreground="#333"/>
             <TextBlock Text="Добавление, редактирование и удаление записей"

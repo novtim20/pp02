@@ -141,6 +141,19 @@ namespace PP02.Label
             ApplyFilters();
         }
 
+        private void BtnBack_Click(object sender, RoutedEventArgs e)
+        {
+            if (NavigationService != null && NavigationService.CanGoBack)
+            {
+                NavigationService.GoBack();
+            }
+            else
+            {
+                // Если нет возможности вернуться назад, переходим на главную страницу поиска
+                NavigationService?.Navigate(new search());
+            }
+        }
+
         private void BtnExportWord_Click(object sender, RoutedEventArgs e)
         {
             if (_filteredPeople == null || !_filteredPeople.Any())
@@ -164,7 +177,7 @@ namespace PP02.Label
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка при создании Word файла: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                   // MessageBox.Show($"Ошибка при создании Word файла: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -248,18 +261,22 @@ namespace PP02.Label
         {
             Table table = new Table();
 
-            TableProperties tblProps = new TableProperties(
-                new TableBorders(
-                    new TopBorder { Val = BorderValues.Single, Size = 6 },
-                    new BottomBorder { Val = BorderValues.Single, Size = 6 },
-                    new LeftBorder { Val = BorderValues.Single, Size = 6 },
-                    new RightBorder { Val = BorderValues.Single, Size = 6 },
-                    new InsideHorizontalBorder { Val = BorderValues.Single, Size = 6 },
-                    new InsideVerticalBorder { Val = BorderValues.Single, Size = 6 }
-                )
+            // Создаем границы таблицы
+            TableBorders borders = new TableBorders(
+                new TopBorder() { Val = BorderValues.Single, Size = 6 },
+                new BottomBorder() { Val = BorderValues.Single, Size = 6 },
+                new LeftBorder() { Val = BorderValues.Single, Size = 6 },
+                new RightBorder() { Val = BorderValues.Single, Size = 6 },
+                new InsideHorizontalBorder() { Val = BorderValues.Single, Size = 6 },
+                new InsideVerticalBorder() { Val = BorderValues.Single, Size = 6 }
             );
 
+            // Создаем свойства таблицы и добавляем границы
+            TableProperties tblProps = new TableProperties();
+            tblProps.TableBorders = borders;
+
             table.Append(tblProps);
+
             // Добавим стиль таблицы для красоты (опционально)
             table.Append(new TableStyle { Val = "TableGrid" });
 

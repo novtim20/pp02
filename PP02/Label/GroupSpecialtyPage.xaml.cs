@@ -81,16 +81,14 @@ namespace PP02.Label
                     connection.Open();
 
                     const string sql = @"
-INSERT INTO specialties (code, name, short_name, is_active)
-VALUES (@code, @name, @short_name, @is_active);
+INSERT INTO `specialties` (code, name, is_active)
+VALUES (@code, @name, @is_active);
 SELECT LAST_INSERT_ID();";
 
                     using (var command = new MySqlCommand(sql, connection))
                     {
                         command.Parameters.AddWithValue("@code", NewSpecialtyCodeTextBox.Text.Trim());
                         command.Parameters.AddWithValue("@name", NewSpecialtyNameTextBox.Text.Trim());
-                        command.Parameters.AddWithValue("@short_name",
-                            (object)NewSpecialtyShortNameTextBox.Text.Trim() ?? DBNull.Value);
                         command.Parameters.AddWithValue("@is_active", NewSpecialtyIsActiveCheckBox.IsChecked == true);
 
                         var result = command.ExecuteScalar();
@@ -157,7 +155,7 @@ SELECT LAST_INSERT_ID();";
                     connection.Open();
 
                     const string sql = @"
-INSERT INTO groups (code, short_name, name, specialty_id, is_active)
+INSERT INTO `groups` (code, short_name, name, specialty_id, is_active)
 VALUES (@code, @short_name, @name, @specialty_id, @is_active);
 SELECT LAST_INSERT_ID();";
 
@@ -212,6 +210,15 @@ SELECT LAST_INSERT_ID();";
                 NewGroupSpecialtyComboBox.SelectedIndex = 0;
             }
             NewGroupCodeTextBox.Focus();
+        }
+
+        // Кнопка Назад
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (NavigationService != null && NavigationService.CanGoBack)
+            {
+                NavigationService.GoBack();
+            }
         }
     }
 }

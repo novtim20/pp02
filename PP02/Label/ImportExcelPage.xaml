@@ -1,0 +1,225 @@
+﻿<Page x:Class="PP02.Label.ImportExcelPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:PP02.Label"
+      mc:Ignorable="d"
+      d:DesignHeight="900" d:DesignWidth="1200"
+      Background="#F5F5F5"
+      Title="Импорт студентов из Excel">
+
+    <ScrollViewer x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- ЗАГОЛОВОК -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                <TextBlock Text="📥 Импорт данных из Excel"
+                           FontSize="24" FontWeight="Bold" Foreground="#333"/>
+                <TextBlock Text="Загрузите файл Excel и настройте соответствие столбцов полям базы данных"
+                           FontSize="14" Foreground="#666" Margin="0,5,0,0"/>
+            </StackPanel>
+
+            <!-- ШАГ 1: ЗАГРУЗКА ФАЙЛА -->
+            <Border Grid.Row="1" Background="White" CornerRadius="5" Padding="20"
+                    BorderBrush="#DDD" BorderThickness="1" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="📁 Шаг 1: Выберите файл Excel"
+                               FontSize="16" FontWeight="Bold" Margin="0,0,0,15"
+                               Foreground="#333"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button x:Name="BrowseButton" Content="📂 Обзор..." Width="120" Height="35"
+                                Background="#2196F3" Foreground="White" FontWeight="Bold"
+                                BorderThickness="0" Click="BrowseButton_Click"/>
+                        <TextBox x:Name="FilePathTextBox" Width="500" Height="35"
+                                 Margin="10,0,0,0" Padding="8,0,0,0"
+                                 BorderBrush="#DDD" BorderThickness="1"
+                                 IsReadOnly="True"
+                                 VerticalContentAlignment="Center"/>
+                        <Button x:Name="LoadFileButton" Content="📋 Загрузить файл" Width="130" Height="35"
+                                Margin="10,0,0,0" Background="#4CAF50" Foreground="White"
+                                FontWeight="Bold" BorderThickness="0" Click="LoadFileButton_Click"/>
+                    </StackPanel>
+
+                    <TextBlock x:Name="FileStatusText" Text="Файл не выбран"
+                               FontSize="12" Foreground="#888" FontStyle="Italic"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ШАГ 2: НАСТРОЙКА МАППИНГА -->
+            <Border Grid.Row="2" Background="White" CornerRadius="5" Padding="20"
+                    BorderBrush="#DDD" BorderThickness="1" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="🔧 Шаг 2: Настройте соответствие столбцов"
+                               FontSize="16" FontWeight="Bold" Margin="0,0,0,15"
+                               Foreground="#333"/>
+
+                    <TextBlock Text="Выберите, какие данные брать из файла и в каком порядке их обрабатывать. Перетаскивайте строки для изменения порядка."
+                               FontSize="12" Foreground="#666" Margin="0,0,0,15"
+                               TextWrapping="Wrap"/>
+
+                    <!-- Таблица маппинга -->
+                    <DataGrid x:Name="MappingDataGrid" AutoGenerateColumns="False"
+                              CanUserAddRows="False" CanUserDeleteRows="False"
+                              CanUserReorderColumns="False" CanUserResizeColumns="True"
+                              HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                              BorderBrush="#DDD" BorderThickness="1"
+                              RowHeight="40" MaxHeight="400">
+                        <DataGrid.Columns>
+                            <!-- Порядок -->
+                            <DataGridTemplateColumn Header="Порядок" Width="70">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <Button Content="⬆" Width="25" Height="25" FontSize="10"
+                                                    Background="#E0E0E0" BorderThickness="0"
+                                                    Click="MoveUp_Click" ToolTip="Вверх"/>
+                                            <Button Content="⬇" Width="25" Height="25" FontSize="10"
+                                                    Margin="5,0,0,0" Background="#E0E0E0" BorderThickness="0"
+                                                    Click="MoveDown_Click" ToolTip="Вниз"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Поле БД -->
+                            <DataGridTextColumn Header="Поле базы данных" Binding="{Binding DatabaseField}"
+                                                Width="180" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="Padding" Value="5,0,0,0"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <!-- Столбец Excel -->
+                            <DataGridTemplateColumn Header="Столбец из Excel" Width="200">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=DataGrid}, Path=DataContext.ExcelColumns}"
+                                                  SelectedItem="{Binding ExcelColumn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  Height="28" Margin="5,0,0,0">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}"/>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Использовать -->
+                            <DataGridTemplateColumn Header="Использовать" Width="90">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding UseForImport, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Пример данных -->
+                            <DataGridTextColumn Header="Пример из файла" Binding="{Binding SampleValue}"
+                                                Width="200" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="Padding" Value="5,0,0,0"/>
+                                        <Setter Property="Foreground" Value="#666"/>
+                                        <Setter Property="FontStyle" Value="Italic"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
+                        <Button x:Name="AutoMapButton" Content="🔄 Авто-настройка" Width="130" Height="35"
+                                Background="#9C27B0" Foreground="White" FontWeight="Bold"
+                                BorderThickness="0" Click="AutoMapButton_Click" Margin="0,0,10,0"/>
+                        <Button x:Name="ResetMappingButton" Content="🗑 Сбросить" Width="100" Height="35"
+                                Background="#E0E0E0" Foreground="#333" FontWeight="Bold"
+                                BorderThickness="0" Click="ResetMappingButton_Click"/>
+                        <TextBlock x:Name="MappingStatusText" Text=""
+                                   FontSize="12" Foreground="#4CAF50"
+                                   Margin="15,0,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- ШАГ 3: ПРЕДВАРИТЕЛЬНЫЙ ПРОСМОТР -->
+            <Border Grid.Row="3" Background="White" CornerRadius="5" Padding="20"
+                    BorderBrush="#DDD" BorderThickness="1" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="👁 Шаг 3: Предварительный просмотр"
+                               FontSize="16" FontWeight="Bold" Margin="0,0,0,15"
+                               Foreground="#333"/>
+
+                    <DataGrid x:Name="PreviewDataGrid" AutoGenerateColumns="False"
+                              CanUserAddRows="False" CanUserDeleteRows="False"
+                              IsReadOnly="True" HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              BorderBrush="#DDD" BorderThickness="1"
+                              MaxHeight="250">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ФИО" Binding="{Binding FullName}" Width="200"/>
+                            <DataGridTextColumn Header="Роль" Binding="{Binding Role}" Width="80"/>
+                            <DataGridTextColumn Header="Группа" Binding="{Binding GroupName}" Width="100"/>
+                            <DataGridTextColumn Header="Специальность" Binding="{Binding SpecialtyName}" Width="150"/>
+                            <DataGridTextColumn Header="Год выпуска" Binding="{Binding GraduationYear}" Width="80"/>
+                            <DataGridTextColumn Header="Пол" Binding="{Binding Gender}" Width="50"/>
+                            <DataGridTextColumn Header="Год рождения" Binding="{Binding BirthYear}" Width="80"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock x:Name="PreviewStatusText" Text="Загрузите файл и настройте маппинг для просмотра"
+                               FontSize="12" Foreground="#888" Margin="0,10,0,0" FontStyle="Italic"/>
+                </StackPanel>
+            </Border>
+
+            <!-- КНОПКИ ИМПОРТА -->
+            <Border Grid.Row="4" Background="White" CornerRadius="5" Padding="20"
+                    BorderBrush="#DDD" BorderThickness="1" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="🚀 Шаг 4: Импорт данных"
+                               FontSize="16" FontWeight="Bold" Margin="0,0,0,15"
+                               Foreground="#333"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <CheckBox x:Name="SkipDuplicatesCheckBox" Content="Пропускать дубликаты по ФИО"
+                                  IsChecked="True" VerticalContentAlignment="Center" Margin="0,0,20,0"/>
+                        <CheckBox x:Name="ValidateDataCheckBox" Content="Проверять корректность данных"
+                                  IsChecked="True" VerticalContentAlignment="Center"/>
+                    </StackPanel>
+
+                    <ProgressBar x:Name="ImportProgressBar" Height="20" Minimum="0" Maximum="100"
+                                 Visibility="Collapsed" Margin="0,0,0,10"/>
+                    <TextBlock x:Name="ImportProgressText" Text=""
+                               FontSize="12" Foreground="#666"
+                               Visibility="Collapsed" Margin="0,0,0,10"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ФИНАЛЬНЫЕ КНОПКИ -->
+            <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button x:Name="CancelButton" Content="❌ Отмена" Width="120" Height="40"
+                        Background="#E0E0E0" Foreground="#333" FontWeight="Bold"
+                        BorderThickness="0" Click="CancelButton_Click" Margin="0,0,10,0"/>
+                <Button x:Name="ImportButton" Content="✅ Импортировать" Width="150" Height="40"
+                        Background="#4CAF50" Foreground="White" FontWeight="Bold"
+                        BorderThickness="0" Click="ImportButton_Click" IsEnabled="False"/>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Page>

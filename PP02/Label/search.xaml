@@ -353,6 +353,9 @@
                     <Button Content="➕ Добавить студента" Width="200" Height="45" FontSize="16" FontWeight="Bold"
                             Background="#28A745" Foreground="White" BorderThickness="0"
                             Margin="0,0,10,0" Cursor="Hand" Click="AddStudentButton_Click"/>
+                    <Button Content="📥 Импорт из Excel" Width="200" Height="45" FontSize="16" FontWeight="Bold"
+                            Background="#FF9800" Foreground="White" BorderThickness="0"
+                            Margin="0,0,10,0" Cursor="Hand" Click="ImportExcelButton_Click"/>
                     <Button Content="📚 Группы/Специальности" Width="200" Height="45" FontSize="16" FontWeight="Bold"
                             Background="#9C27B0" Foreground="White" BorderThickness="0"
                             Margin="0,0,10,0" Cursor="Hand" Click="GroupSpecialtyButton_Click"/>

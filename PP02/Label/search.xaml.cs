@@ -350,6 +350,12 @@ namespace PP02.Label
             NavigationService?.Navigate(new AddStudentPage());
         }
 
+        // === 🔹 КНОПКА "ИМПОРТ ИЗ EXCEL" (переход на ImportExcelPage) ===
+        private void ImportExcelButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService?.Navigate(new ImportExcelPage());
+        }
+
         // === 🔹 КНОПКА "ГРУППЫ/СПЕЦИАЛЬНОСТИ" (переход на GroupSpecialtyPage) ===
         private void GroupSpecialtyButton_Click(object sender, RoutedEventArgs e)
         {

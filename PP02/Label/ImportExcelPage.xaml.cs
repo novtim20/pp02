@@ -57,6 +57,15 @@ namespace PP02.Label
     }
 
     /// <summary>
+    /// Информация о маппинге для использования в фоновом потоке
+    /// </summary>
+    public class ColumnMappingInfo
+    {
+        public string DatabaseField { get; set; }
+        public string ExcelColumn { get; set; }
+    }
+
+    /// <summary>
     /// Страница импорта данных студентов из Excel с гибкой настройкой маппинга
     /// </summary>
     public partial class ImportExcelPage : Page
@@ -460,7 +469,7 @@ namespace PP02.Label
 
             // Создаем локальную копию маппингов в потоке UI перед фоновой операцией
             var activeMappings = _mappings.Where(m => m.UseForImport && !string.IsNullOrEmpty(m.ExcelColumn))
-                .Select(m => new { m.DatabaseField, m.ExcelColumn })
+                .Select(m => new ColumnMappingInfo { DatabaseField = m.DatabaseField, ExcelColumn = m.ExcelColumn })
                 .ToList();
 
             if (activeMappings.Count == 0)
@@ -616,7 +625,7 @@ namespace PP02.Label
         /// <summary>
         /// Валидация строки данных с использованием копии маппингов (для фонового потока)
         /// </summary>
-        private bool ValidateRowData(Dictionary<string, string> rowData, List<dynamic> mappingsCopy)
+        private bool ValidateRowData(Dictionary<string, string> rowData, List<ColumnMappingInfo> mappingsCopy)
         {
             return ValidateRowDataInternal(rowData, mappingsCopy);
         }
@@ -624,7 +633,7 @@ namespace PP02.Label
         /// <summary>
         /// Внутренний метод валидации строки данных
         /// </summary>
-        private bool ValidateRowDataInternal(Dictionary<string, string> rowData, List<dynamic> mappingsCopy)
+        private bool ValidateRowDataInternal(Dictionary<string, string> rowData, List<ColumnMappingInfo> mappingsCopy)
         {
             // Обязательное поле - ФИО
             var fullName = GetMappedValueInternal(rowData, mappingsCopy, "full_name");
@@ -661,7 +670,7 @@ namespace PP02.Label
         /// <summary>
         /// Вставка записи о человеке в базу с использованием копии маппингов (для фонового потока)
         /// </summary>
-        private bool InsertPerson(MySqlConnection connection, Dictionary<string, string> rowData, MySqlTransaction transaction, List<dynamic> mappingsCopy)
+        private bool InsertPerson(MySqlConnection connection, Dictionary<string, string> rowData, MySqlTransaction transaction, List<ColumnMappingInfo> mappingsCopy)
         {
             return InsertPersonInternal(connection, rowData, transaction, mappingsCopy);
         }
@@ -669,7 +678,7 @@ namespace PP02.Label
         /// <summary>
         /// Внутренний метод вставки записи
         /// </summary>
-        private bool InsertPersonInternal(MySqlConnection connection, Dictionary<string, string> rowData, MySqlTransaction transaction, List<dynamic> mappingsCopy)
+        private bool InsertPersonInternal(MySqlConnection connection, Dictionary<string, string> rowData, MySqlTransaction transaction, List<ColumnMappingInfo> mappingsCopy)
         {
             try
             {
@@ -737,7 +746,7 @@ INSERT INTO people (
         /// <summary>
         /// Получение значения из строки данных с использованием копии маппингов или глобальных маппингов
         /// </summary>
-        private string GetMappedValueInternal(Dictionary<string, string> rowData, List<dynamic> mappingsCopy, string dbField)
+        private string GetMappedValueInternal(Dictionary<string, string> rowData, List<ColumnMappingInfo> mappingsCopy, string dbField)
         {
             if (mappingsCopy != null)
             {

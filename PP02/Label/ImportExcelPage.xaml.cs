@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -71,7 +72,7 @@ namespace PP02.Label
     public partial class ImportExcelPage : Page
     {
         // Строка подключения к БД
-        private readonly string _connectionString = "server=127.0.0.1;uid=root;pwd=root;database=pp022;port=3306;";
+        private readonly string _connectionString = "server=127.0.0.1;uid=root;pwd=root;database=pp02;port=3306;";
 
         // Список всех возможных полей БД для маппинга
         private readonly List<string> _databaseFields = new List<string>
@@ -487,10 +488,6 @@ namespace PP02.Label
 
             if (result != MessageBoxResult.Yes) return;
 
-            // Сохраняем значения UI-элементов в локальные переменные ПЕРЕД запуском фонового потока
-            bool skipDuplicates = SkipDuplicatesCheckBox.IsChecked ?? false;
-            bool validateData = ValidateDataCheckBox.IsChecked ?? false;
-
             // Создаем локальную копию данных для использования в фоновом потоке
             var excelDataCopy = _excelData.ToList();
             var mappingsCopy = activeMappings.ToList();
@@ -519,7 +516,7 @@ namespace PP02.Label
                                 var rowData = excelDataCopy[i];
 
                                 // Проверка на дубликаты
-                                if (skipDuplicates)
+                                if (SkipDuplicatesCheckBox.IsChecked == true)
                                 {
                                     var fullName = GetMappedValueInternal(rowData, mappingsCopy, "full_name");
                                     if (!string.IsNullOrEmpty(fullName) && IsDuplicate(connection, fullName, transaction))
@@ -530,7 +527,7 @@ namespace PP02.Label
                                 }
 
                                 // Валидация данных
-                                if (validateData)
+                                if (ValidateDataCheckBox.IsChecked == true)
                                 {
                                     if (!ValidateRowData(rowData, mappingsCopy))
                                     {
@@ -578,45 +575,8 @@ namespace PP02.Label
             }
             catch (Exception ex)
             {
-                string errorMessage = $"Ошибка при импорте: {ex.Message}\n\n" +
-                                     $"Тип ошибки: {ex.GetType().Name}\n";
-
-                if (ex is InvalidOperationException || ex.Message.Contains("поток"))
-                {
-                    errorMessage += "\n⚠️ ВНИМАНИЕ: Обнаружена ошибка доступа к потоку!\n" +
-                                   "Это означает, что фоновый поток пытается обратиться к UI-элементам.\n\n" +
-                                   "Проблемные элементы могут быть:\n" +
-                                   "• SkipDuplicatesCheckBox.IsChecked\n" +
-                                   "• ValidateDataCheckBox.IsChecked\n" +
-                                   "• _mappings (коллекция маппингов)\n\n" +
-                                   "Решение: Сохраните значения этих элементов в локальные переменные ПЕРЕД запуском Task.Run()\n";
-                }
-
-                errorMessage += $"\nПуть к файлу: {FilePathTextBox.Text}\n" +
-                               $"Записей в файле: {_excelData.Count}\n" +
-                               $"Активных маппингов: {activeMappings.Count}\n\n" +
-                               $"Детали (Stack Trace):\n{ex.StackTrace}";
-
-                if (ex.InnerException != null)
-                {
-                    errorMessage += $"\n\nВнутреннее исключение:\n{ex.InnerException.Message}\n{ex.InnerException.StackTrace}";
-                }
-
-                MessageBox.Show(errorMessage, "Подробная ошибка импорта",
+                MessageBox.Show($"Ошибка при импорте: {ex.Message}", "Ошибка",
                     MessageBoxButton.OK, MessageBoxImage.Error);
-
-                // Логируем в консоль для отладки
-                System.Diagnostics.Debug.WriteLine($"=== IMPORT ERROR ===");
-                System.Diagnostics.Debug.WriteLine($"Time: {DateTime.Now}");
-                System.Diagnostics.Debug.WriteLine($"Type: {ex.GetType().FullName}");
-                System.Diagnostics.Debug.WriteLine($"Message: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
-                if (ex.InnerException != null)
-                {
-                    System.Diagnostics.Debug.WriteLine($"InnerException: {ex.InnerException.Message}");
-                    System.Diagnostics.Debug.WriteLine($"InnerStackTrace: {ex.InnerException.StackTrace}");
-                }
-                System.Diagnostics.Debug.WriteLine($"===================");
             }
             finally
             {
@@ -723,13 +683,32 @@ namespace PP02.Label
         {
             try
             {
+                // Получаем ФИО и группу из данных
+                string fullName = GetMappedValueInternal(rowData, mappingsCopy, "full_name");
+                string groupCodeFromExcel = GetMappedValueInternal(rowData, mappingsCopy, "group_code");
+
+                // Если группа не найдена в отдельной колонке, пытаемся извлечь её из ФИО
+                if (string.IsNullOrEmpty(groupCodeFromExcel) && !string.IsNullOrEmpty(fullName))
+                {
+                    // Пытаемся найти паттерн "ФИО Группа" (разделено табуляцией или пробелами)
+                    var parts = ParseFullNameAndGroup(fullName);
+                    fullName = parts.FullName;
+                    groupCodeFromExcel = parts.GroupCode;
+                }
+
                 // Получаем ID для справочников - используем копию маппингов если предоставлена
                 var educationId = GetDictionaryIdFromCopy(connection, "ref_education", "name", GetMappedValueInternal(rowData, mappingsCopy, "education_name"), transaction);
                 var socialOriginId = GetDictionaryIdFromCopy(connection, "ref_social_origin", "name", GetMappedValueInternal(rowData, mappingsCopy, "social_origin_name"), transaction);
                 var socialStatusId = GetDictionaryIdFromCopy(connection, "ref_social_status", "name", GetMappedValueInternal(rowData, mappingsCopy, "social_status_name"), transaction);
                 var partyId = GetDictionaryIdFromCopy(connection, "ref_party", "name", GetMappedValueInternal(rowData, mappingsCopy, "party_name"), transaction);
                 var specialtyId = GetSpecialtyIdFromCopy(connection, GetMappedValueInternal(rowData, mappingsCopy, "specialty_name"), transaction);
-                var groupId = GetGroupIdFromCopy(connection, GetMappedValueInternal(rowData, mappingsCopy, "group_code"), transaction);
+
+                // Получаем или создаем группу
+                int? groupId = null;
+                if (!string.IsNullOrEmpty(groupCodeFromExcel))
+                {
+                    groupId = GetOrCreateGroupId(connection, groupCodeFromExcel, specialtyId, transaction);
+                }
 
                 const string sql = @"
 INSERT INTO people (
@@ -746,7 +725,7 @@ INSERT INTO people (
 
                 using (var command = new MySqlCommand(sql, connection, transaction))
                 {
-                    command.Parameters.AddWithValue("@full_name", (object)GetMappedValueInternal(rowData, mappingsCopy, "full_name") ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@full_name", (object)fullName ?? DBNull.Value);
                     command.Parameters.AddWithValue("@role", (object)GetMappedValueInternal(rowData, mappingsCopy, "role") ?? "Студент");
                     command.Parameters.AddWithValue("@specialty_id", GetDbValue(specialtyId));
                     command.Parameters.AddWithValue("@group_id", GetDbValue(groupId));
@@ -910,6 +889,92 @@ INSERT INTO people (
         private object GetDbValue(int? value)
         {
             return value.HasValue ? (object)value.Value : DBNull.Value;
+        }
+
+        /// <summary>
+        /// Разбор строки "ФИО [табуляция] Группа" на отдельные части
+        /// </summary>
+        private (string FullName, string GroupCode) ParseFullNameAndGroup(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return (input, null);
+
+            // Проверяем наличие табуляции
+            var tabIndex = input.IndexOf('\t');
+            if (tabIndex >= 0)
+            {
+                var fullName = input.Substring(0, tabIndex).Trim();
+                var groupCode = input.Substring(tabIndex + 1).Trim();
+                return (fullName, groupCode);
+            }
+
+            // Проверяем наличие нескольких пробелов подряд (возможно разделение)
+            // Или паттерн где после фамилии идет код группы типа "Х-Ш 36"
+            var parts = input.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length >= 2)
+            {
+                // Проверяем, похожа ли последняя часть на код группы (содержит дефис и цифры)
+                var lastPart = parts[parts.Length - 1];
+                var secondLastPart = parts.Length > 1 ? parts[parts.Length - 2] : "";
+
+                // Паттерн группы: что-то вроде "Х-Ш 36" или "М-Ш 40"
+                if (System.Text.RegularExpressions.Regex.IsMatch(lastPart, @"^\d+$") &&
+                    System.Text.RegularExpressions.Regex.IsMatch(secondLastPart, @"^[А-ЯA-Z]-[А-ЯA-Z]$"))
+                {
+                    var groupCode = secondLastPart + " " + lastPart;
+                    var fullName = string.Join(" ", parts.Take(parts.Length - 2));
+                    return (fullName, groupCode);
+                }
+            }
+
+            // Если не нашли паттерн группы, возвращаем как есть
+            return (input, null);
+        }
+
+        /// <summary>
+        /// Получение ID группы по коду или создание новой группы
+        /// </summary>
+        private int? GetOrCreateGroupId(MySqlConnection connection, string groupCode, int? specialtyId, MySqlTransaction transaction)
+        {
+            if (string.IsNullOrEmpty(groupCode))
+                return null;
+
+            // Сначала пытаемся найти существующую группу
+            var existingId = GetGroupIdInternal(connection, groupCode, transaction);
+            if (existingId.HasValue)
+            {
+                return existingId.Value;
+            }
+
+            // Группы не существует, создаем новую
+            // Извлекаем short_name из кода группы (например, "Х-Ш" из "Х-Ш 36")
+            string shortName = groupCode;
+            var spaceIndex = groupCode.IndexOf(' ');
+            if (spaceIndex > 0)
+            {
+                shortName = groupCode.Substring(0, spaceIndex);
+            }
+
+            // Если specialtyId не указан, пытаемся определить его по коду группы
+            int specId = specialtyId ?? 1; // Значение по умолчанию
+
+            const string insertSql = @"
+INSERT INTO `groups` (code, short_name, specialty_id, is_active)
+VALUES (@code, @short_name, @specialty_id, 1)";
+
+            using (var command = new MySqlCommand(insertSql, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@code", groupCode);
+                command.Parameters.AddWithValue("@short_name", (object)shortName ?? DBNull.Value);
+                command.Parameters.AddWithValue("@specialty_id", specId);
+                command.ExecuteNonQuery();
+
+                // Получаем новый ID
+                command.CommandText = "SELECT LAST_INSERT_ID()";
+                command.Parameters.Clear();
+                var newId = command.ExecuteScalar();
+                return newId != null ? (int?)Convert.ToInt32(newId) : null;
+            }
         }
 
         /// <summary>

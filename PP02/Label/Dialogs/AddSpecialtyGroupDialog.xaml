@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:PP02.Label.Dialogs"
         mc:Ignorable="d"
         Title="Добавление специальности и группы"
-        Height="500" Width="450"
+        Height="612" Width="450"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="#F5F5F5">

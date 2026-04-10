@@ -13,8 +13,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- Кнопка Назад -->
@@ -79,8 +79,18 @@
             </Grid>
         </Border>
 
+        <!-- Кнопки экспорта -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,15">
+            <Button Content="📊 Экспорт в Excel" Width="150" Height="40" Margin="0,0,15,0"
+                    Click="BtnExportExcel_Click" Background="#217346" Foreground="White" FontWeight="Bold"/>
+            <Button Content="📄 Экспорт в Word" Width="150" Height="40" Margin="15,0,0,0"
+                    Click="BtnExportWord_Click" Background="#2B579A" Foreground="White" FontWeight="Bold"/>
+            <Button Content="Применить фильтры" Width="150" Height="40" Margin="15,0,0,0"
+                    Click="FilterButton_Click" Background="#007ACC" Foreground="White" FontWeight="Bold"/>
+        </StackPanel>
+
         <!-- Предпросмотр данных -->
-        <Border Grid.Row="2" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="5" Padding="15" Margin="0,0,0,15">
+        <Border Grid.Row="3" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="5" Padding="15" Margin="0,0,0,15">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -90,30 +100,22 @@
                 <TextBlock Grid.Row="0" Text="Предпросмотр данных:" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
                 <TextBlock x:Name="LbCount" Grid.Row="0" Text="Найдено записей: 0" FontWeight="Bold" FontSize="14" Margin="0,0,0,10" HorizontalAlignment="Right"/>
 
-                <ItemsControl x:Name="ResultsItemsControl" Grid.Row="1">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="3" Padding="10" Margin="0,0,0,5">
-                                <StackPanel>
-                                    <TextBlock Text="{Binding FullName}" FontWeight="Bold" FontSize="14"/>
-                                    <TextBlock Text="{Binding Role}" FontStyle="Italic"/>
-                                    <TextBlock Text="{Binding SpecialtyName}"/>
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl x:Name="ResultsItemsControl">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="3" Padding="10" Margin="0,0,0,5">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding FullName}" FontWeight="Bold" FontSize="14"/>
+                                        <TextBlock Text="{Binding Role}" FontStyle="Italic"/>
+                                        <TextBlock Text="{Binding SpecialtyName}"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
             </Grid>
         </Border>
-
-        <!-- Кнопки экспорта -->
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
-            <Button Content="📊 Экспорт в Excel" Width="150" Height="40" Margin="0,0,15,0"
-                    Click="BtnExportExcel_Click" Background="#217346" Foreground="White" FontWeight="Bold"/>
-            <Button Content="📄 Экспорт в Word" Width="150" Height="40" Margin="15,0,0,0"
-                    Click="BtnExportWord_Click" Background="#2B579A" Foreground="White" FontWeight="Bold"/>
-            <Button Content="Применить фильтры" Width="150" Height="40" Margin="15,0,0,0"
-                    Click="FilterButton_Click" Background="#007ACC" Foreground="White" FontWeight="Bold"/>
-        </StackPanel>
     </Grid>
 </Page>

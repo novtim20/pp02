@@ -141,12 +141,15 @@ namespace PP02.Label
                 return;
             }
 
+            // Сохраняем путь к файлу в локальную переменную до запуска задачи
+            string filePath = FilePathTextBox.Text;
+
             try
             {
                 LoadFileButton.IsEnabled = false;
                 LoadFileButton.Content = "⏳ Загрузка...";
 
-                await Task.Run(() => LoadExcelFile(FilePathTextBox.Text));
+                await Task.Run(() => LoadExcelFile(filePath));
 
                 LoadFileButton.Content = "✅ Файл загружен";
                 FileStatusText.Text = $"Загружено строк: {_excelData.Count}";
@@ -162,7 +165,12 @@ namespace PP02.Label
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка загрузки файла: {ex.Message}", "Ошибка",
+                string errorMessage = $"Ошибка загрузки файла: {ex.Message}\n\n" +
+                                     $"Тип ошибки: {ex.GetType().Name}\n" +
+                                     $"Путь к файлу: {FilePathTextBox.Text}\n\n" +
+                                     $"Детали (Stack Trace):\n{ex.StackTrace}";
+
+                MessageBox.Show(errorMessage, "Ошибка",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 LoadFileButton.Content = "📋 Загрузить файл";
             }
@@ -180,30 +188,45 @@ namespace PP02.Label
             _excelData.Clear();
             _excelColumns.Clear();
 
-            using (var workbook = new XLWorkbook(filePath))
+            // Копируем файл во временную папку, чтобы избежать блокировок
+            string tempPath = Path.Combine(Path.GetTempPath(), Path.GetFileName(filePath));
+            try
             {
-                var worksheet = workbook.Worksheet(1); // Первый лист
-                var firstRow = worksheet.FirstRowUsed();
+                File.Copy(filePath, tempPath, true);
 
-                // Чтение заголовков
-                foreach (var cell in firstRow.Cells())
+                using (var workbook = new XLWorkbook(tempPath))
                 {
-                    var header = cell.GetValue<string>()?.Trim();
-                    if (!string.IsNullOrEmpty(header))
-                        _excelColumns.Add(header);
-                }
+                    var worksheet = workbook.Worksheet(1); // Первый лист
+                    var firstRow = worksheet.FirstRowUsed();
 
-                // Чтение данных
-                var dataRows = worksheet.RowsUsed().Skip(1); // Пропускаем заголовок
-                foreach (var row in dataRows)
-                {
-                    var rowData = new Dictionary<string, string>();
-                    for (int i = 0; i < _excelColumns.Count; i++)
+                    // Чтение заголовков
+                    foreach (var cell in firstRow.Cells())
                     {
-                        var cellValue = row.Cell(i + 1).GetValue<string>();
-                        rowData[_excelColumns[i]] = cellValue ?? "";
+                        var header = cell.GetValue<string>()?.Trim();
+                        if (!string.IsNullOrEmpty(header))
+                            _excelColumns.Add(header);
                     }
-                    _excelData.Add(rowData);
+
+                    // Чтение данных
+                    var dataRows = worksheet.RowsUsed().Skip(1); // Пропускаем заголовок
+                    foreach (var row in dataRows)
+                    {
+                        var rowData = new Dictionary<string, string>();
+                        for (int i = 0; i < _excelColumns.Count; i++)
+                        {
+                            var cellValue = row.Cell(i + 1).GetValue<string>();
+                            rowData[_excelColumns[i]] = cellValue ?? "";
+                        }
+                        _excelData.Add(rowData);
+                    }
+                }
+            }
+            finally
+            {
+                // Удаляем временный файл
+                if (File.Exists(tempPath))
+                {
+                    try { File.Delete(tempPath); } catch { }
                 }
             }
         }

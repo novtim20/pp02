@@ -73,7 +73,8 @@
                               CanUserReorderColumns="False" CanUserResizeColumns="True"
                               HeadersVisibility="Column" GridLinesVisibility="Horizontal"
                               BorderBrush="#DDD" BorderThickness="1"
-                              RowHeight="40" MaxHeight="400">
+                              RowHeight="40" MaxHeight="400"
+                              ItemsSource="{Binding _mappings, RelativeSource={RelativeSource AncestorType=Page}}">
                         <DataGrid.Columns>
                             <!-- Порядок -->
                             <DataGridTemplateColumn Header="Порядок" Width="70">
@@ -106,7 +107,7 @@
                             <DataGridTemplateColumn Header="Столбец из Excel" Width="200">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <ComboBox ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=DataGrid}, Path=DataContext.ExcelColumns}"
+                                        <ComboBox ItemsSource="{Binding DataContext.ExcelColumns, RelativeSource={RelativeSource AncestorType=Page}}"
                                                   SelectedItem="{Binding ExcelColumn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   Height="28" Margin="5,0,0,0">
                                             <ComboBox.ItemTemplate>

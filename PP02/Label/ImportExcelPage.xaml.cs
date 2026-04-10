@@ -75,10 +75,11 @@ namespace PP02.Label
 
         // Столбцы из Excel файла
         private List<string> _excelColumns = new List<string>();
-        public ObservableCollection<string> ExcelColumns => new ObservableCollection<string>(_excelColumns);
+        public ObservableCollection<string> ExcelColumns { get; } = new ObservableCollection<string>();
 
         // Данные маппинга
         private ObservableCollection<ColumnMapping> _mappings = new ObservableCollection<ColumnMapping>();
+        public ObservableCollection<ColumnMapping> Mappings => _mappings;
 
         // Загруженные данные из Excel
         private List<Dictionary<string, string>> _excelData = new List<Dictionary<string, string>>();
@@ -90,6 +91,7 @@ namespace PP02.Label
         {
             InitializeComponent();
             InitializeMappings();
+            DataContext = this;
         }
 
         /// <summary>
@@ -199,23 +201,37 @@ namespace PP02.Label
                     var worksheet = workbook.Worksheet(1); // Первый лист
                     var firstRow = worksheet.FirstRowUsed();
 
-                    // Чтение заголовков
+                    // Чтение заголовков - выполняем в потоке UI
+                    var headers = new List<string>();
                     foreach (var cell in firstRow.Cells())
                     {
                         var header = cell.GetValue<string>()?.Trim();
                         if (!string.IsNullOrEmpty(header))
-                            _excelColumns.Add(header);
+                        {
+                            headers.Add(header);
+                        }
                     }
+
+                    // Обновляем коллекцию в потоке UI
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        ExcelColumns.Clear();
+                        foreach (var header in headers)
+                        {
+                            ExcelColumns.Add(header);
+                            _excelColumns.Add(header);
+                        }
+                    });
 
                     // Чтение данных
                     var dataRows = worksheet.RowsUsed().Skip(1); // Пропускаем заголовок
                     foreach (var row in dataRows)
                     {
                         var rowData = new Dictionary<string, string>();
-                        for (int i = 0; i < _excelColumns.Count; i++)
+                        for (int i = 0; i < headers.Count; i++)
                         {
                             var cellValue = row.Cell(i + 1).GetValue<string>();
-                            rowData[_excelColumns[i]] = cellValue ?? "";
+                            rowData[headers[i]] = cellValue ?? "";
                         }
                         _excelData.Add(rowData);
                     }
@@ -336,6 +352,7 @@ namespace PP02.Label
             }
             MappingStatusText.Text = "Настройки сброшены";
             PreviewDataGrid.ItemsSource = null;
+            _previewItems.Clear();
             PreviewStatusText.Text = "Загрузите файл и настройте маппинг для просмотра";
         }
 
@@ -424,6 +441,7 @@ namespace PP02.Label
                 _previewItems.Add(previewItem);
             }
 
+            PreviewDataGrid.ItemsSource = null;
             PreviewDataGrid.ItemsSource = _previewItems;
             PreviewStatusText.Text = $"Показано {previewCount} из {_excelData.Count} записей";
         }
@@ -440,7 +458,11 @@ namespace PP02.Label
                 return;
             }
 
-            var activeMappings = _mappings.Where(m => m.UseForImport && !string.IsNullOrEmpty(m.ExcelColumn)).ToList();
+            // Создаем локальную копию маппингов в потоке UI перед фоновой операцией
+            var activeMappings = _mappings.Where(m => m.UseForImport && !string.IsNullOrEmpty(m.ExcelColumn))
+                .Select(m => new { m.DatabaseField, m.ExcelColumn })
+                .ToList();
+
             if (activeMappings.Count == 0)
             {
                 MessageBox.Show("Настройте хотя бы одно поле для импорта", "Ошибка",
@@ -455,6 +477,10 @@ namespace PP02.Label
                 MessageBoxImage.Question);
 
             if (result != MessageBoxResult.Yes) return;
+
+            // Создаем локальную копию данных для использования в фоновом потоке
+            var excelDataCopy = _excelData.ToList();
+            var mappingsCopy = activeMappings.ToList();
 
             try
             {
@@ -475,14 +501,14 @@ namespace PP02.Label
 
                         try
                         {
-                            for (int i = 0; i < _excelData.Count; i++)
+                            for (int i = 0; i < excelDataCopy.Count; i++)
                             {
-                                var rowData = _excelData[i];
+                                var rowData = excelDataCopy[i];
 
                                 // Проверка на дубликаты
                                 if (SkipDuplicatesCheckBox.IsChecked == true)
                                 {
-                                    var fullName = GetMappedValue(rowData, "full_name");
+                                    var fullName = GetMappedValueInternal(rowData, mappingsCopy, "full_name");
                                     if (!string.IsNullOrEmpty(fullName) && IsDuplicate(connection, fullName, transaction))
                                     {
                                         skippedCount++;
@@ -493,7 +519,7 @@ namespace PP02.Label
                                 // Валидация данных
                                 if (ValidateDataCheckBox.IsChecked == true)
                                 {
-                                    if (!ValidateRowData(rowData))
+                                    if (!ValidateRowData(rowData, mappingsCopy))
                                     {
                                         errorCount++;
                                         continue;
@@ -501,7 +527,7 @@ namespace PP02.Label
                                 }
 
                                 // Вставка записи
-                                if (InsertPerson(connection, rowData, transaction))
+                                if (InsertPerson(connection, rowData, transaction, mappingsCopy))
                                 {
                                     importedCount++;
                                 }
@@ -513,8 +539,8 @@ namespace PP02.Label
                                 // Обновление прогресса
                                 Dispatcher.Invoke(() =>
                                 {
-                                    ImportProgressBar.Value = (double)(i + 1) / _excelData.Count * 100;
-                                    ImportProgressText.Text = $"Обработано: {i + 1} из {_excelData.Count} | Успешно: {importedCount} | Пропущено: {skippedCount} | Ошибки: {errorCount}";
+                                    ImportProgressBar.Value = (double)(i + 1) / excelDataCopy.Count * 100;
+                                    ImportProgressText.Text = $"Обработано: {i + 1} из {excelDataCopy.Count} | Успешно: {importedCount} | Пропущено: {skippedCount} | Ошибки: {errorCount}";
                                 });
                             }
 
@@ -563,6 +589,8 @@ namespace PP02.Label
             return null;
         }
 
+
+
         /// <summary>
         /// Проверка на дубликат по ФИО
         /// </summary>
@@ -578,17 +606,33 @@ namespace PP02.Label
         }
 
         /// <summary>
-        /// Валидация строки данных
+        /// Валидация строки данных (использует глобальные маппинги)
         /// </summary>
         private bool ValidateRowData(Dictionary<string, string> rowData)
         {
+            return ValidateRowDataInternal(rowData, null);
+        }
+
+        /// <summary>
+        /// Валидация строки данных с использованием копии маппингов (для фонового потока)
+        /// </summary>
+        private bool ValidateRowData(Dictionary<string, string> rowData, List<dynamic> mappingsCopy)
+        {
+            return ValidateRowDataInternal(rowData, mappingsCopy);
+        }
+
+        /// <summary>
+        /// Внутренний метод валидации строки данных
+        /// </summary>
+        private bool ValidateRowDataInternal(Dictionary<string, string> rowData, List<dynamic> mappingsCopy)
+        {
             // Обязательное поле - ФИО
-            var fullName = GetMappedValue(rowData, "full_name");
+            var fullName = GetMappedValueInternal(rowData, mappingsCopy, "full_name");
             if (string.IsNullOrWhiteSpace(fullName))
                 return false;
 
             // Проверка года рождения
-            var birthYearStr = GetMappedValue(rowData, "birth_year");
+            var birthYearStr = GetMappedValueInternal(rowData, mappingsCopy, "birth_year");
             if (!string.IsNullOrEmpty(birthYearStr))
             {
                 if (!int.TryParse(birthYearStr, out int birthYear) || birthYear < 1900 || birthYear > DateTime.Now.Year)
@@ -596,7 +640,7 @@ namespace PP02.Label
             }
 
             // Проверка года выпуска
-            var graduationYearStr = GetMappedValue(rowData, "graduation_year");
+            var graduationYearStr = GetMappedValueInternal(rowData, mappingsCopy, "graduation_year");
             if (!string.IsNullOrEmpty(graduationYearStr))
             {
                 if (!int.TryParse(graduationYearStr, out int graduationYear) || graduationYear < 1900 || graduationYear > DateTime.Now.Year + 5)
@@ -607,19 +651,35 @@ namespace PP02.Label
         }
 
         /// <summary>
-        /// Вставка записи о человеке в базу
+        /// Вставка записи о человеке в базу (использует глобальные маппинги из UI потока)
         /// </summary>
         private bool InsertPerson(MySqlConnection connection, Dictionary<string, string> rowData, MySqlTransaction transaction)
         {
+            return InsertPersonInternal(connection, rowData, transaction, null);
+        }
+
+        /// <summary>
+        /// Вставка записи о человеке в базу с использованием копии маппингов (для фонового потока)
+        /// </summary>
+        private bool InsertPerson(MySqlConnection connection, Dictionary<string, string> rowData, MySqlTransaction transaction, List<dynamic> mappingsCopy)
+        {
+            return InsertPersonInternal(connection, rowData, transaction, mappingsCopy);
+        }
+
+        /// <summary>
+        /// Внутренний метод вставки записи
+        /// </summary>
+        private bool InsertPersonInternal(MySqlConnection connection, Dictionary<string, string> rowData, MySqlTransaction transaction, List<dynamic> mappingsCopy)
+        {
             try
             {
-                // Получаем ID для справочников
-                var educationId = GetDictionaryId(connection, "ref_education", "name", GetMappedValue(rowData, "education_name"), transaction);
-                var socialOriginId = GetDictionaryId(connection, "ref_social_origin", "name", GetMappedValue(rowData, "social_origin_name"), transaction);
-                var socialStatusId = GetDictionaryId(connection, "ref_social_status", "name", GetMappedValue(rowData, "social_status_name"), transaction);
-                var partyId = GetDictionaryId(connection, "ref_party", "name", GetMappedValue(rowData, "party_name"), transaction);
-                var specialtyId = GetSpecialtyId(connection, GetMappedValue(rowData, "specialty_name"), transaction);
-                var groupId = GetGroupId(connection, GetMappedValue(rowData, "group_code"), transaction);
+                // Получаем ID для справочников - используем копию маппингов если предоставлена
+                var educationId = GetDictionaryIdFromCopy(connection, "ref_education", "name", GetMappedValueInternal(rowData, mappingsCopy, "education_name"), transaction);
+                var socialOriginId = GetDictionaryIdFromCopy(connection, "ref_social_origin", "name", GetMappedValueInternal(rowData, mappingsCopy, "social_origin_name"), transaction);
+                var socialStatusId = GetDictionaryIdFromCopy(connection, "ref_social_status", "name", GetMappedValueInternal(rowData, mappingsCopy, "social_status_name"), transaction);
+                var partyId = GetDictionaryIdFromCopy(connection, "ref_party", "name", GetMappedValueInternal(rowData, mappingsCopy, "party_name"), transaction);
+                var specialtyId = GetSpecialtyIdFromCopy(connection, GetMappedValueInternal(rowData, mappingsCopy, "specialty_name"), transaction);
+                var groupId = GetGroupIdFromCopy(connection, GetMappedValueInternal(rowData, mappingsCopy, "group_code"), transaction);
 
                 const string sql = @"
 INSERT INTO people (
@@ -636,8 +696,8 @@ INSERT INTO people (
 
                 using (var command = new MySqlCommand(sql, connection, transaction))
                 {
-                    command.Parameters.AddWithValue("@full_name", (object)GetMappedValue(rowData, "full_name") ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@role", (object)GetMappedValue(rowData, "role") ?? "Студент");
+                    command.Parameters.AddWithValue("@full_name", (object)GetMappedValueInternal(rowData, mappingsCopy, "full_name") ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@role", (object)GetMappedValueInternal(rowData, mappingsCopy, "role") ?? "Студент");
                     command.Parameters.AddWithValue("@specialty_id", GetDbValue(specialtyId));
                     command.Parameters.AddWithValue("@group_id", GetDbValue(groupId));
                     command.Parameters.AddWithValue("@education_id", GetDbValue(educationId));
@@ -645,23 +705,23 @@ INSERT INTO people (
                     command.Parameters.AddWithValue("@social_status_id", GetDbValue(socialStatusId));
                     command.Parameters.AddWithValue("@party_id", GetDbValue(partyId));
 
-                    var gradYear = GetMappedValue(rowData, "graduation_year");
+                    var gradYear = GetMappedValueInternal(rowData, mappingsCopy, "graduation_year");
                     command.Parameters.AddWithValue("@graduation_year", !string.IsNullOrEmpty(gradYear) && int.TryParse(gradYear, out int gy) ? (object)gy : DBNull.Value);
 
-                    command.Parameters.AddWithValue("@gender", (object)GetMappedValue(rowData, "gender") ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@nationality", (object)GetMappedValue(rowData, "nationality") ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@gender", (object)GetMappedValueInternal(rowData, mappingsCopy, "gender") ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@nationality", (object)GetMappedValueInternal(rowData, mappingsCopy, "nationality") ?? DBNull.Value);
 
-                    var birthYear = GetMappedValue(rowData, "birth_year");
+                    var birthYear = GetMappedValueInternal(rowData, mappingsCopy, "birth_year");
                     command.Parameters.AddWithValue("@birth_year", !string.IsNullOrEmpty(birthYear) && int.TryParse(birthYear, out int by) ? (object)by : DBNull.Value);
 
-                    command.Parameters.AddWithValue("@birth_place", (object)GetMappedValue(rowData, "birth_place") ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@address", (object)GetMappedValue(rowData, "address") ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@birth_place", (object)GetMappedValueInternal(rowData, mappingsCopy, "birth_place") ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@address", (object)GetMappedValueInternal(rowData, mappingsCopy, "address") ?? DBNull.Value);
 
-                    var diplomaDate = GetMappedValue(rowData, "diploma_date");
+                    var diplomaDate = GetMappedValueInternal(rowData, mappingsCopy, "diploma_date");
                     command.Parameters.AddWithValue("@diploma_date", !string.IsNullOrEmpty(diplomaDate) && DateTime.TryParse(diplomaDate, out DateTime dd) ? (object)dd : DBNull.Value);
 
-                    command.Parameters.AddWithValue("@work_after", (object)GetMappedValue(rowData, "work_after") ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@source", (object)GetMappedValue(rowData, "source") ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@work_after", (object)GetMappedValueInternal(rowData, mappingsCopy, "work_after") ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@source", (object)GetMappedValueInternal(rowData, mappingsCopy, "source") ?? DBNull.Value);
 
                     command.ExecuteNonQuery();
                 }
@@ -675,9 +735,49 @@ INSERT INTO people (
         }
 
         /// <summary>
+        /// Получение значения из строки данных с использованием копии маппингов или глобальных маппингов
+        /// </summary>
+        private string GetMappedValueInternal(Dictionary<string, string> rowData, List<dynamic> mappingsCopy, string dbField)
+        {
+            if (mappingsCopy != null)
+            {
+                var mapping = mappingsCopy.FirstOrDefault(m => m.DatabaseField == dbField);
+                if (mapping != null && !string.IsNullOrEmpty(mapping.ExcelColumn) && rowData.ContainsKey(mapping.ExcelColumn))
+                {
+                    return rowData[mapping.ExcelColumn];
+                }
+            }
+            else
+            {
+                var mapping = _mappings.FirstOrDefault(m => m.DatabaseField == dbField && m.UseForImport);
+                if (mapping != null && !string.IsNullOrEmpty(mapping.ExcelColumn) && rowData.ContainsKey(mapping.ExcelColumn))
+                {
+                    return rowData[mapping.ExcelColumn];
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Получение ID из справочника по названию
         /// </summary>
         private int? GetDictionaryId(MySqlConnection connection, string tableName, string columnName, string name, MySqlTransaction transaction)
+        {
+            return GetDictionaryIdInternal(connection, tableName, columnName, name, transaction);
+        }
+
+        /// <summary>
+        /// Получение ID из справочника по названию (для фонового потока с копией маппингов)
+        /// </summary>
+        private int? GetDictionaryIdFromCopy(MySqlConnection connection, string tableName, string columnName, string name, MySqlTransaction transaction)
+        {
+            return GetDictionaryIdInternal(connection, tableName, columnName, name, transaction);
+        }
+
+        /// <summary>
+        /// Внутренний метод получения ID из справочника
+        /// </summary>
+        private int? GetDictionaryIdInternal(MySqlConnection connection, string tableName, string columnName, string name, MySqlTransaction transaction)
         {
             if (string.IsNullOrEmpty(name)) return null;
 
@@ -695,6 +795,22 @@ INSERT INTO people (
         /// </summary>
         private int? GetSpecialtyId(MySqlConnection connection, string specialtyName, MySqlTransaction transaction)
         {
+            return GetSpecialtyIdInternal(connection, specialtyName, transaction);
+        }
+
+        /// <summary>
+        /// Получение ID специальности по названию (для фонового потока)
+        /// </summary>
+        private int? GetSpecialtyIdFromCopy(MySqlConnection connection, string specialtyName, MySqlTransaction transaction)
+        {
+            return GetSpecialtyIdInternal(connection, specialtyName, transaction);
+        }
+
+        /// <summary>
+        /// Внутренний метод получения ID специальности
+        /// </summary>
+        private int? GetSpecialtyIdInternal(MySqlConnection connection, string specialtyName, MySqlTransaction transaction)
+        {
             if (string.IsNullOrEmpty(specialtyName)) return null;
 
             const string sql = "SELECT id FROM specialties WHERE name = @name OR code = @name LIMIT 1";
@@ -710,6 +826,22 @@ INSERT INTO people (
         /// Получение ID группы по коду
         /// </summary>
         private int? GetGroupId(MySqlConnection connection, string groupCode, MySqlTransaction transaction)
+        {
+            return GetGroupIdInternal(connection, groupCode, transaction);
+        }
+
+        /// <summary>
+        /// Получение ID группы по коду (для фонового потока)
+        /// </summary>
+        private int? GetGroupIdFromCopy(MySqlConnection connection, string groupCode, MySqlTransaction transaction)
+        {
+            return GetGroupIdInternal(connection, groupCode, transaction);
+        }
+
+        /// <summary>
+        /// Внутренний метод получения ID группы
+        /// </summary>
+        private int? GetGroupIdInternal(MySqlConnection connection, string groupCode, MySqlTransaction transaction)
         {
             if (string.IsNullOrEmpty(groupCode)) return null;
 

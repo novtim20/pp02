@@ -492,6 +492,10 @@ namespace PP02.Label
             var excelDataCopy = _excelData.ToList();
             var mappingsCopy = activeMappings.ToList();
 
+            // Сохраняем значения чекбоксов в локальные переменные до фонового потока
+            bool skipDuplicates = SkipDuplicatesCheckBox.IsChecked == true;
+            bool validateData = ValidateDataCheckBox.IsChecked == true;
+
             try
             {
                 ImportProgressBar.Visibility = Visibility.Visible;
@@ -516,7 +520,7 @@ namespace PP02.Label
                                 var rowData = excelDataCopy[i];
 
                                 // Проверка на дубликаты
-                                if (SkipDuplicatesCheckBox.IsChecked == true)
+                                if (skipDuplicates)
                                 {
                                     var fullName = GetMappedValueInternal(rowData, mappingsCopy, "full_name");
                                     if (!string.IsNullOrEmpty(fullName) && IsDuplicate(connection, fullName, transaction))
@@ -527,7 +531,7 @@ namespace PP02.Label
                                 }
 
                                 // Валидация данных
-                                if (ValidateDataCheckBox.IsChecked == true)
+                                if (validateData)
                                 {
                                     if (!ValidateRowData(rowData, mappingsCopy))
                                     {

@@ -71,7 +71,7 @@ namespace PP02.Label
     public partial class ImportExcelPage : Page
     {
         // Строка подключения к БД
-        private readonly string _connectionString = "server=127.0.0.1;uid=root;pwd=root;database=pp02;port=3306;";
+        private readonly string _connectionString = "server=127.0.0.1;uid=root;pwd=root;database=pp022;port=3306;";
 
         // Список всех возможных полей БД для маппинга
         private readonly List<string> _databaseFields = new List<string>
@@ -487,6 +487,10 @@ namespace PP02.Label
 
             if (result != MessageBoxResult.Yes) return;
 
+            // Сохраняем значения UI-элементов в локальные переменные ПЕРЕД запуском фонового потока
+            bool skipDuplicates = SkipDuplicatesCheckBox.IsChecked ?? false;
+            bool validateData = ValidateDataCheckBox.IsChecked ?? false;
+
             // Создаем локальную копию данных для использования в фоновом потоке
             var excelDataCopy = _excelData.ToList();
             var mappingsCopy = activeMappings.ToList();
@@ -515,7 +519,7 @@ namespace PP02.Label
                                 var rowData = excelDataCopy[i];
 
                                 // Проверка на дубликаты
-                                if (SkipDuplicatesCheckBox.IsChecked == true)
+                                if (skipDuplicates)
                                 {
                                     var fullName = GetMappedValueInternal(rowData, mappingsCopy, "full_name");
                                     if (!string.IsNullOrEmpty(fullName) && IsDuplicate(connection, fullName, transaction))
@@ -526,7 +530,7 @@ namespace PP02.Label
                                 }
 
                                 // Валидация данных
-                                if (ValidateDataCheckBox.IsChecked == true)
+                                if (validateData)
                                 {
                                     if (!ValidateRowData(rowData, mappingsCopy))
                                     {
@@ -574,8 +578,45 @@ namespace PP02.Label
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при импорте: {ex.Message}", "Ошибка",
+                string errorMessage = $"Ошибка при импорте: {ex.Message}\n\n" +
+                                     $"Тип ошибки: {ex.GetType().Name}\n";
+
+                if (ex is InvalidOperationException || ex.Message.Contains("поток"))
+                {
+                    errorMessage += "\n⚠️ ВНИМАНИЕ: Обнаружена ошибка доступа к потоку!\n" +
+                                   "Это означает, что фоновый поток пытается обратиться к UI-элементам.\n\n" +
+                                   "Проблемные элементы могут быть:\n" +
+                                   "• SkipDuplicatesCheckBox.IsChecked\n" +
+                                   "• ValidateDataCheckBox.IsChecked\n" +
+                                   "• _mappings (коллекция маппингов)\n\n" +
+                                   "Решение: Сохраните значения этих элементов в локальные переменные ПЕРЕД запуском Task.Run()\n";
+                }
+
+                errorMessage += $"\nПуть к файлу: {FilePathTextBox.Text}\n" +
+                               $"Записей в файле: {_excelData.Count}\n" +
+                               $"Активных маппингов: {activeMappings.Count}\n\n" +
+                               $"Детали (Stack Trace):\n{ex.StackTrace}";
+
+                if (ex.InnerException != null)
+                {
+                    errorMessage += $"\n\nВнутреннее исключение:\n{ex.InnerException.Message}\n{ex.InnerException.StackTrace}";
+                }
+
+                MessageBox.Show(errorMessage, "Подробная ошибка импорта",
                     MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // Логируем в консоль для отладки
+                System.Diagnostics.Debug.WriteLine($"=== IMPORT ERROR ===");
+                System.Diagnostics.Debug.WriteLine($"Time: {DateTime.Now}");
+                System.Diagnostics.Debug.WriteLine($"Type: {ex.GetType().FullName}");
+                System.Diagnostics.Debug.WriteLine($"Message: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"InnerException: {ex.InnerException.Message}");
+                    System.Diagnostics.Debug.WriteLine($"InnerStackTrace: {ex.InnerException.StackTrace}");
+                }
+                System.Diagnostics.Debug.WriteLine($"===================");
             }
             finally
             {

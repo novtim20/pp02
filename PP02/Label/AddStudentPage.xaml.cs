@@ -17,7 +17,7 @@ namespace PP02.Label
     public partial class AddStudentPage : Page
     {
         // 🔹 Строка подключения к БД
-        private readonly string _connectionString = "server=127.0.0.1;uid=root;pwd=root;database=pp02;port=3306;";
+        private readonly string _connectionString = "server=127.0.0.1;uid=root;pwd=root;database=pp022;port=3306;";
 
         public AddStudentPage()
         {

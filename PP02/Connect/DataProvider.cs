@@ -184,7 +184,7 @@ namespace PP02.Connect
         {
             SpecialtyList.Clear();
 
-            const string sql = "SELECT id, name, active, data, group_id FROM specialties WHERE active = 1 ORDER BY name";
+            const string sql = "SELECT id, name, short_name, active, data, group_id FROM specialties WHERE active = 1 ORDER BY name";
 
             using (var connection = GetConnection(connectionString))
             using (var command = new MySqlCommand(sql, connection))
@@ -196,10 +196,10 @@ namespace PP02.Connect
                     {
                         Id = reader.GetInt32(0),
                         Name = GetStringOrNull(reader, 1),
-                        ShortName = null,
-                        IsActive = reader.GetBoolean(2),
-                        ValidFrom = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3),
-                        GroupId = GetIntOrNull(reader, 4)
+                        ShortName = GetStringOrNull(reader, 2),
+                        IsActive = reader.GetBoolean(3),
+                        ValidFrom = reader.IsDBNull(4) ? (DateTime?)null : reader.GetDateTime(4),
+                        GroupId = GetIntOrNull(reader, 5)
                     });
                 }
             }

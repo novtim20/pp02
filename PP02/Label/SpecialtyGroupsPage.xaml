@@ -100,13 +100,67 @@
 
                             <DataGrid Grid.Row="1" x:Name="SpecialtiesDataGrid"
                                       AutoGenerateColumns="False" CanUserAddRows="False"
-                                      IsReadOnly="True" SelectionMode="Single"
+                                      IsReadOnly="False" SelectionMode="Single"
                                       HeadersVisibility="Column" GridLinesVisibility="Horizontal"
-                                      Background="White" BorderBrush="#EEE" BorderThickness="0">
+                                      Background="White" BorderBrush="#EEE" BorderThickness="0"
+                                      SelectionChanged="SpecialtiesDataGrid_SelectionChanged">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
                                     <DataGridTextColumn Header="Сокращение" Binding="{Binding ShortName}" Width="150"/>
                                     <DataGridCheckBoxColumn Header="Активна" Binding="{Binding IsActive}" Width="60"/>
+                                    <DataGridTemplateColumn Header="Группа" Width="200">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Margin="5,0,0,0">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="Привязано к группе"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding GroupId}" Value="{x:Null}">
+                                                                    <Setter Property="Text" Value="Не привязана"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                        <DataGridTemplateColumn.CellEditingTemplate>
+                                            <DataTemplate>
+                                                <ComboBox ItemsSource="{Binding DataContext.SpecialtyGroups, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                          SelectedValue="{Binding GroupId, UpdateSourceTrigger=PropertyChanged}"
+                                                          DisplayMemberPath="Name"
+                                                          SelectedValuePath="Id"
+                                                          SelectionChanged="SpecialtyGroupComboBox_SelectionChanged"
+                                                          IsEditable="True"
+                                                          TextSearch.TextPath="Name">
+                                                    <ComboBox.Resources>
+                                                        <Style TargetType="ComboBox">
+                                                            <Setter Property="Width" Value="180"/>
+                                                        </Style>
+                                                    </ComboBox.Resources>
+                                                </ComboBox>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellEditingTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Действия" Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Button Content="✏️" Width="30" Height="25"
+                                                            Background="#2196F3" Foreground="White" FontWeight="Bold"
+                                                            Click="BtnEditSpecialty_Click"
+                                                            Tag="{Binding}"
+                                                            ToolTip="Редактировать специальность" Margin="0,0,5,0"/>
+                                                    <Button Content="🗑" Width="30" Height="25"
+                                                            Background="#F44336" Foreground="White" FontWeight="Bold"
+                                                            Click="BtnDeleteSpecialty_Click"
+                                                            Tag="{Binding Id}"
+                                                            ToolTip="Удалить специальность"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Grid>

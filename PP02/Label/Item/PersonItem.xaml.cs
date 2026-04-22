@@ -387,68 +387,111 @@ namespace PP02.Label.Item
             using (var connection = new MySql.Data.MySqlClient.MySqlConnection(_connectionString))
             {
                 connection.Open();
-
-                const string sql = @"
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        // 1. Обновление основной таблицы persons
+                        const string sqlPersons = @"
 UPDATE persons SET
     role = @role,
-    specialty_id = @specialty_id,
-    education_id = @education_id,
-    social_origin_id = @social_origin_id,
-    social_status_id = @social_status_id,
-    party_id = @party_id,
-    graduation_year = @graduation_year,
-    group_id = @group_id,
     gender = @gender,
     nationality = @nationality,
     birth_year = @birth_year,
     birth_place = @birth_place,
     address = @address,
-    work_after = @work_after,
-    source = @source,
-    historical_alias_id = @historical_alias_id
+    source = @source
 WHERE id = @id";
 
-                // Если группа выбрана, специальность должна соответствовать группе
-                // (триггеры в БД также проверят это)
-                int? specialtyId = person.SpecialtyId;
-                if (person.GroupId.HasValue && person.GroupId.Value > 0)
-                {
-                    var group = DataProvider.GroupList.FirstOrDefault(g => g.Id == person.GroupId.Value);
-                    if (group != null && group.SpecialtyId > 0)
-                    {
-                        specialtyId = group.SpecialtyId;
+                        using (var command = new MySql.Data.MySqlClient.MySqlCommand(sqlPersons, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@id", person.Id);
+                            command.Parameters.AddWithValue("@role", (object)person.Role ?? DBNull.Value);
+                            command.Parameters.AddWithValue("@gender", (object)person.Gender ?? DBNull.Value);
+                            command.Parameters.AddWithValue("@nationality", (object)person.Nationality ?? DBNull.Value);
+                            command.Parameters.AddWithValue("@birth_year", (object)person.BirthYear ?? DBNull.Value);
+                            command.Parameters.AddWithValue("@birth_place", (object)person.BirthPlace ?? DBNull.Value);
+                            command.Parameters.AddWithValue("@address", (object)person.Address ?? DBNull.Value);
+                            command.Parameters.AddWithValue("@source", (object)person.Source ?? DBNull.Value);
+                            command.ExecuteNonQuery();
+                        }
+
+                        // 2. Обновление academic_records (образование, группа, специальность, год выпуска)
+                        const string sqlAcademic = @"
+INSERT INTO academic_records (person_id, group_id, specialty_id, education_id, graduation_year, diploma_date)
+VALUES (@person_id, @group_id, @specialty_id, @education_id, @graduation_year, @diploma_date)
+ON DUPLICATE KEY UPDATE
+    group_id = VALUES(group_id),
+    specialty_id = VALUES(specialty_id),
+    education_id = VALUES(education_id),
+    graduation_year = VALUES(graduation_year),
+    diploma_date = VALUES(diploma_date)";
+
+                        // Определяем specialty_id на основе группы
+                        int? specialtyId = null;
+                        if (person.GroupId.HasValue)
+                        {
+                            var group = DataProvider.GroupList.FirstOrDefault(g => g.Id == person.GroupId.Value);
+                            if (group != null)
+                            {
+                                specialtyId = group.SpecialtyId;
+                            }
+                        }
+                        else if (person.SpecialtyId.HasValue)
+                        {
+                            specialtyId = person.SpecialtyId;
+                        }
+
+                        using (var command = new MySql.Data.MySqlClient.MySqlCommand(sqlAcademic, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@person_id", person.Id);
+                            command.Parameters.AddWithValue("@group_id", (object)person.GroupId ?? DBNull.Value);
+                            command.Parameters.AddWithValue("@specialty_id", (object)specialtyId ?? DBNull.Value);
+                            command.Parameters.AddWithValue("@education_id", (object)person.EducationId ?? DBNull.Value);
+                            command.Parameters.AddWithValue("@graduation_year", (object)person.GraduationYear ?? DBNull.Value);
+                            command.Parameters.AddWithValue("@diploma_date", DBNull.Value); // Можно добавить поле DiplomaDate в модель
+                            command.ExecuteNonQuery();
+                        }
+
+                        // 3. Обновление social_profiles (соц. происхождение, статус, партийность)
+                        const string sqlSocial = @"
+INSERT INTO social_profiles (person_id, social_origin_id, social_status_id, party_id)
+VALUES (@person_id, @social_origin_id, @social_status_id, @party_id)
+ON DUPLICATE KEY UPDATE
+    social_origin_id = VALUES(social_origin_id),
+    social_status_id = VALUES(social_status_id),
+    party_id = VALUES(party_id)";
+
+                        using (var command = new MySql.Data.MySqlClient.MySqlCommand(sqlSocial, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@person_id", person.Id);
+                            command.Parameters.AddWithValue("@social_origin_id", (object)person.SocialOriginId ?? DBNull.Value);
+                            command.Parameters.AddWithValue("@social_status_id", (object)person.SocialStatusId ?? DBNull.Value);
+                            command.Parameters.AddWithValue("@party_id", (object)person.PartyId ?? DBNull.Value);
+                            command.ExecuteNonQuery();
+                        }
+
+                        // 4. Обновление career_records (работа после)
+                        const string sqlCareer = @"
+INSERT INTO career_records (person_id, work_after)
+VALUES (@person_id, @work_after)
+ON DUPLICATE KEY UPDATE
+    work_after = VALUES(work_after)";
+
+                        using (var command = new MySql.Data.MySqlClient.MySqlCommand(sqlCareer, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@person_id", person.Id);
+                            command.Parameters.AddWithValue("@work_after", (object)person.WorkAfter ?? DBNull.Value);
+                            command.ExecuteNonQuery();
+                        }
+
+                        transaction.Commit();
                     }
-                }
-
-                // Поиск исторического алиаса по выбранной специальности (если есть)
-                int? historicalAliasId = null;
-                if (specialtyId.HasValue)
-                {
-                    // Можно добавить логику выбора исторического алиаса
-                    // Например, если пользователь выбрал старый код из ComboBox
-                }
-
-                using (var command = new MySql.Data.MySqlClient.MySqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@id", person.Id);
-                    command.Parameters.AddWithValue("@role", (object)person.Role ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@specialty_id", (object)specialtyId ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@education_id", (object)person.EducationId ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@social_origin_id", (object)person.SocialOriginId ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@social_status_id", (object)person.SocialStatusId ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@party_id", (object)person.PartyId ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@graduation_year", (object)person.GraduationYear ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@group_id", (object)person.GroupId ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@gender", (object)person.Gender ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@nationality", (object)person.Nationality ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@birth_year", (object)person.BirthYear ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@birth_place", (object)person.BirthPlace ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@address", (object)person.Address ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@work_after", (object)person.WorkAfter ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@source", (object)person.Source ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@historical_alias_id", (object)historicalAliasId ?? DBNull.Value);
-
-                    command.ExecuteNonQuery();
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
                 }
             }
         }

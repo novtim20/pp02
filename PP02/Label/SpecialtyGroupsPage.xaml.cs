@@ -64,13 +64,17 @@ namespace PP02.Label
                     connection.Open();
 
                     const string sql = @"
-INSERT INTO `specialty_groups` (name)
-VALUES (@name);
+INSERT INTO `specialty_groups` (name, short_name)
+VALUES (@name, @short_name);
 SELECT LAST_INSERT_ID();";
 
                     using (var command = new MySqlCommand(sql, connection))
                     {
                         command.Parameters.AddWithValue("@name", NewGroupNameTextBox.Text.Trim());
+                        command.Parameters.AddWithValue("@short_name",
+                            string.IsNullOrWhiteSpace(NewGroupShortNameTextBox.Text)
+                                ? (object)DBNull.Value
+                                : NewGroupShortNameTextBox.Text.Trim());
 
                         var result = command.ExecuteScalar();
                         int newId = Convert.ToInt32(result);
@@ -112,13 +116,17 @@ SELECT LAST_INSERT_ID();";
                     connection.Open();
 
                     const string sql = @"
-INSERT INTO `specialties` (name, is_active)
-VALUES (@name, @is_active);
+INSERT INTO `specialties` (name, short_name, is_active)
+VALUES (@name, @short_name, @is_active);
 SELECT LAST_INSERT_ID();";
 
                     using (var command = new MySqlCommand(sql, connection))
                     {
                         command.Parameters.AddWithValue("@name", NewSpecialtyNameTextBox.Text.Trim());
+                        command.Parameters.AddWithValue("@short_name",
+                            string.IsNullOrWhiteSpace(NewSpecialtyShortNameTextBox.Text)
+                                ? (object)DBNull.Value
+                                : NewSpecialtyShortNameTextBox.Text.Trim());
                         command.Parameters.AddWithValue("@is_active", NewSpecialtyIsActiveCheckBox.IsChecked == true);
 
                         var result = command.ExecuteScalar();
@@ -146,6 +154,7 @@ SELECT LAST_INSERT_ID();";
         private void ClearGroupFields()
         {
             NewGroupNameTextBox.Clear();
+            NewGroupShortNameTextBox.Clear();
             NewGroupNameTextBox.Focus();
         }
 

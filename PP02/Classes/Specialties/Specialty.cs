@@ -10,6 +10,7 @@ namespace PP02.Classes.Specialties
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public string ShortName { get; set; }    // Сокращённое название специальности
         public bool IsActive { get; set; }       // is_active из БД
         public DateTime? ValidFrom { get; set; } // Дата введения/обновления (из column 'data')
         public int? GroupId { get; set; }        // ID группы/категории специальности
@@ -22,7 +23,7 @@ namespace PP02.Classes.Specialties
         // Для отображения в ComboBox
         public override string ToString()
         {
-            return $"{Name}";
+            return !string.IsNullOrEmpty(ShortName) ? $"{Name} [{ShortName}]" : Name;
         }
     }
 

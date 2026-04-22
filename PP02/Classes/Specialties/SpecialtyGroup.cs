@@ -13,6 +13,7 @@ namespace PP02.Classes.Specialties
     {
         public int Id { get; set; }
         public string Name { get; set; }           // Название группы специальностей
+        public string ShortName { get; set; }      // Сокращённое название группы
 
         // Список специальностей, принадлежащих этой группе
         public List<Specialty> Specialties { get; set; } = new List<Specialty>();
@@ -20,7 +21,7 @@ namespace PP02.Classes.Specialties
         // Для отображения в ComboBox
         public override string ToString()
         {
-            return Name;
+            return !string.IsNullOrEmpty(ShortName) ? $"{Name} [{ShortName}]" : Name;
         }
     }
 }

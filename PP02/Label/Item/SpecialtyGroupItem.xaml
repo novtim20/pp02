@@ -65,16 +65,24 @@
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,0">
+                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,5">
                                     <TextBlock Text="Название специальности *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                     <TextBox x:Name="NewSpecialtyNameTextBox" Height="30" Padding="8,0,0,0"
+                                             BorderBrush="#DDD" BorderThickness="1"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,0,5">
+                                    <TextBlock Text="Сокращённое название" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                                    <TextBox x:Name="NewSpecialtyShortNameTextBox" Height="30" Padding="8,0,0,0"
                                              BorderBrush="#DDD" BorderThickness="1"/>
                                 </StackPanel>
 
@@ -83,8 +91,14 @@
                                               IsChecked="True" FontSize="12" Foreground="#555"/>
                                 </StackPanel>
 
-                                <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
-                                        Content="➕ Добавить" Width="100" Height="55"
+                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,5,0,0">
+                                    <TextBlock Text="Год добавления" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                                    <TextBox x:Name="NewSpecialtyYearTextBox" Height="30" Padding="8,0,0,0"
+                                             BorderBrush="#DDD" BorderThickness="1" MaxLength="4"/>
+                                </StackPanel>
+
+                                <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="2"
+                                        Content="➕ Добавить" Width="100" Height="65"
                                         Background="#4CAF50" Foreground="White" FontWeight="Bold"
                                         Click="BtnAddNewSpecialty_Click" Margin="10,0,0,0"/>
                             </Grid>

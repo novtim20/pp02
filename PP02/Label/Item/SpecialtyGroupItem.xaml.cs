@@ -135,14 +135,14 @@ namespace PP02.Label.Item
                     connection.Open();
 
                     const string sql = @"
-INSERT INTO `specialties` (name, is_active, group_id)
-VALUES (@name, @is_active, @group_id);
+INSERT INTO `specialties` (name, active, group_id)
+VALUES (@name, @active, @group_id);
 SELECT LAST_INSERT_ID();";
 
                     using (var command = new MySqlCommand(sql, connection))
                     {
                         command.Parameters.AddWithValue("@name", NewSpecialtyNameTextBox.Text.Trim());
-                        command.Parameters.AddWithValue("@is_active", NewSpecialtyIsActiveCheckBox.IsChecked == true);
+                        command.Parameters.AddWithValue("@active", NewSpecialtyIsActiveCheckBox.IsChecked == true);
                         command.Parameters.AddWithValue("@group_id", _currentGroup.Id);
 
                         var result = command.ExecuteScalar();

@@ -17,15 +17,12 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Название группы, Дата создания, Количество специальностей -->
+                <!-- Название группы, Количество специальностей -->
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
                     <TextBlock x:Name="TxtGroupName" FontWeight="Bold" FontSize="14" Text="Название группы"/>
                     <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                        <TextBlock x:Name="TxtCreatedDate" Text="Дата: ----" Foreground="#666" FontSize="11"/>
-                        <TextBlock Text=" | " Foreground="#666" FontSize="11"/>
                         <TextBlock x:Name="TxtSpecialtiesCount" Text="Специальностей: 0" Foreground="#0066CC" FontSize="11"/>
                     </StackPanel>
                 </StackPanel>

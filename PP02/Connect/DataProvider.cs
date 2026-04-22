@@ -206,15 +206,15 @@ namespace PP02.Connect
 
         /// <summary>
         /// Загружает группы специальностей (таблица specialty_groups)
-        /// Сортировка по дате создания (CreatedAt) - от новых к старым
+        /// Сортировка по названию
         /// </summary>
         public void DataSpecialtyGroups(string connectionString)
         {
             SpecialtyGroupList.Clear();
 
-            const string sql = @"SELECT id, name, description, created_at, is_active
+            const string sql = @"SELECT id, name
                                  FROM specialty_groups
-                                 ORDER BY created_at DESC";
+                                 ORDER BY name";
 
             using (var connection = GetConnection(connectionString))
             using (var command = new MySqlCommand(sql, connection))
@@ -225,10 +225,7 @@ namespace PP02.Connect
                     var group = new SpecialtyGroup
                     {
                         Id = reader.GetInt32(0),
-                        Name = GetStringOrNull(reader, 1),
-                        Description = GetStringOrNull(reader, 2),
-                        CreatedAt = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3),
-                        IsActive = reader.GetBoolean(4)
+                        Name = GetStringOrNull(reader, 1)
                     };
 
                     // Загружаем специальности для этой группы

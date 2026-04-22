@@ -57,32 +57,18 @@ namespace PP02.Label
                     return;
                 }
 
-                if (!NewGroupCreatedAtDatePicker.SelectedDate.HasValue)
-                {
-                    MessageBox.Show("Выберите дату создания группы", "Ошибка",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                    NewGroupCreatedAtDatePicker.Focus();
-                    return;
-                }
-
                 using (var connection = new MySqlConnection(_connectionString))
                 {
                     connection.Open();
 
                     const string sql = @"
-INSERT INTO `specialty_groups` (name, description, created_at, is_active)
-VALUES (@name, @description, @created_at, @is_active);
+INSERT INTO `specialty_groups` (name)
+VALUES (@name);
 SELECT LAST_INSERT_ID();";
 
                     using (var command = new MySqlCommand(sql, connection))
                     {
                         command.Parameters.AddWithValue("@name", NewGroupNameTextBox.Text.Trim());
-                        command.Parameters.AddWithValue("@description",
-                            string.IsNullOrWhiteSpace(NewGroupDescriptionTextBox.Text)
-                                ? (object)DBNull.Value
-                                : NewGroupDescriptionTextBox.Text.Trim());
-                        command.Parameters.AddWithValue("@created_at", NewGroupCreatedAtDatePicker.SelectedDate.Value);
-                        command.Parameters.AddWithValue("@is_active", NewGroupIsActiveCheckBox.IsChecked == true);
 
                         var result = command.ExecuteScalar();
                         int newId = Convert.ToInt32(result);
@@ -109,9 +95,6 @@ SELECT LAST_INSERT_ID();";
         private void ClearGroupFields()
         {
             NewGroupNameTextBox.Clear();
-            NewGroupDescriptionTextBox.Clear();
-            NewGroupCreatedAtDatePicker.SelectedDate = DateTime.Now;
-            NewGroupIsActiveCheckBox.IsChecked = true;
             NewGroupNameTextBox.Focus();
         }
 

@@ -46,41 +46,19 @@
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,10">
+                        <StackPanel Grid.Row="0" Margin="0,0,0,10">
                             <TextBlock Text="Название группы *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                             <TextBox x:Name="NewGroupNameTextBox" Height="35" Padding="8,0,0,0"
                                      BorderBrush="#DDD" BorderThickness="1"/>
                         </StackPanel>
 
-                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,0,10">
-                            <TextBlock Text="Описание" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
-                            <TextBox x:Name="NewGroupDescriptionTextBox" Height="35" Padding="8,0,0,0"
-                                     BorderBrush="#DDD" BorderThickness="1"/>
-                        </StackPanel>
-
-                        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,10">
-                            <TextBlock Text="Дата создания *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
-                            <DatePicker x:Name="NewGroupCreatedAtDatePicker" Height="35"
-                                        BorderBrush="#DDD" BorderThickness="1"
-                                        SelectedDate="{x:Static sys:DateTime.Now}"
-                                        xmlns:sys="clr-namespace:System;assembly=mscorlib"/>
-                        </StackPanel>
-
-                        <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,0,0,10">
-                            <CheckBox x:Name="NewGroupIsActiveCheckBox" Content="Активная группа"
-                                      IsChecked="True" FontSize="12" Foreground="#555"/>
-                        </StackPanel>
-
-                        <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Content="💾 Сохранить группу" Width="180" Height="40"
                                     Background="#4CAF50" Foreground="White" FontWeight="Bold" BorderThickness="0"
                                     Click="AddGroupButton_Click"/>

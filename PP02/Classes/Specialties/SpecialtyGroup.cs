@@ -13,9 +13,6 @@ namespace PP02.Classes.Specialties
     {
         public int Id { get; set; }
         public string Name { get; set; }           // Название группы специальностей
-        public string Description { get; set; }    // Описание группы
-        public DateTime? CreatedAt { get; set; }   // Дата создания группы
-        public bool IsActive { get; set; }         // Статус активности
 
         // Список специальностей, принадлежащих этой группе
         public List<Specialty> Specialties { get; set; } = new List<Specialty>();

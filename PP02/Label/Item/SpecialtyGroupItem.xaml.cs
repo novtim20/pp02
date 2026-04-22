@@ -52,9 +52,7 @@ namespace PP02.Label.Item
 
             // Краткий вид
             TxtGroupName.Text = _currentGroup.Name;
-            TxtCreatedDate.Text = _currentGroup.CreatedAt.HasValue
-                ? $"Дата: {_currentGroup.CreatedAt.Value:dd.MM.yyyy}"
-                : "Дата: ----";
+            TxtCreatedDate.Visibility = Visibility.Collapsed;
             TxtSpecialtiesCount.Text = $"Специальностей: {_currentGroup.Specialties.Count}";
 
             // Загружаем список специальностей в DataGrid

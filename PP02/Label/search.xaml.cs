@@ -376,7 +376,9 @@ namespace PP02.Label
                 var db = new DataProvider();
                 db.DataGroups(_connectionString);
 
-                // Обновляем ComboBox
+                // Обновляем ComboBox, сохраняя текущий выбранный элемент
+                var currentSelected = GroupComboBox.SelectedItem;
+
                 GroupComboBox.ItemsSource = new List<Group>
                     { new Group { Id = -1, Code = "Все", ShortName = "", Name = "Все", SpecialtyId = -1, IsActive = true, SpecialtyName = "" } }
                     .Concat(DataProvider.GroupList)
@@ -385,7 +387,16 @@ namespace PP02.Label
                 // Если была добавлена группа - выбираем её
                 if (dialog.NewGroupId.HasValue)
                 {
-                    GroupComboBox.SelectedValue = dialog.NewGroupId.Value;
+                    var newGroup = DataProvider.GroupList.FirstOrDefault(g => g.Id == dialog.NewGroupId.Value);
+                    if (newGroup != null)
+                    {
+                        GroupComboBox.SelectedItem = newGroup;
+                    }
+                }
+                else if (currentSelected != null)
+                {
+                    // Пытаемся восстановить предыдущий выбор
+                    GroupComboBox.SelectedItem = currentSelected;
                 }
             }
         }
@@ -404,7 +415,9 @@ namespace PP02.Label
                 var db = new DataProvider();
                 db.DataSpecialties(_connectionString);
 
-                // Обновляем ComboBox
+                // Обновляем ComboBox, сохраняя текущий выбранный элемент
+                var currentSelected = SpecialtyComboBox.SelectedItem;
+
                 SpecialtyComboBox.ItemsSource = new List<Specialty>
                     { new Specialty { Id = -1, Name = "Все", IsActive = true } }
                     .Concat(DataProvider.SpecialtyList)
@@ -413,7 +426,16 @@ namespace PP02.Label
                 // Если была добавлена специальность - выбираем её
                 if (dialog.NewSpecialtyId.HasValue)
                 {
-                    SpecialtyComboBox.SelectedValue = dialog.NewSpecialtyId.Value;
+                    var newSpecialty = DataProvider.SpecialtyList.FirstOrDefault(s => s.Id == dialog.NewSpecialtyId.Value);
+                    if (newSpecialty != null)
+                    {
+                        SpecialtyComboBox.SelectedItem = newSpecialty;
+                    }
+                }
+                else if (currentSelected != null)
+                {
+                    // Пытаемся восстановить предыдущий выбор
+                    SpecialtyComboBox.SelectedItem = currentSelected;
                 }
             }
         }

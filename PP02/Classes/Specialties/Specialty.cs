@@ -14,6 +14,11 @@ namespace PP02.Classes.Specialties
         public DateTime? ValidFrom { get; set; } // Дата введения/обновления (из column 'data')
         public int? GroupId { get; set; }        // ID группы/категории специальности
 
+        // Для совместимости с элементом "Все" в ComboBox
+        public Specialty()
+        {
+        }
+
         // Для отображения в ComboBox
         public override string ToString()
         {
@@ -41,6 +46,12 @@ namespace PP02.Classes.Specialties
 
         // Название специальности для отображения в списке групп
         public string SpecialtyName { get; set; }
+
+        // Для совместимости с элементом "Все" в ComboBox
+        public Group()
+        {
+            SpecialtyName = "";
+        }
     }
 
     /// <summary>

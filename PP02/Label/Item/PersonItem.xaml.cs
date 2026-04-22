@@ -389,7 +389,7 @@ namespace PP02.Label.Item
                 connection.Open();
 
                 const string sql = @"
-UPDATE people SET
+UPDATE persons SET
     role = @role,
     specialty_id = @specialty_id,
     education_id = @education_id,

@@ -162,6 +162,14 @@ SELECT LAST_INSERT_ID();";
             {
                 connection.Open();
 
+                var specialtyId = GroupSpecialtyComboBox.SelectedValue;
+                if (specialtyId == null || !(specialtyId is int))
+                {
+                    MessageBox.Show("Некорректно выбрана специальность", "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
                 const string sql = @"
 INSERT INTO `groups` (code, short_name, name, specialty_id, is_active)
 VALUES (@code, @short_name, @name, @specialty_id, @is_active);
@@ -172,7 +180,7 @@ SELECT LAST_INSERT_ID();";
                     command.Parameters.AddWithValue("@code", GroupCodeTextBox.Text.Trim());
                     command.Parameters.AddWithValue("@short_name", GroupShortNameTextBox.Text.Trim());
                     command.Parameters.AddWithValue("@name", GroupNameTextBox.Text.Trim());
-                    command.Parameters.AddWithValue("@specialty_id", GroupSpecialtyComboBox.SelectedValue);
+                    command.Parameters.AddWithValue("@specialty_id", (int)specialtyId);
                     command.Parameters.AddWithValue("@is_active", GroupIsActiveCheckBox.IsChecked == true);
 
                     var result = command.ExecuteScalar();

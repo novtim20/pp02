@@ -83,9 +83,11 @@
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,15">
             <Button Content="📊 Экспорт в Excel" Width="150" Height="40" Margin="0,0,15,0"
                     Click="BtnExportExcel_Click" Background="#217346" Foreground="White" FontWeight="Bold"/>
-            <Button Content="📄 Экспорт в Word" Width="150" Height="40" Margin="15,0,0,0"
+            <Button Content="📄 Экспорт в Word" Width="150" Height="40" Margin="0,0,15,0"
                     Click="BtnExportWord_Click" Background="#2B579A" Foreground="White" FontWeight="Bold"/>
-            <Button Content="Применить фильтры" Width="150" Height="40" Margin="15,0,0,0"
+            <Button Content="📕 Экспорт в PDF" Width="150" Height="40" Margin="0,0,15,0"
+                    Click="BtnExportPdf_Click" Background="#DC2626" Foreground="White" FontWeight="Bold"/>
+            <Button Content="Применить фильтры" Width="150" Height="40" Margin="0,0,0,0"
                     Click="FilterButton_Click" Background="#007ACC" Foreground="White" FontWeight="Bold"/>
         </StackPanel>
 

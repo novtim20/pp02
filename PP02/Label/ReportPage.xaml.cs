@@ -12,6 +12,11 @@ using PP02.Connect;
 using PP02.Classes.Dictionaries;
 using PP02.Classes.Specialties;
 using ClosedXML.Excel; // Для работы с Excel
+using QuestPDF.Fluent; // Для работы с PDF
+using QuestPDF.Helpers; // Вспомогательные классы для PDF
+using QuestPDF.Infrastructure; // Инфраструктура PDF
+using WordDocument = DocumentFormat.OpenXml.Wordprocessing.Document; // Алиас для Word Document
+using PdfDocument = QuestPDF.Fluent.Document; // Алиас для PDF Document
 
 namespace PP02.Label
 {
@@ -211,12 +216,40 @@ namespace PP02.Label
             }
         }
 
+        private void BtnExportPdf_Click(object sender, RoutedEventArgs e)
+        {
+            if (_filteredPeople == null || !_filteredPeople.Any())
+            {
+                MessageBox.Show("Нет данных для экспорта.", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Документ PDF (*.pdf)|*.pdf",
+                Title = "Сохранить отчет в PDF"
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    ExportToPdf(saveFileDialog.FileName, _filteredPeople);
+                    MessageBox.Show("Отчет успешно создан!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при создании PDF файла: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
         private void ExportToWord(string filePath, List<PersonViewModel> people)
         {
             using (WordprocessingDocument wordDocument = WordprocessingDocument.Create(filePath, WordprocessingDocumentType.Document))
             {
                 MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
-                mainPart.Document = new Document();
+                mainPart.Document = new WordDocument();
                 Body body = mainPart.Document.AppendChild(new Body());
 
                 // Заголовок
@@ -381,5 +414,95 @@ namespace PP02.Label
                 workbook.SaveAs(filePath);
             }
         }
+
+        private void ExportToPdf(string filePath, List<PersonViewModel> people)
+        {
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            PdfDocument.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(20);
+                    page.DefaultTextStyle(x => x.FontSize(10));
+
+                    // Заголовок
+                    page.Header().Column(col =>
+                    {
+                        col.Item()
+                            .Text("Отчет по базе данных людей")
+                            .FontSize(16)
+                            .Bold()
+                            .AlignCenter();
+
+                        col.Item()
+                            .PaddingTop(10)
+                            .Text($"Дата формирования: {DateTime.Now.ToShortDateString()}")
+                            .FontSize(12);
+
+                        col.Item()
+                            .PaddingTop(5)
+                            .Text($"Всего записей: {people.Count}")
+                            .FontSize(12);
+                    });
+
+                    // Таблица
+                    page.Content()
+                        .PaddingVertical(20)
+                        .Table(table =>
+                        {
+                            // Настройка колонок
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(2); // ФИО
+                                columns.RelativeColumn(1); // Роль
+                                columns.RelativeColumn(1.5f); // Специальность
+                                columns.RelativeColumn(1); // Образование
+                                columns.RelativeColumn(1); // Год выпуска
+                                columns.RelativeColumn(1); // Группа
+                            });
+
+                            // Заголовки таблицы
+                            string[] headers = { "ФИО", "Роль", "Специальность", "Образование", "Год выпуска", "Группа" };
+                            foreach (var header in headers)
+                            {
+                                table.Cell().Element(CellStyle).Text(header);
+                            }
+
+                            // Данные
+                            foreach (var person in people)
+                            {
+                                table.Cell().Element(CellStyle).Text(person.FullName ?? "-");
+                                table.Cell().Element(CellStyle).Text(person.Role ?? "-");
+                                table.Cell().Element(CellStyle).Text(person.SpecialtyName ?? "-");
+                                table.Cell().Element(CellStyle).Text(person.EducationName ?? "-");
+                                table.Cell().Element(CellStyle).Text(person.GraduationYear?.ToString() ?? "-");
+                                table.Cell().Element(CellStyle).Text(person.GroupName ?? "-");
+                            }
+                        });
+
+                    static IContainer CellStyle(IContainer container)
+                    {
+                        return container
+                            .BorderBottom(1)
+                            .BorderColor(Colors.Grey.Lighten2)
+                            .Padding(5);
+                    }
+                });
+
+                // Нумерация страниц
+                page.Footer()
+                    .AlignCenter()
+                    .Text(text =>
+                    {
+                        text.CurrentPageNumber();
+                        text.Span(" / ");
+                        text.TotalPages();
+                    });
+            });
+        })
+            .GeneratePdf(filePath);
     }
+}
 }

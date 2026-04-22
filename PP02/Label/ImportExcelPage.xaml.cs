@@ -560,8 +560,16 @@ namespace PP02.Label
 
                             transaction.Commit();
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            Console.WriteLine($"[ERROR] Transaction failed during import:");
+                            Console.WriteLine($"[ERROR] Exception type: {ex.GetType().Name}");
+                            Console.WriteLine($"[ERROR] Message: {ex.Message}");
+                            Console.WriteLine($"[ERROR] StackTrace: {ex.StackTrace}");
+                            if (ex.InnerException != null)
+                            {
+                                Console.WriteLine($"[ERROR] InnerException: {ex.InnerException.Message}");
+                            }
                             transaction.Rollback();
                             throw;
                         }
@@ -579,6 +587,14 @@ namespace PP02.Label
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"[ERROR] Import failed:");
+                Console.WriteLine($"[ERROR] Exception type: {ex.GetType().Name}");
+                Console.WriteLine($"[ERROR] Message: {ex.Message}");
+                Console.WriteLine($"[ERROR] StackTrace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"[ERROR] InnerException: {ex.InnerException.Message}");
+                }
                 MessageBox.Show($"Ошибка при импорте: {ex.Message}", "Ошибка",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -761,8 +777,16 @@ INSERT INTO people (
 
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"[ERROR] InsertPerson failed for row: {string.Join(", ", rowData.Select(kvp => $"{kvp.Key}={kvp.Value}"))}");
+                Console.WriteLine($"[ERROR] Exception type: {ex.GetType().Name}");
+                Console.WriteLine($"[ERROR] Message: {ex.Message}");
+                Console.WriteLine($"[ERROR] StackTrace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"[ERROR] InnerException: {ex.InnerException.Message}");
+                }
                 return false;
             }
         }
@@ -814,12 +838,29 @@ INSERT INTO people (
         {
             if (string.IsNullOrEmpty(name)) return null;
 
-            var sql = $"SELECT id FROM {tableName} WHERE name = @name LIMIT 1";
-            using (var command = new MySqlCommand(sql, connection, transaction))
+            try
             {
-                command.Parameters.AddWithValue("@name", name);
-                var result = command.ExecuteScalar();
-                return result != null ? (int?)Convert.ToInt32(result) : null;
+                var sql = $"SELECT id FROM {tableName} WHERE name = @name LIMIT 1";
+                using (var command = new MySqlCommand(sql, connection, transaction))
+                {
+                    command.Parameters.AddWithValue("@name", name);
+                    Console.WriteLine($"[DEBUG] Looking up {tableName}.name='{name}'");
+                    var result = command.ExecuteScalar();
+                    var id = result != null ? (int?)Convert.ToInt32(result) : null;
+                    Console.WriteLine($"[DEBUG] Found {tableName}.id={id} for name='{name}'");
+                    return id;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] GetDictionaryIdInternal failed for table '{tableName}', name='{name}':");
+                Console.WriteLine($"[ERROR] Exception type: {ex.GetType().Name}");
+                Console.WriteLine($"[ERROR] Message: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"[ERROR] InnerException: {ex.InnerException.Message}");
+                }
+                throw;
             }
         }
 
@@ -846,12 +887,29 @@ INSERT INTO people (
         {
             if (string.IsNullOrEmpty(specialtyName)) return null;
 
-            const string sql = "SELECT id FROM specialties WHERE name = @name OR code = @name LIMIT 1";
-            using (var command = new MySqlCommand(sql, connection, transaction))
+            try
             {
-                command.Parameters.AddWithValue("@name", specialtyName);
-                var result = command.ExecuteScalar();
-                return result != null ? (int?)Convert.ToInt32(result) : null;
+                const string sql = "SELECT id FROM specialties WHERE name = @name OR code = @name LIMIT 1";
+                using (var command = new MySqlCommand(sql, connection, transaction))
+                {
+                    command.Parameters.AddWithValue("@name", specialtyName);
+                    Console.WriteLine($"[DEBUG] Looking up specialties for '{specialtyName}'");
+                    var result = command.ExecuteScalar();
+                    var id = result != null ? (int?)Convert.ToInt32(result) : null;
+                    Console.WriteLine($"[DEBUG] Found specialties.id={id} for name='{specialtyName}'");
+                    return id;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] GetSpecialtyIdInternal failed for specialty '{specialtyName}':");
+                Console.WriteLine($"[ERROR] Exception type: {ex.GetType().Name}");
+                Console.WriteLine($"[ERROR] Message: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"[ERROR] InnerException: {ex.InnerException.Message}");
+                }
+                throw;
             }
         }
 
@@ -878,12 +936,29 @@ INSERT INTO people (
         {
             if (string.IsNullOrEmpty(groupCode)) return null;
 
-            const string sql = "SELECT id FROM `groups` WHERE code = @code LIMIT 1";
-            using (var command = new MySqlCommand(sql, connection, transaction))
+            try
             {
-                command.Parameters.AddWithValue("@code", groupCode);
-                var result = command.ExecuteScalar();
-                return result != null ? (int?)Convert.ToInt32(result) : null;
+                const string sql = "SELECT id FROM `groups` WHERE code = @code LIMIT 1";
+                using (var command = new MySqlCommand(sql, connection, transaction))
+                {
+                    command.Parameters.AddWithValue("@code", groupCode);
+                    Console.WriteLine($"[DEBUG] Looking up groups.code='{groupCode}'");
+                    var result = command.ExecuteScalar();
+                    var id = result != null ? (int?)Convert.ToInt32(result) : null;
+                    Console.WriteLine($"[DEBUG] Found groups.id={id} for code='{groupCode}'");
+                    return id;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] GetGroupIdInternal failed for group '{groupCode}':");
+                Console.WriteLine($"[ERROR] Exception type: {ex.GetType().Name}");
+                Console.WriteLine($"[ERROR] Message: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"[ERROR] InnerException: {ex.InnerException.Message}");
+                }
+                throw;
             }
         }
 
@@ -943,41 +1018,66 @@ INSERT INTO people (
             if (string.IsNullOrEmpty(groupCode))
                 return null;
 
-            // Сначала пытаемся найти существующую группу
-            var existingId = GetGroupIdInternal(connection, groupCode, transaction);
-            if (existingId.HasValue)
+            try
             {
-                return existingId.Value;
+                // Сначала пытаемся найти существующую группу
+                var existingId = GetGroupIdInternal(connection, groupCode, transaction);
+                if (existingId.HasValue)
+                {
+                    Console.WriteLine($"[INFO] Found existing group '{groupCode}' with ID {existingId.Value}");
+                    return existingId.Value;
+                }
+
+                // Группы не существует, создаем новую
+                Console.WriteLine($"[INFO] Creating new group '{groupCode}'...");
+
+                // Извлекаем short_name из кода группы (например, "Х-Ш" из "Х-Ш 36")
+                string shortName = groupCode;
+                var spaceIndex = groupCode.IndexOf(' ');
+                if (spaceIndex > 0)
+                {
+                    shortName = groupCode.Substring(0, spaceIndex);
+                }
+
+                // Если specialtyId не указан, пытаемся определить его по коду группы
+                int specId = specialtyId ?? 1; // Значение по умолчанию
+                Console.WriteLine($"[INFO] Using specialty_id={specId} for group '{groupCode}'");
+
+                const string insertSql = @"
+INSERT INTO `groups` (code, short_name, name, specialty_id, is_active)
+VALUES (@code, @short_name, @name, @specialty_id, 1)";
+
+                using (var command = new MySqlCommand(insertSql, connection, transaction))
+                {
+                    command.Parameters.AddWithValue("@code", groupCode);
+                    command.Parameters.AddWithValue("@short_name", (object)shortName ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@name", (object)groupCode ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@specialty_id", specId);
+
+                    Console.WriteLine($"[DEBUG] Executing INSERT: code={groupCode}, short_name={shortName}, name={groupCode}, specialty_id={specId}");
+
+                    command.ExecuteNonQuery();
+
+                    // Получаем новый ID
+                    command.CommandText = "SELECT LAST_INSERT_ID()";
+                    command.Parameters.Clear();
+                    var newId = command.ExecuteScalar();
+                    var result = newId != null ? (int?)Convert.ToInt32(newId) : null;
+                    Console.WriteLine($"[INFO] Created group '{groupCode}' with ID {result}");
+                    return result;
+                }
             }
-
-            // Группы не существует, создаем новую
-            // Извлекаем short_name из кода группы (например, "Х-Ш" из "Х-Ш 36")
-            string shortName = groupCode;
-            var spaceIndex = groupCode.IndexOf(' ');
-            if (spaceIndex > 0)
+            catch (Exception ex)
             {
-                shortName = groupCode.Substring(0, spaceIndex);
-            }
-
-            // Если specialtyId не указан, пытаемся определить его по коду группы
-            int specId = specialtyId ?? 1; // Значение по умолчанию
-
-            const string insertSql = @"
-INSERT INTO `groups` (code, short_name, specialty_id, is_active)
-VALUES (@code, @short_name, @specialty_id, 1)";
-
-            using (var command = new MySqlCommand(insertSql, connection, transaction))
-            {
-                command.Parameters.AddWithValue("@code", groupCode);
-                command.Parameters.AddWithValue("@short_name", (object)shortName ?? DBNull.Value);
-                command.Parameters.AddWithValue("@specialty_id", specId);
-                command.ExecuteNonQuery();
-
-                // Получаем новый ID
-                command.CommandText = "SELECT LAST_INSERT_ID()";
-                command.Parameters.Clear();
-                var newId = command.ExecuteScalar();
-                return newId != null ? (int?)Convert.ToInt32(newId) : null;
+                Console.WriteLine($"[ERROR] GetOrCreateGroupId failed for group '{groupCode}':");
+                Console.WriteLine($"[ERROR] Exception type: {ex.GetType().Name}");
+                Console.WriteLine($"[ERROR] Message: {ex.Message}");
+                Console.WriteLine($"[ERROR] StackTrace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"[ERROR] InnerException: {ex.InnerException.Message}");
+                }
+                throw;
             }
         }
 

@@ -98,7 +98,6 @@
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock Text="{Binding Code}" FontWeight="Bold" Width="80"/>
                                                     <TextBlock Text="{Binding ShortName}" Margin="5,0" Width="150"/>
-                                                    <TextBlock Text="{Binding SpecialtyCode}" Foreground="#666" Width="100"/>
                                                 </StackPanel>
                                             </DataTemplate>
                                         </ComboBox.ItemTemplate>

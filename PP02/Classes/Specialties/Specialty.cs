@@ -39,11 +39,8 @@ namespace PP02.Classes.Specialties
             return $"{Code} [{ShortName}]";
         }
 
-        // Название специальности (заполняется при загрузке)
+        // Название специальности для отображения в списке групп
         public string SpecialtyName { get; set; }
-
-        // Код специальности для отображения в списке групп
-        public string SpecialtyCode { get; set; }
     }
 
     /// <summary>

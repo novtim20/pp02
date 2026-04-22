@@ -42,31 +42,24 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0" Margin="0,0,0,15">
-                        <TextBlock Text="Код *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
-                        <TextBox x:Name="SpecialtyCodeTextBox" Height="35" Padding="8,0,0,0"
-                                 BorderBrush="#DDD" BorderThickness="1"
-                                 ToolTip="Например: 09.02.01"/>
-                    </StackPanel>
-
-                    <StackPanel Grid.Row="1" Margin="0,0,0,15">
                         <TextBlock Text="Название *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                         <TextBox x:Name="SpecialtyNameTextBox" Height="35" Padding="8,0,0,0"
                                  BorderBrush="#DDD" BorderThickness="1"
                                  ToolTip="Полное название специальности"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="2" Margin="0,0,0,15">
+                    <StackPanel Grid.Row="1" Margin="0,0,0,15">
                         <TextBlock Text="Сокращённое название" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                         <TextBox x:Name="SpecialtyShortNameTextBox" Height="35" Padding="8,0,0,0"
                                  BorderBrush="#DDD" BorderThickness="1"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="3" Margin="0,0,0,15">
+                    <StackPanel Grid.Row="2" Margin="0,0,0,15">
                         <CheckBox x:Name="SpecialtyIsActiveCheckBox" Content="Активная специальность"
                                   IsChecked="True" FontSize="12" Foreground="#555"/>
                     </StackPanel>
 
-                    <TextBlock Grid.Row="4" Text="* Обязательные поля"
+                    <TextBlock Grid.Row="3" Text="* Обязательные поля"
                                FontSize="11" Foreground="#888" FontStyle="Italic"/>
                 </Grid>
             </TabItem>

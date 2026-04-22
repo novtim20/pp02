@@ -146,13 +146,11 @@
                                               BorderBrush="#DDD" BorderThickness="1"
                                               IsEditable="True"
                                               IsTextSearchEnabled="True"
-                                              TextSearch.TextPath="Code"
+                                              TextSearch.TextPath="Name"
                                               SelectionChanged="SpecialtyComboBox_SelectionChanged">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal">
-                                                    <TextBlock FontWeight="Bold" Text="{Binding Code}"/>
-                                                    <TextBlock Text=" - " Foreground="#888"/>
                                                     <TextBlock Text="{Binding Name}"/>
                                                 </StackPanel>
                                             </DataTemplate>

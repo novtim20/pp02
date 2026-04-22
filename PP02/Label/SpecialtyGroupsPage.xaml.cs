@@ -10,9 +10,8 @@ using PP02.Classes.Specialties;
 namespace PP02.Label
 {
     /// <summary>
-    /// Страница для управления группами специальностей (specialty_groups)
-    /// Позволяет добавлять, редактировать и удалять группы специальностей
-    ///以及管理每组内的专业
+    /// Страница для управления группами специальностей (specialty_groups) и специальностями (specialties)
+    /// Позволяет добавлять, редактировать и удалять группы специальностей и специальности
     /// </summary>
     public partial class SpecialtyGroupsPage : Page
     {
@@ -31,10 +30,13 @@ namespace PP02.Label
             {
                 var db = new DataProvider();
                 db.DataSpecialtyGroups(_connectionString);
+                db.DataSpecialties(_connectionString);
 
                 // Заполняем ItemsControl списком групп специальностей
-                // Данные уже отсортированы по дате создания (DESC) в DataProvider
                 SpecialtyGroupsItemsControl.ItemsSource = DataProvider.SpecialtyGroupList.ToList();
+
+                // Заполняем DataGrid специальностей
+                SpecialtiesDataGrid.ItemsSource = DataProvider.SpecialtyList.ToList();
             }
             catch (Exception ex)
             {
@@ -91,11 +93,69 @@ SELECT LAST_INSERT_ID();";
             }
         }
 
+        // Добавление специальности
+        private void AddSpecialtyButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Валидация
+                if (string.IsNullOrWhiteSpace(NewSpecialtyNameTextBox.Text))
+                {
+                    MessageBox.Show("Введите название специальности", "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    NewSpecialtyNameTextBox.Focus();
+                    return;
+                }
+
+                using (var connection = new MySqlConnection(_connectionString))
+                {
+                    connection.Open();
+
+                    const string sql = @"
+INSERT INTO `specialties` (name, is_active)
+VALUES (@name, @is_active);
+SELECT LAST_INSERT_ID();";
+
+                    using (var command = new MySqlCommand(sql, connection))
+                    {
+                        command.Parameters.AddWithValue("@name", NewSpecialtyNameTextBox.Text.Trim());
+                        command.Parameters.AddWithValue("@is_active", NewSpecialtyIsActiveCheckBox.IsChecked == true);
+
+                        var result = command.ExecuteScalar();
+                        int newId = Convert.ToInt32(result);
+
+                        MessageBox.Show($"Специальность \"{NewSpecialtyNameTextBox.Text}\" успешно добавлена!\nID: {newId}",
+                            "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+
+                // Очищаем поля
+                ClearSpecialtyFields();
+
+                // Перезагружаем данные
+                LoadData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка сохранения: {ex.Message}",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         // Очистка полей группы
         private void ClearGroupFields()
         {
             NewGroupNameTextBox.Clear();
             NewGroupNameTextBox.Focus();
+        }
+
+        // Очистка полей специальности
+        private void ClearSpecialtyFields()
+        {
+            NewSpecialtyNameTextBox.Clear();
+            NewSpecialtyShortNameTextBox.Clear();
+            NewSpecialtyIsActiveCheckBox.IsChecked = true;
+            NewSpecialtyNameTextBox.Focus();
         }
 
         // Кнопка Назад

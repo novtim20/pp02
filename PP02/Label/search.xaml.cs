@@ -356,12 +356,6 @@ namespace PP02.Label
             NavigationService?.Navigate(new ImportExcelPage());
         }
 
-        // === 🔹 КНОПКА "ГРУППЫ/СПЕЦИАЛЬНОСТИ" (переход на GroupSpecialtyPage) ===
-        private void GroupSpecialtyButton_Click(object sender, RoutedEventArgs e)
-        {
-            NavigationService?.Navigate(new GroupSpecialtyPage());
-        }
-
         // === 🔹 КНОПКА "ГРУППЫ СПЕЦИАЛЬНОСТЕЙ" (переход на SpecialtyGroupsPage) ===
         private void SpecialtyGroupsButton_Click(object sender, RoutedEventArgs e)
         {

@@ -25,71 +25,159 @@
 
             <TextBlock Text="📚 Управление группами специальностей"
                        FontSize="20" FontWeight="Bold" Foreground="#333"/>
-            <TextBlock Text="Добавление, редактирование и удаление групп специальностей"
+            <TextBlock Text="Добавление, редактирование и удаление групп специальностей и специальностей"
                        FontSize="14" Foreground="#666" Margin="0,5,0,0"/>
         </StackPanel>
 
-        <!-- ОСНОВНАЯ ЧАСТЬ -->
-        <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <!-- ОСНОВНАЯ ЧАСТЬ С ТАБАМИ -->
+        <TabControl Grid.Row="1" x:Name="MainTabControl"
+                    Background="White" BorderBrush="#DDD" BorderThickness="1">
 
-            <!-- Панель добавления новой группы -->
-            <Border Grid.Row="0" Background="White" CornerRadius="5" Padding="15" Margin="0,0,0,15"
-                    BorderBrush="#DDD" BorderThickness="1">
-                <StackPanel>
-                    <TextBlock Text="➕ Добавить группу специальностей" FontSize="16" FontWeight="Bold"
-                               Foreground="#333" Margin="0,0,0,10"/>
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <StackPanel Grid.Row="0" Margin="0,0,0,10">
-                            <TextBlock Text="Название группы *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
-                            <TextBox x:Name="NewGroupNameTextBox" Height="35" Padding="8,0,0,0"
-                                     BorderBrush="#DDD" BorderThickness="1"/>
-                        </StackPanel>
-
-                        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="💾 Сохранить группу" Width="180" Height="40"
-                                    Background="#4CAF50" Foreground="White" FontWeight="Bold" BorderThickness="0"
-                                    Click="AddGroupButton_Click"/>
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-            </Border>
-
-            <!-- Список групп специальностей -->
-            <Border Grid.Row="1" Background="White" CornerRadius="5" Padding="10"
-                    BorderBrush="#DDD" BorderThickness="1">
-                <Grid>
+            <!-- Вкладка: Специальности -->
+            <TabItem Header="📋 Специальности">
+                <Grid Margin="15">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="📝 Существующие группы специальностей (отсортированы по дате создания)"
-                               FontSize="14" FontWeight="Bold" Margin="0,0,0,10" Foreground="#333"/>
+                    <!-- Панель добавления -->
+                    <Border Grid.Row="0" Background="#FAFAFA" CornerRadius="5" Padding="15" Margin="0,0,0,15"
+                            BorderBrush="#EEE" BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="➕ Добавить специальность" FontSize="16" FontWeight="Bold"
+                                       Foreground="#333" Margin="0,0,0,10"/>
 
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                        <ItemsControl x:Name="SpecialtyGroupsItemsControl">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <item:SpecialtyGroupItem GroupData="{Binding}"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,10">
+                                    <TextBlock Text="Название *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                                    <TextBox x:Name="NewSpecialtyNameTextBox" Height="35" Padding="8,0,0,0"
+                                             BorderBrush="#DDD" BorderThickness="1"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,0,10">
+                                    <TextBlock Text="Сокращённое название" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                                    <TextBox x:Name="NewSpecialtyShortNameTextBox" Height="35" Padding="8,0,0,0"
+                                             BorderBrush="#DDD" BorderThickness="1"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,10">
+                                    <CheckBox x:Name="NewSpecialtyIsActiveCheckBox" Content="Активная специальность"
+                                              IsChecked="True" FontSize="12" Foreground="#555"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Content="💾 Сохранить специальность" Width="180" Height="40"
+                                            Background="#4CAF50" Foreground="White" FontWeight="Bold" BorderThickness="0"
+                                            Click="AddSpecialtyButton_Click"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Список специальностей -->
+                    <Border Grid.Row="1" Background="White" CornerRadius="5" Padding="10"
+                            BorderBrush="#DDD" BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Text="📝 Существующие специальности"
+                                       FontSize="14" FontWeight="Bold" Margin="0,0,0,10" Foreground="#333"/>
+
+                            <DataGrid Grid.Row="1" x:Name="SpecialtiesDataGrid"
+                                      AutoGenerateColumns="False" CanUserAddRows="False"
+                                      IsReadOnly="True" SelectionMode="Single"
+                                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                      Background="White" BorderBrush="#EEE" BorderThickness="0">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
+                                    <DataGridTextColumn Header="Сокращение" Binding="{Binding ShortName}" Width="150"/>
+                                    <DataGridCheckBoxColumn Header="Активна" Binding="{Binding IsActive}" Width="60"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </Border>
                 </Grid>
-            </Border>
-        </Grid>
+            </TabItem>
+
+            <!-- Вкладка: Группы специальностей -->
+            <TabItem Header="📁 Группы специальностей">
+                <Grid Margin="15">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Панель добавления новой группы -->
+                    <Border Grid.Row="0" Background="#FAFAFA" CornerRadius="5" Padding="15" Margin="0,0,0,15"
+                            BorderBrush="#EEE" BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="➕ Добавить группу специальностей" FontSize="16" FontWeight="Bold"
+                                       Foreground="#333" Margin="0,0,0,10"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                                    <TextBlock Text="Название группы *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                                    <TextBox x:Name="NewGroupNameTextBox" Height="35" Padding="8,0,0,0"
+                                             BorderBrush="#DDD" BorderThickness="1"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Content="💾 Сохранить группу" Width="180" Height="40"
+                                            Background="#4CAF50" Foreground="White" FontWeight="Bold" BorderThickness="0"
+                                            Click="AddGroupButton_Click"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Список групп специальностей -->
+                    <Border Grid.Row="1" Background="White" CornerRadius="5" Padding="10"
+                            BorderBrush="#DDD" BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Text="📝 Существующие группы специальностей (отсортированы по дате создания)"
+                                       FontSize="14" FontWeight="Bold" Margin="0,0,0,10" Foreground="#333"/>
+
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl x:Name="SpecialtyGroupsItemsControl">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <item:SpecialtyGroupItem GroupData="{Binding}"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Page>

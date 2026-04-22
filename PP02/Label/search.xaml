@@ -348,15 +348,12 @@
 
                 <!-- 🔹 КНОПКИ ДЕЙСТВИЙ -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,20">
-                    <Button Content="➕ Добавить студента" Width="200" Height="45" FontSize="16" FontWeight="Bold"
-                            Background="#28A745" Foreground="White" BorderThickness="0"
-                            Margin="0,0,10,0" Cursor="Hand" Click="AddStudentButton_Click"/>
-                    <Button Content="📥 Импорт из Excel" Width="200" Height="45" FontSize="16" FontWeight="Bold"
-                            Background="#FF9800" Foreground="White" BorderThickness="0"
-                            Margin="0,0,10,0" Cursor="Hand" Click="ImportExcelButton_Click"/>
                     <Button Content="📚 Группы/Специальности" Width="200" Height="45" FontSize="16" FontWeight="Bold"
                             Background="#9C27B0" Foreground="White" BorderThickness="0"
                             Margin="0,0,10,0" Cursor="Hand" Click="GroupSpecialtyButton_Click"/>
+                    <Button Content="🗂 Группы специальностей" Width="200" Height="45" FontSize="16" FontWeight="Bold"
+                            Background="#607D8B" Foreground="White" BorderThickness="0"
+                            Margin="0,0,10,0" Cursor="Hand" Click="SpecialtyGroupsButton_Click"/>
                     <Button Content="🔍 Найти" Width="150" Height="45" FontSize="16" FontWeight="Bold"
                             Background="#007ACC" Foreground="White" BorderThickness="0"
                             Margin="0,0,10,0" Cursor="Hand" Click="SearchButton_Click"/>
@@ -389,23 +386,63 @@
                             <TextBlock Grid.Column="0" Text="📄 Результаты поиска" FontSize="16" FontWeight="Bold"
                                        Foreground="#333" VerticalAlignment="Center"/>
 
-                            <Button Grid.Column="2" Content="📊 Отчёт"
-                                    Height="30" Padding="15,5" Margin="10,0,0,0"
-                                    Background="#28A745" Foreground="White" BorderThickness="0"
-                                    FontSize="13" FontWeight="Bold" Cursor="Hand"
-                                    Click="ReportButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Opacity" Value="0.9"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Opacity" Value="1"/>
-                                                <Setter Property="Background" Value="#218838"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
+                            <!-- Кнопки: Отчёт, Добавить студента, Импорт из Excel -->
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Content="➕ Студент"
+                                        Height="24" Padding="8,3" Margin="0,0,5,0"
+                                        Background="#28A745" Foreground="White" BorderThickness="0"
+                                        FontSize="11" FontWeight="Normal" Cursor="Hand"
+                                        Click="AddStudentButton_Click"
+                                        ToolTip="Добавить студента">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Opacity" Value="0.9"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Opacity" Value="1"/>
+                                                    <Setter Property="Background" Value="#218838"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                                <Button Content="📥 Excel"
+                                        Height="24" Padding="8,3" Margin="0,0,5,0"
+                                        Background="#FF9800" Foreground="White" BorderThickness="0"
+                                        FontSize="11" FontWeight="Normal" Cursor="Hand"
+                                        Click="ImportExcelButton_Click"
+                                        ToolTip="Импорт из Excel">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Opacity" Value="0.9"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Opacity" Value="1"/>
+                                                    <Setter Property="Background" Value="#F57C00"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                                <Button Content="📊 Отчёт"
+                                        Height="24" Padding="10,3" Margin="0,0,0,0"
+                                        Background="#28A745" Foreground="White" BorderThickness="0"
+                                        FontSize="11" FontWeight="Normal" Cursor="Hand"
+                                        Click="ReportButton_Click"
+                                        ToolTip="Отчёт">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Opacity" Value="0.9"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Opacity" Value="1"/>
+                                                    <Setter Property="Background" Value="#218838"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </StackPanel>
 
                             <TextBlock Grid.Column="1" x:Name="ResultsCountText" Text="0 записей"
                                        FontSize="14" Foreground="#666"

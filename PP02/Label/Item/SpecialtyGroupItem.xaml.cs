@@ -52,7 +52,6 @@ namespace PP02.Label.Item
 
             // Краткий вид
             TxtGroupName.Text = _currentGroup.Name;
-            TxtCreatedDate.Visibility = Visibility.Collapsed;
             TxtSpecialtiesCount.Text = $"Специальностей: {_currentGroup.Specialties.Count}";
 
             // Загружаем список специальностей в DataGrid

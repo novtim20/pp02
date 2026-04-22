@@ -362,6 +362,12 @@ namespace PP02.Label
             NavigationService?.Navigate(new GroupSpecialtyPage());
         }
 
+        // === 🔹 КНОПКА "ГРУППЫ СПЕЦИАЛЬНОСТЕЙ" (переход на SpecialtyGroupsPage) ===
+        private void SpecialtyGroupsButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService?.Navigate(new SpecialtyGroupsPage());
+        }
+
         // === 🔹 КНОПКА ДОБАВЛЕНИЯ ГРУППЫ ===
         private void AddGroupButton_Click(object sender, RoutedEventArgs e)
         {

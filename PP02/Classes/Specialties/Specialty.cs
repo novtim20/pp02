@@ -9,15 +9,15 @@ namespace PP02.Classes.Specialties
     public class Specialty
     {
         public int Id { get; set; }
-        public string Code { get; set; }         // Актуальный код (напр. 09.02.01)
         public string Name { get; set; }
         public bool IsActive { get; set; }       // is_active из БД
-        public DateTime? ValidFrom { get; set; } // Дата введения актуального кода
+        public DateTime? ValidFrom { get; set; } // Дата введения/обновления (из column 'data')
+        public int? GroupId { get; set; }        // ID группы/категории специальности
 
         // Для отображения в ComboBox
         public override string ToString()
         {
-            return $"{Code} - {Name}";
+            return $"{Name}";
         }
     }
 

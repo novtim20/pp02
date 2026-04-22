@@ -88,7 +88,7 @@ namespace PP02.Label
 
                 // Специальность - выпадающий список
                 SpecialtyComboBox.ItemsSource = new List<Specialty>
-                    { new Specialty { Id = 0, Code = "", Name = "(не выбрано)", IsActive = true } }
+                    { new Specialty { Id = 0, Name = "(не выбрано)", IsActive = true } }
                     .Concat(DataProvider.SpecialtyList)
                     .ToList();
                 SpecialtyComboBox.SelectedIndex = 0;
@@ -147,7 +147,7 @@ namespace PP02.Label
 
                 // Обновляем ComboBox
                 SpecialtyComboBox.ItemsSource = new List<Specialty>
-                    { new Specialty { Id = 0, Code = "", Name = "(не выбрано)", IsActive = true } }
+                    { new Specialty { Id = 0, Name = "(не выбрано)", IsActive = true } }
                     .Concat(DataProvider.SpecialtyList)
                     .ToList();
 

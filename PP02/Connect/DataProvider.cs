@@ -183,7 +183,7 @@ namespace PP02.Connect
         {
             SpecialtyList.Clear();
 
-            const string sql = "SELECT id, name, active FROM specialties WHERE active = 1 ORDER BY name";
+            const string sql = "SELECT id, name, active, data, group_id FROM specialties WHERE active = 1 ORDER BY name";
 
             using (var connection = GetConnection(connectionString))
             using (var command = new MySqlCommand(sql, connection))
@@ -194,10 +194,10 @@ namespace PP02.Connect
                     SpecialtyList.Add(new Specialty
                     {
                         Id = reader.GetInt32(0),
-                        Code = GetStringOrNull(reader, 1),
-                        Name = reader.GetString(2),
-                        IsActive = reader.GetBoolean(3),
-                        ValidFrom = reader.IsDBNull(4) ? (DateTime?)null : reader.GetDateTime(4)
+                        Name = GetStringOrNull(reader, 1),
+                        IsActive = reader.GetBoolean(2),
+                        ValidFrom = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3),
+                        GroupId = GetIntOrNull(reader, 4)
                     });
                 }
             }
@@ -210,7 +210,7 @@ namespace PP02.Connect
         {
             GroupList.Clear();
 
-            const string sql = @"SELECT g.id, g.code, g.short_name, g.name, g.specialty_id, g.is_active, s.name as specialty_name, s.code as specialty_code
+            const string sql = @"SELECT g.id, g.code, g.short_name, g.name, g.specialty_id, g.is_active, s.name as specialty_name
                                  FROM `groups` g
                                  LEFT JOIN specialties s ON g.specialty_id = s.id
                                  WHERE g.is_active = 1
@@ -230,8 +230,7 @@ namespace PP02.Connect
                         Name = GetStringOrNull(reader, 3),
                         SpecialtyId = reader.GetInt32(4),
                         IsActive = reader.GetBoolean(5),
-                        SpecialtyName = GetStringOrNull(reader, 6),
-                        SpecialtyCode = GetStringOrNull(reader, 7)
+                        SpecialtyName = GetStringOrNull(reader, 6)
                     });
                 }
             }
@@ -250,7 +249,7 @@ namespace PP02.Connect
             }
 
             // Используем FULLTEXT поиск по таблице groups
-            const string sql = @"SELECT g.id, g.code, g.short_name, g.name, g.specialty_id, g.is_active, s.name as specialty_name, s.code as specialty_code
+            const string sql = @"SELECT g.id, g.code, g.short_name, g.name, g.specialty_id, g.is_active, s.name as specialty_name
                                  FROM `groups` g
                                  LEFT JOIN specialties s ON g.specialty_id = s.id
                                  WHERE MATCH(g.code, g.short_name, g.name) AGAINST(@search IN BOOLEAN MODE)
@@ -272,8 +271,7 @@ namespace PP02.Connect
                             Name = GetStringOrNull(reader, 3),
                             SpecialtyId = reader.GetInt32(4),
                             IsActive = reader.GetBoolean(5),
-                            SpecialtyName = GetStringOrNull(reader, 6),
-                            SpecialtyCode = GetStringOrNull(reader, 7)
+                            SpecialtyName = GetStringOrNull(reader, 6)
                         });
                     }
                 }
@@ -378,7 +376,7 @@ namespace PP02.Connect
             PeopleVMList.Clear();
 
             const string sql = @"
-SELECT 
+SELECT
     p.id, p.full_name, p.role, p.gender, p.nationality, p.birth_year, p.birth_place, p.address, p.source,
     ar.group_id, ar.specialty_id, ar.education_id, ar.graduation_year, ar.diploma_date,
     sp.social_origin_id, sp.social_status_id, sp.party_id,
@@ -393,7 +391,7 @@ FROM persons p
 LEFT JOIN academic_records ar ON p.id = ar.person_id
 LEFT JOIN social_profiles sp ON p.id = sp.person_id
 LEFT JOIN career_records cr ON p.id = cr.person_id
-LEFT JOIN groups g ON ar.group_id = g.id
+LEFT JOIN `groups` g ON ar.group_id = g.id
 LEFT JOIN specialties s ON ar.specialty_id = s.id
 LEFT JOIN ref_education edu ON ar.education_id = edu.id
 LEFT JOIN ref_social_origin orig ON sp.social_origin_id = orig.id

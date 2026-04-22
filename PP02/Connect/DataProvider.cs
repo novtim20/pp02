@@ -25,6 +25,7 @@ namespace PP02.Connect
         public static List<Party> PartyList { get; } = new List<Party>();
         public static List<Specialty> SpecialtyList { get; } = new List<Specialty>();
         public static List<Group> GroupList { get; } = new List<Group>();
+        public static List<SpecialtyGroup> SpecialtyGroupList { get; } = new List<SpecialtyGroup>();
         public static List<SpecialtyMapping> SpecialtyMappingList { get; } = new List<SpecialtyMapping>();
         public static List<SpecialtyAlias> SpecialtyAliasList { get; } = new List<SpecialtyAlias>();
         public static List<SpecialtyTransition> SpecialtyTransitionList { get; } = new List<SpecialtyTransition>();
@@ -199,6 +200,69 @@ namespace PP02.Connect
                         ValidFrom = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3),
                         GroupId = GetIntOrNull(reader, 4)
                     });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Загружает группы специальностей (таблица specialty_groups)
+        /// Сортировка по дате создания (CreatedAt) - от новых к старым
+        /// </summary>
+        public void DataSpecialtyGroups(string connectionString)
+        {
+            SpecialtyGroupList.Clear();
+
+            const string sql = @"SELECT id, name, description, created_at, is_active
+                                 FROM specialty_groups
+                                 ORDER BY created_at DESC";
+
+            using (var connection = GetConnection(connectionString))
+            using (var command = new MySqlCommand(sql, connection))
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var group = new SpecialtyGroup
+                    {
+                        Id = reader.GetInt32(0),
+                        Name = GetStringOrNull(reader, 1),
+                        Description = GetStringOrNull(reader, 2),
+                        CreatedAt = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3),
+                        IsActive = reader.GetBoolean(4)
+                    };
+
+                    // Загружаем специальности для этой группы
+                    LoadSpecialtiesForGroup(group, connectionString);
+
+                    SpecialtyGroupList.Add(group);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Загружает специальности для конкретной группы специальностей
+        /// </summary>
+        private void LoadSpecialtiesForGroup(SpecialtyGroup group, string connectionString)
+        {
+            const string sql = "SELECT id, name, active, data, group_id FROM specialties WHERE group_id = @groupId ORDER BY name";
+
+            using (var connection = GetConnection(connectionString))
+            using (var command = new MySqlCommand(sql, connection))
+            {
+                command.Parameters.AddWithValue("@groupId", group.Id);
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        group.Specialties.Add(new Specialty
+                        {
+                            Id = reader.GetInt32(0),
+                            Name = GetStringOrNull(reader, 1),
+                            IsActive = reader.GetBoolean(2),
+                            ValidFrom = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3),
+                            GroupId = GetIntOrNull(reader, 4)
+                        });
+                    }
                 }
             }
         }

@@ -23,6 +23,9 @@ namespace PP02.Label.Item
         // 🔹 Флаг: были ли изменены данные
         private bool _isDirty = false;
 
+        // 🔹 Событие удаления студента (для уведомления родителя)
+        public event Action<int> PersonDeleted;
+
         public PersonItem()
         {
             InitializeComponent();
@@ -366,6 +369,94 @@ namespace PP02.Label.Item
             // Перезагружаем данные из модели (отменяем изменения в UI)
             LoadDataToUI();
             SetViewMode();
+        }
+
+        // === 🔹 УДАЛЕНИЕ СТУДЕНТА ИЗ БАЗЫ ДАННЫХ ===
+
+        // Кнопка "🗑 Удалить"
+        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentPerson == null) return;
+
+            var result = MessageBox.Show(
+                $"Вы действительно хотите удалить студента {_currentPerson.FullName}?\n\nЭто действие нельзя отменить.",
+                "Подтверждение удаления",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result != MessageBoxResult.Yes) return;
+
+            try
+            {
+                int deletedPersonId = _currentPerson.Id;
+                DeletePersonFromDatabase(_currentPerson.Id);
+
+                MessageBox.Show($"Студент {_currentPerson.FullName} успешно удалён", "Успех",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // Уведомляем родительский контрол об удалении
+                PersonDeleted?.Invoke(deletedPersonId);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // === 🔹 УДАЛЕНИЕ ДАННЫХ ИЗ БАЗЫ (реальный SQL DELETE) ===
+        private void DeletePersonFromDatabase(int personId)
+        {
+            using (var connection = new MySql.Data.MySqlClient.MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        // 1. Удаляем записи из зависимых таблиц (каскадное удаление через FOREIGN KEY может быть настроено)
+
+                        // Удаляем из career_records
+                        const string sqlCareer = @"DELETE FROM career_records WHERE person_id = @person_id";
+                        using (var command = new MySql.Data.MySqlClient.MySqlCommand(sqlCareer, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@person_id", personId);
+                            command.ExecuteNonQuery();
+                        }
+
+                        // Удаляем из social_profiles
+                        const string sqlSocial = @"DELETE FROM social_profiles WHERE person_id = @person_id";
+                        using (var command = new MySql.Data.MySqlClient.MySqlCommand(sqlSocial, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@person_id", personId);
+                            command.ExecuteNonQuery();
+                        }
+
+                        // Удаляем из academic_records
+                        const string sqlAcademic = @"DELETE FROM academic_records WHERE person_id = @person_id";
+                        using (var command = new MySql.Data.MySqlClient.MySqlCommand(sqlAcademic, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@person_id", personId);
+                            command.ExecuteNonQuery();
+                        }
+
+                        // 2. Удаляем основную запись из persons
+                        const string sqlPersons = @"DELETE FROM persons WHERE id = @id";
+                        using (var command = new MySql.Data.MySqlClient.MySqlCommand(sqlPersons, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@id", personId);
+                            command.ExecuteNonQuery();
+                        }
+
+                        transaction.Commit();
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
         }
 
         // === 🔹 ПЕРЕКЛЮЧЕНИЕ В РЕЖИМ ПРОСМОТРА ===

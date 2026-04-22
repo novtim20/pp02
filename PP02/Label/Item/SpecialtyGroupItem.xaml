@@ -1,0 +1,127 @@
+﻿<UserControl x:Class="PP02.Label.Item.SpecialtyGroupItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:PP02.Label.Item"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="800">
+
+    <Border BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="5" Margin="5" Background="White">
+        <StackPanel>
+
+            <!-- === КРАТКИЙ ВИД (Всегда виден) === -->
+            <Grid Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Название группы, Дата создания, Количество специальностей -->
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock x:Name="TxtGroupName" FontWeight="Bold" FontSize="14" Text="Название группы"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                        <TextBlock x:Name="TxtCreatedDate" Text="Дата: ----" Foreground="#666" FontSize="11"/>
+                        <TextBlock Text=" | " Foreground="#666" FontSize="11"/>
+                        <TextBlock x:Name="TxtSpecialtiesCount" Text="Специальностей: 0" Foreground="#0066CC" FontSize="11"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Кнопка раскрытия -->
+                <Button x:Name="BtnExpand" Grid.Column="1" Content="▼" Width="30" Height="30"
+                        Click="BtnExpand_Click" ToolTip="Развернуть"/>
+
+                <!-- Кнопка добавления специальности -->
+                <Button x:Name="BtnAddSpecialty" Grid.Column="2" Content="+ Специальность" Width="120" Height="30"
+                        Background="#2196F3" Foreground="White" FontWeight="Bold"
+                        Click="BtnAddSpecialty_Click" Margin="5,0,0,0" ToolTip="Добавить специальность"/>
+
+                <!-- Кнопка удаления группы -->
+                <Button x:Name="BtnDelete" Grid.Column="3" Content="🗑" Width="30" Height="30"
+                        Background="#F44336" Foreground="White" FontWeight="Bold"
+                        Click="BtnDelete_Click" Margin="5,0,0,0" ToolTip="Удалить группу"/>
+
+                <!-- Кнопка отмены (скрыта по умолчанию) -->
+                <Button x:Name="BtnCancel" Grid.Column="4" Content="✕" Width="30" Height="30"
+                        Visibility="Collapsed" Click="BtnCancel_Click" Margin="5,0,0,0" ToolTip="Отменить"/>
+            </Grid>
+
+            <!-- === РАСКРЫВАЕМАЯ ПАНЕЛЬ СО СПИСКОМ СПЕЦИАЛЬНОСТЕЙ === -->
+            <Expander x:Name="ExpDetails" Visibility="Collapsed" Expanded="ExpDetails_Expanded">
+                <Expander.Header>
+                    <TextBlock Text="Специальности группы (можно добавлять и удалять)" FontStyle="Italic" Foreground="#666"/>
+                </Expander.Header>
+
+                <Border BorderBrush="#EEEEEE" BorderThickness="0,1,0,0" Padding="10">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Панель добавления новой специальности -->
+                        <Border Grid.Row="0" Background="#FAFAFA" CornerRadius="5" Padding="10" Margin="0,0,0,10"
+                                BorderBrush="#EEE" BorderThickness="1">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,0">
+                                    <TextBlock Text="Название специальности *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                                    <TextBox x:Name="NewSpecialtyNameTextBox" Height="30" Padding="8,0,0,0"
+                                             BorderBrush="#DDD" BorderThickness="1"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,5,10,0">
+                                    <CheckBox x:Name="NewSpecialtyIsActiveCheckBox" Content="Активная специальность"
+                                              IsChecked="True" FontSize="12" Foreground="#555"/>
+                                </StackPanel>
+
+                                <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
+                                        Content="➕ Добавить" Width="100" Height="55"
+                                        Background="#4CAF50" Foreground="White" FontWeight="Bold"
+                                        Click="BtnAddNewSpecialty_Click" Margin="10,0,0,0"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Список специальностей -->
+                        <Border Grid.Row="1" Background="White" CornerRadius="5" Padding="5"
+                                BorderBrush="#DDD" BorderThickness="1">
+                            <DataGrid x:Name="SpecialtiesDataGrid"
+                                      AutoGenerateColumns="False" CanUserAddRows="False"
+                                      IsReadOnly="False" SelectionMode="Single"
+                                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                      Background="White" BorderBrush="#EEE" BorderThickness="0"
+                                      MinHeight="100">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
+                                    <DataGridCheckBoxColumn Header="Активна" Binding="{Binding IsActive}" Width="70"/>
+                                    <DataGridTemplateColumn Header="Действия" Width="80">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="🗑 Удалить" Width="70" Height="25"
+                                                        Background="#FF5722" Foreground="White" FontWeight="Bold"
+                                                        Click="BtnRemoveSpecialty_Click"
+                                                        Tag="{Binding Id}"
+                                                        ToolTip="Удалить специальность из группы"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Expander>
+        </StackPanel>
+    </Border>
+</UserControl>

@@ -195,11 +195,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Label\Item\SpecialtyGroupItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Label\ReportPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Label\search.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Label\SpecialtyGroupsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -218,6 +226,7 @@
     <Compile Include="Classes\Person\Person.cs" />
     <Compile Include="Classes\Person\PersonViewModel.cs" />
     <Compile Include="Classes\Specialties\Specialty.cs" />
+    <Compile Include="Classes\Specialties\SpecialtyGroup.cs" />
     <Compile Include="Classes\Specialties\SpecialtyMapping.cs" />
     <Compile Include="Connect\Connect.cs" />
     <Compile Include="Connect\DataProvider.cs" />
@@ -239,11 +248,17 @@
     <Compile Include="Label\Item\PersonItem.xaml.cs">
       <DependentUpon>PersonItem.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Label\Item\SpecialtyGroupItem.xaml.cs">
+      <DependentUpon>SpecialtyGroupItem.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Label\ReportPage.xaml.cs">
       <DependentUpon>ReportPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Label\search.xaml.cs">
       <DependentUpon>search.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Label\SpecialtyGroupsPage.xaml.cs">
+      <DependentUpon>SpecialtyGroupsPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

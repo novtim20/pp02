@@ -420,7 +420,8 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <!-- 🔹 ПОДКЛЮЧЕНИЕ PersonItem С ПЕРЕДАЧЕЙ ДАННЫХ -->
-                                    <local1:PersonItem PersonData="{Binding}" Margin="0,0,0,10"/>
+                                    <local1:PersonItem PersonData="{Binding}" Margin="0,0,0,10"
+                                                       PersonDeleted="PersonItem_PersonDeleted"/>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>

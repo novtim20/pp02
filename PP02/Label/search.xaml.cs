@@ -401,6 +401,28 @@ namespace PP02.Label
             }
         }
 
+        // === 🔹 ОБРАБОТЧИК УДАЛЕНИЯ СТУДЕНТА ИЗ PersonItem ===
+        private void PersonItem_PersonDeleted(int personId)
+        {
+            // Удаляем из ObservableCollection
+            var personToRemove = _searchResults?.FirstOrDefault(p => p.Id == personId);
+            if (personToRemove != null)
+            {
+                _searchResults.Remove(personToRemove);
+                ResultsCountText.Text = $"{_searchResults.Count} записей";
+            }
+
+            // Также удаляем из общего списка DataProvider.PeopleVMList
+            var dbPerson = DataProvider.PeopleVMList.FirstOrDefault(p => p.Id == personId);
+            if (dbPerson != null)
+            {
+                DataProvider.PeopleVMList.Remove(dbPerson);
+            }
+
+            MessageBox.Show("Список студентов обновлён", "Информация",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
         // === 🔹 КНОПКА ДОБАВЛЕНИЯ СПЕЦИАЛЬНОСТИ ===
         private void AddSpecialtyButton_Click(object sender, RoutedEventArgs e)
         {

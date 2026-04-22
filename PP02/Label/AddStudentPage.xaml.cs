@@ -91,6 +91,8 @@ namespace PP02.Label
                     { new Specialty { Id = 0, Name = "(не выбрано)", IsActive = true } }
                     .Concat(DataProvider.SpecialtyList)
                     .ToList();
+                SpecialtyComboBox.SelectedValuePath = "Id";
+                SpecialtyComboBox.DisplayMemberPath = "Name";
                 SpecialtyComboBox.SelectedIndex = 0;
 
                 // Пол по умолчанию

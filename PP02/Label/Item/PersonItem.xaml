@@ -17,6 +17,7 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- ФИО, Год, Группа, Специальность -->
@@ -43,6 +44,11 @@
                 <!-- Кнопка отмены -->
                 <Button Grid.Column="3" Content="✕" Width="30" Height="30"
                         x:Name="BtnCancel" Visibility="Collapsed" Click="BtnCancel_Click" Margin="5,0,0,0" ToolTip="Отменить"/>
+
+                <!-- Кнопка удаления -->
+                <Button Grid.Column="4" Content="🗑" Width="30" Height="30"
+                        x:Name="BtnDelete" Background="#FF5252" Foreground="White" FontWeight="Bold"
+                        Click="BtnDelete_Click" Margin="5,0,0,0" ToolTip="Удалить студента"/>
             </Grid>
 
             <!-- === РАСКРЫВАЕМАЯ ПАНЕЛЬ С РЕДАКТИРОВАНИЕМ === -->

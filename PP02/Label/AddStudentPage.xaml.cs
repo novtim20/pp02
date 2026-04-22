@@ -314,44 +314,78 @@ namespace PP02.Label
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
-
-                const string sql = @"
-INSERT INTO people (
-    full_name, role, specialty_id, group_id, education_id,
-    social_origin_id, social_status_id, party_id,
-    graduation_year, gender, nationality, birth_year, birth_place,
-    address, diploma_date, work_after, source
-) VALUES (
-    @full_name, @role, @specialty_id, @group_id, @education_id,
-    @social_origin_id, @social_status_id, @party_id,
-    @graduation_year, @gender, @nationality, @birth_year, @birth_place,
-    @address, @diploma_date, @work_after, @source
-);
-SELECT LAST_INSERT_ID();";
-
-                using (var command = new MySqlCommand(sql, connection))
+                using (var transaction = connection.BeginTransaction())
                 {
-                    command.Parameters.AddWithValue("@full_name", (object)person.FullName ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@role", (object)person.Role ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@specialty_id", GetDbValue(person.SpecialtyId));
-                    command.Parameters.AddWithValue("@group_id", GetDbValue(person.GroupId));
-                    command.Parameters.AddWithValue("@education_id", GetDbValue(person.EducationId));
-                    command.Parameters.AddWithValue("@social_origin_id", GetDbValue(person.SocialOriginId));
-                    command.Parameters.AddWithValue("@social_status_id", GetDbValue(person.SocialStatusId));
-                    command.Parameters.AddWithValue("@party_id", GetDbValue(person.PartyId));
-                    command.Parameters.AddWithValue("@graduation_year", GetDbValue(person.GraduationYear));
-                    command.Parameters.AddWithValue("@gender", (object)person.Gender ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@nationality", (object)person.Nationality ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@birth_year", GetDbValue(person.BirthYear));
-                    command.Parameters.AddWithValue("@birth_place", (object)person.BirthPlace ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@address", (object)person.Address ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@diploma_date", (object)person.DiplomaDate ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@work_after", (object)person.WorkAfter ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@source", (object)person.Source ?? DBNull.Value);
+                    try
+                    {
+                        // 1. Вставка в таблицу persons
+                        const string sqlPerson = @"
+                    INSERT INTO persons (full_name, role, gender, nationality, birth_year, birth_place, address, source)
+                    VALUES (@full_name, @role, @gender, @nationality, @birth_year, @birth_place, @address, @source);
+                    SELECT LAST_INSERT_ID();";
 
-                    // Выполняем запрос и получаем новый ID
-                    var result = command.ExecuteScalar();
-                    return Convert.ToInt32(result);
+                        int newId;
+                        using (var cmd = new MySqlCommand(sqlPerson, connection, transaction))
+                        {
+                            cmd.Parameters.AddWithValue("@full_name", person.FullName);
+                            cmd.Parameters.AddWithValue("@role", person.Role);
+                            cmd.Parameters.AddWithValue("@gender", (object)person.Gender ?? DBNull.Value);
+                            cmd.Parameters.AddWithValue("@nationality", (object)person.Nationality ?? DBNull.Value);
+                            cmd.Parameters.AddWithValue("@birth_year", GetDbValue(person.BirthYear));
+                            cmd.Parameters.AddWithValue("@birth_place", (object)person.BirthPlace ?? DBNull.Value);
+                            cmd.Parameters.AddWithValue("@address", (object)person.Address ?? DBNull.Value);
+                            cmd.Parameters.AddWithValue("@source", (object)person.Source ?? DBNull.Value);
+                            newId = Convert.ToInt32(cmd.ExecuteScalar());
+                        }
+
+                        // 2. Вставка в academic_records
+                        const string sqlAcademic = @"
+                    INSERT INTO academic_records (person_id, group_id, specialty_id, education_id, graduation_year, diploma_date)
+                    VALUES (@pid, @gid, @sid, @eid, @gy, @dd);";
+                        using (var cmd = new MySqlCommand(sqlAcademic, connection, transaction))
+                        {
+                            cmd.Parameters.AddWithValue("@pid", newId);
+                            cmd.Parameters.AddWithValue("@gid", GetDbValue(person.GroupId));
+                            cmd.Parameters.AddWithValue("@sid", GetDbValue(person.SpecialtyId));
+                            cmd.Parameters.AddWithValue("@eid", GetDbValue(person.EducationId));
+                            cmd.Parameters.AddWithValue("@gy", GetDbValue(person.GraduationYear));
+                            cmd.Parameters.AddWithValue("@dd", (object)person.DiplomaDate ?? DBNull.Value);
+                            cmd.ExecuteNonQuery();
+                        }
+
+                        // 3. Вставка в social_profiles
+                        const string sqlSocial = @"
+                    INSERT INTO social_profiles (person_id, social_origin_id, social_status_id, party_id)
+                    VALUES (@pid, @soid, @ssid, @paid);";
+                        using (var cmd = new MySqlCommand(sqlSocial, connection, transaction))
+                        {
+                            cmd.Parameters.AddWithValue("@pid", newId);
+                            cmd.Parameters.AddWithValue("@soid", GetDbValue(person.SocialOriginId));
+                            cmd.Parameters.AddWithValue("@ssid", GetDbValue(person.SocialStatusId));
+                            cmd.Parameters.AddWithValue("@paid", GetDbValue(person.PartyId));
+                            cmd.ExecuteNonQuery();
+                        }
+
+                        // 4. Вставка в career_records
+                        if (!string.IsNullOrEmpty(person.WorkAfter))
+                        {
+                            const string sqlCareer = "INSERT INTO career_records (person_id, work_after) VALUES (@pid, @wa);";
+                            using (var cmd = new MySqlCommand(sqlCareer, connection, transaction))
+                            {
+                                cmd.Parameters.AddWithValue("@pid", newId);
+                                cmd.Parameters.AddWithValue("@wa", person.WorkAfter);
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+
+                        transaction.Commit();
+                        return newId;
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
                 }
             }
         }

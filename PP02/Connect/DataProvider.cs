@@ -183,10 +183,7 @@ namespace PP02.Connect
         {
             SpecialtyList.Clear();
 
-            const string sql = @"SELECT id, code, name, is_active, valid_from
-                                 FROM specialties
-                                 WHERE is_active = 1
-                                 ORDER BY name";
+            const string sql = "SELECT id, name, active FROM specialties WHERE active = 1 ORDER BY name";
 
             using (var connection = GetConnection(connectionString))
             using (var command = new MySqlCommand(sql, connection))
@@ -380,50 +377,28 @@ namespace PP02.Connect
         {
             PeopleVMList.Clear();
 
-            // 🔹 Используем представление v_student_full_info для упрощения запроса
-            // Порядок колонок в запросе КРИТИЧЕСКИ ВАЖЕН — соответствует индексам в reader
             const string sql = @"
-SELECT
-    -- Блок 1: Основные данные человека (индексы 0-19)
-    p.id,                      -- 0
-    p.full_name,               -- 1
-    p.role,                    -- 2
-    p.specialty_id,            -- 3
-    p.group_id,                -- 4: group_id (добавлено)
-    p.historical_alias_id,     -- 5: historical_alias_id (добавлено)
-    p.education_id,            -- 6
-    p.social_origin_id,        -- 7
-    p.social_status_id,        -- 8
-    p.party_id,                -- 9
-    p.graduation_year,         -- 10
-    g.code,                    -- 11: group_code
-    g.short_name,              -- 12: group_short_name (добавлено)
-    p.gender,                  -- 13
-    p.nationality,             -- 14
-    p.birth_year,              -- 15
-    p.birth_place,             -- 16
-    p.address,                 -- 17
-    p.diploma_date,            -- 18
-    p.work_after,              -- 19
-    p.source,                  -- 20
-
-    -- Блок 2: Названия из справочников (индексы 21-27)
-    edu.name,                  -- 21: EducationName
-    orig.name,                 -- 22: SocialOriginName
-    stat.name,                 -- 23: SocialStatusName
-    party.name,                -- 24: PartyName
-    COALESCE(sa.old_name, s_curr.name) AS specialty_name,  -- 25: SpecialtyName (как в дипломе)
-    s_curr.name,               -- 26: CurrentSpecialtyName (актуальная)
-    sa.old_code,               -- 27: HistoricalCode (исторический код)
-    sa.old_name                -- 28: HistoricalName (историческое название)
-FROM people p
-LEFT JOIN `groups` g ON p.group_id = g.id
-LEFT JOIN ref_education edu ON p.education_id = edu.id
-LEFT JOIN ref_social_origin orig ON p.social_origin_id = orig.id
-LEFT JOIN ref_social_status stat ON p.social_status_id = stat.id
-LEFT JOIN ref_party party ON p.party_id = party.id
-LEFT JOIN specialties s_curr ON p.specialty_id = s_curr.id
-LEFT JOIN specialty_aliases sa ON p.historical_alias_id = sa.id
+SELECT 
+    p.id, p.full_name, p.role, p.gender, p.nationality, p.birth_year, p.birth_place, p.address, p.source,
+    ar.group_id, ar.specialty_id, ar.education_id, ar.graduation_year, ar.diploma_date,
+    sp.social_origin_id, sp.social_status_id, sp.party_id,
+    cr.work_after,
+    g.code as group_code,
+    s.name as specialty_name,
+    edu.name as education_name,
+    orig.name as social_origin_name,
+    stat.name as social_status_name,
+    party.name as party_name
+FROM persons p
+LEFT JOIN academic_records ar ON p.id = ar.person_id
+LEFT JOIN social_profiles sp ON p.id = sp.person_id
+LEFT JOIN career_records cr ON p.id = cr.person_id
+LEFT JOIN groups g ON ar.group_id = g.id
+LEFT JOIN specialties s ON ar.specialty_id = s.id
+LEFT JOIN ref_education edu ON ar.education_id = edu.id
+LEFT JOIN ref_social_origin orig ON sp.social_origin_id = orig.id
+LEFT JOIN ref_social_status stat ON sp.social_status_id = stat.id
+LEFT JOIN ref_party party ON sp.party_id = party.id
 ORDER BY p.full_name";
 
             using (var connection = GetConnection(connectionString))
@@ -434,48 +409,34 @@ ORDER BY p.full_name";
                 {
                     PeopleVMList.Add(new PersonViewModel
                     {
-                        // === Блок 1: Основные данные (индексы 0-20) ===
                         Id = reader.GetInt32(0),
                         FullName = reader.GetString(1),
                         Role = GetStringOrNull(reader, 2),
+                        Gender = GetStringOrNull(reader, 3),
+                        Nationality = GetStringOrNull(reader, 4),
+                        BirthYear = GetIntOrNull(reader, 5),
+                        BirthPlace = GetStringOrNull(reader, 6),
+                        Address = GetStringOrNull(reader, 7),
+                        Source = GetStringOrNull(reader, 8),
 
-                        // ID связей
-                        SpecialtyId = reader.GetInt32(3),
-                        GroupId = GetIntOrNull(reader, 4),          // 🔹 group_id
-                        HistoricalAliasId = GetIntOrNull(reader, 5), // 🔹 historical_alias_id
-                        EducationId = GetIntOrNull(reader, 6),
-                        SocialOriginId = GetIntOrNull(reader, 7),
-                        SocialStatusId = GetIntOrNull(reader, 8),
-                        PartyId = GetIntOrNull(reader, 9),
+                        GroupId = GetIntOrNull(reader, 9),
+                        SpecialtyId = GetIntOrNull(reader, 10),
+                        EducationId = GetIntOrNull(reader, 11),
+                        GraduationYear = GetIntOrNull(reader, 12),
+                        DiplomaDate = GetDateTimeOrNull(reader, 13),
 
-                        // Текстовые и числовые данные
-                        GraduationYear = GetIntOrNull(reader, 10),
-                        GroupName = GetStringOrNull(reader, 11),      // Код группы из таблицы groups
-                        GroupShortName = GetStringOrNull(reader, 12), // 🔹 Краткое название группы
-                        Gender = GetStringOrNull(reader, 13),
-                        Nationality = GetStringOrNull(reader, 14),
-                        BirthYear = GetIntOrNull(reader, 15),
-                        BirthPlace = GetStringOrNull(reader, 16),
-                        Address = GetStringOrNull(reader, 17),
-                        DiplomaDate = GetDateTimeOrNull(reader, 18),
-                        WorkAfter = GetStringOrNull(reader, 19),
-                        Source = GetStringOrNull(reader, 20),
+                        SocialOriginId = GetIntOrNull(reader, 14),
+                        SocialStatusId = GetIntOrNull(reader, 15),
+                        PartyId = GetIntOrNull(reader, 16),
 
-                        // === Блок 2: Названия справочников (индексы 21-28) ===
-                        EducationName = GetStringOrNull(reader, 21),
-                        SocialOriginName = GetStringOrNull(reader, 22),
-                        SocialStatusName = GetStringOrNull(reader, 23),
-                        PartyName = GetStringOrNull(reader, 24),
-                        SpecialtyName = GetStringOrNull(reader, 25),
+                        WorkAfter = GetStringOrNull(reader, 17),
 
-                        // Актуальная специальность: если есть новая — берём её, иначе старую
-                        CurrentSpecialtyName = reader.IsDBNull(26)
-                            ? GetStringOrNull(reader, 25)
-                            : GetStringOrNull(reader, 26),
-
-                        // 🔹 Исторические данные о специальности
-                        HistoricalCode = GetStringOrNull(reader, 27),
-                        HistoricalName = GetStringOrNull(reader, 28)
+                        GroupName = GetStringOrNull(reader, 18),
+                        SpecialtyName = GetStringOrNull(reader, 19),
+                        EducationName = GetStringOrNull(reader, 20),
+                        SocialOriginName = GetStringOrNull(reader, 21),
+                        SocialStatusName = GetStringOrNull(reader, 22),
+                        PartyName = GetStringOrNull(reader, 23)
                     });
                 }
             }

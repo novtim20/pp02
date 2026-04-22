@@ -24,7 +24,7 @@ namespace PP02.Label.Item
         private bool _isDirty = false;
 
         // 🔹 Событие удаления студента (для уведомления родителя)
-        public event Action<int> PersonDeleted;
+        public event EventHandler<int> PersonDeleted;
 
         public PersonItem()
         {
@@ -395,7 +395,7 @@ namespace PP02.Label.Item
                     MessageBoxButton.OK, MessageBoxImage.Information);
 
                 // Уведомляем родительский контрол об удалении
-                PersonDeleted?.Invoke(deletedPersonId);
+                PersonDeleted?.Invoke(this, deletedPersonId);
             }
             catch (Exception ex)
             {

@@ -402,7 +402,7 @@ namespace PP02.Label
         }
 
         // === 🔹 ОБРАБОТЧИК УДАЛЕНИЯ СТУДЕНТА ИЗ PersonItem ===
-        private void PersonItem_PersonDeleted(int personId)
+        private void PersonItem_PersonDeleted(object sender, int personId)
         {
             // Удаляем из ObservableCollection
             var personToRemove = _searchResults?.FirstOrDefault(p => p.Id == personId);

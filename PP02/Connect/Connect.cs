@@ -11,7 +11,7 @@ namespace PP02.Connect
         public string server = "127.0.0.1";
         public string uid = "root";
         public string pwd = "root";
-        public string database = "vipusk";
+        public string database = "pp022";
         public string port = "3306";
 
         /// <summary>

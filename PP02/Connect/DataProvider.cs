@@ -184,7 +184,7 @@ namespace PP02.Connect
         {
             SpecialtyList.Clear();
 
-            const string sql = "SELECT id, name, short_name, active, data, group_id FROM specialties WHERE active = 1 ORDER BY name";
+            const string sql = "SELECT id, name, active, data, group_id FROM specialties WHERE active = 1 ORDER BY name";
 
             using (var connection = GetConnection(connectionString))
             using (var command = new MySqlCommand(sql, connection))
@@ -196,10 +196,10 @@ namespace PP02.Connect
                     {
                         Id = reader.GetInt32(0),
                         Name = GetStringOrNull(reader, 1),
-                        ShortName = GetStringOrNull(reader, 2),
-                        IsActive = reader.GetBoolean(3),
-                        ValidFrom = reader.IsDBNull(4) ? (DateTime?)null : reader.GetDateTime(4),
-                        GroupId = GetIntOrNull(reader, 5)
+                        ShortName = null,
+                        IsActive = reader.GetBoolean(2),
+                        ValidFrom = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3),
+                        GroupId = GetIntOrNull(reader, 4)
                     });
                 }
             }
@@ -213,7 +213,7 @@ namespace PP02.Connect
         {
             SpecialtyGroupList.Clear();
 
-            const string sql = @"SELECT id, name, short_name
+            const string sql = @"SELECT id, name
                                  FROM specialty_groups
                                  ORDER BY name";
 
@@ -227,7 +227,7 @@ namespace PP02.Connect
                     {
                         Id = reader.GetInt32(0),
                         Name = GetStringOrNull(reader, 1),
-                        ShortName = GetStringOrNull(reader, 2)
+                        ShortName = null
                     };
 
                     // Загружаем специальности для этой группы
@@ -243,7 +243,7 @@ namespace PP02.Connect
         /// </summary>
         private void LoadSpecialtiesForGroup(SpecialtyGroup group, string connectionString)
         {
-            const string sql = "SELECT id, name, short_name, active, data, group_id FROM specialties WHERE group_id = @groupId ORDER BY name";
+            const string sql = "SELECT id, name, active, data, group_id FROM specialties WHERE group_id = @groupId ORDER BY name";
 
             using (var connection = GetConnection(connectionString))
             using (var command = new MySqlCommand(sql, connection))
@@ -257,10 +257,10 @@ namespace PP02.Connect
                         {
                             Id = reader.GetInt32(0),
                             Name = GetStringOrNull(reader, 1),
-                            ShortName = GetStringOrNull(reader, 2),
-                            IsActive = reader.GetBoolean(3),
-                            ValidFrom = reader.IsDBNull(4) ? (DateTime?)null : reader.GetDateTime(4),
-                            GroupId = GetIntOrNull(reader, 5)
+                            ShortName = null,
+                            IsActive = reader.GetBoolean(2),
+                            ValidFrom = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3),
+                            GroupId = GetIntOrNull(reader, 4)
                         });
                     }
                 }
@@ -277,7 +277,6 @@ namespace PP02.Connect
             const string sql = @"SELECT g.id, g.code, g.short_name, g.name, g.specialty_id, g.is_active, s.name as specialty_name
                                  FROM `groups` g
                                  LEFT JOIN specialties s ON g.specialty_id = s.id
-                                 WHERE g.is_active = 1
                                  ORDER BY g.code";
 
             using (var connection = GetConnection(connectionString))
@@ -301,7 +300,7 @@ namespace PP02.Connect
         }
 
         /// <summary>
-        /// Поиск групп по строке с использованием FULLTEXT индекса
+        /// Поиск групп по строке с использованием LIKE (FULLTEXT удалён, т.к. не поддерживается в вашей БД)
         /// </summary>
         public List<Group> SearchGroups(string connectionString, string searchText)
         {
@@ -312,17 +311,17 @@ namespace PP02.Connect
                 return new List<Group>(GroupList);
             }
 
-            // Используем FULLTEXT поиск по таблице groups
+            // Используем LIKE поиск по таблице groups
             const string sql = @"SELECT g.id, g.code, g.short_name, g.name, g.specialty_id, g.is_active, s.name as specialty_name
                                  FROM `groups` g
                                  LEFT JOIN specialties s ON g.specialty_id = s.id
-                                 WHERE MATCH(g.code, g.short_name, g.name) AGAINST(@search IN BOOLEAN MODE)
+                                 WHERE g.code LIKE @search OR g.short_name LIKE @search OR g.name LIKE @search
                                  ORDER BY g.code";
 
             using (var connection = GetConnection(connectionString))
             using (var command = new MySqlCommand(sql, connection))
             {
-                command.Parameters.AddWithValue("@search", searchText);
+                command.Parameters.AddWithValue("@search", "%" + searchText + "%");
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
@@ -346,86 +345,32 @@ namespace PP02.Connect
 
         /// <summary>
         /// Загружает таблицу маппинга специальностей (переходы между специальностями)
+        /// Метод заглушка, т.к. таблица specialty_transitions отсутствует в вашей БД
         /// </summary>
         public void DataSpecialtyMapping(string connectionString)
         {
             SpecialtyMappingList.Clear();
-
-            const string sql = "SELECT id, from_specialty_id, to_specialty_id, transition_type, effective_date FROM specialty_transitions";
-
-            using (var connection = GetConnection(connectionString))
-            using (var command = new MySqlCommand(sql, connection))
-            using (var reader = command.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    SpecialtyMappingList.Add(new SpecialtyMapping
-                    {
-                        Id = reader.GetInt32(0),
-                        OldSpecialtyId = reader.GetInt32(1),
-                        NewSpecialtyId = reader.GetInt32(2)
-                    });
-                }
-            }
+            // Таблица specialty_transitions отсутствует в БД
         }
 
         /// <summary>
         /// Загружает исторические алиасы специальностей (таблица specialty_aliases)
+        /// Метод заглушка, т.к. таблица specialty_aliases отсутствует в вашей БД
         /// </summary>
         public void DataSpecialtyAliases(string connectionString)
         {
             SpecialtyAliasList.Clear();
-
-            const string sql = @"SELECT id, specialty_id, old_code, old_name, valid_from, valid_to
-                                 FROM specialty_aliases
-                                 ORDER BY old_code";
-
-            using (var connection = GetConnection(connectionString))
-            using (var command = new MySqlCommand(sql, connection))
-            using (var reader = command.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    SpecialtyAliasList.Add(new SpecialtyAlias
-                    {
-                        Id = reader.GetInt32(0),
-                        SpecialtyId = reader.GetInt32(1),
-                        OldCode = GetStringOrNull(reader, 2),
-                        OldName = GetStringOrNull(reader, 3),
-                        ValidFrom = GetDateTimeOrNull(reader, 4),
-                        ValidTo = GetDateTimeOrNull(reader, 5)
-                    });
-                }
-            }
+            // Таблица specialty_aliases отсутствует в БД
         }
 
         /// <summary>
         /// Загружает переходы между специальностями (таблица specialty_transitions)
+        /// Метод заглушка, т.к. таблица specialty_transitions отсутствует в вашей БД
         /// </summary>
         public void DataSpecialtyTransitions(string connectionString)
         {
             SpecialtyTransitionList.Clear();
-
-            const string sql = @"SELECT id, from_specialty_id, to_specialty_id, transition_type, effective_date
-                                 FROM specialty_transitions
-                                 ORDER BY effective_date";
-
-            using (var connection = GetConnection(connectionString))
-            using (var command = new MySqlCommand(sql, connection))
-            using (var reader = command.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    SpecialtyTransitionList.Add(new SpecialtyTransition
-                    {
-                        Id = reader.GetInt32(0),
-                        FromSpecialtyId = reader.GetInt32(1),
-                        ToSpecialtyId = reader.GetInt32(2),
-                        TransitionType = GetStringOrNull(reader, 3),
-                        EffectiveDate = GetDateTimeOrNull(reader, 4)
-                    });
-                }
-            }
+            // Таблица specialty_transitions отсутствует в БД
         }
 
         // ============================================================================
@@ -519,9 +464,11 @@ ORDER BY p.full_name";
             DataParty(connectionString);
             DataSpecialties(connectionString);
             DataGroups(connectionString);
-            DataSpecialtyMapping(connectionString);
-            DataSpecialtyAliases(connectionString);
-            DataSpecialtyTransitions(connectionString);
+            DataSpecialtyGroups(connectionString);
+            // Методы-заглушки для отсутствующих таблиц:
+            // DataSpecialtyMapping(connectionString);
+            // DataSpecialtyAliases(connectionString);
+            // DataSpecialtyTransitions(connectionString);
         }
 
         /// <summary>

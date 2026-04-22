@@ -12,7 +12,7 @@ namespace PP02.Label.Item
 {
     public partial class SpecialtyGroupItem : UserControl
     {
-        private readonly string _connectionString = "server=127.0.0.1;uid=root;pwd=root;database=pp022;port=3306;";
+        private readonly string _connectionString = Connect.Connect.GetConnectionString();
         private SpecialtyGroup _currentGroup;
         private bool _isDirty = false;
 

@@ -23,7 +23,7 @@ namespace PP02.Label.Item
     public partial class PersonItem : UserControl
     {
         // 🔹 Строка подключения (замените на вашу или возьмите из конфигурации)
-        private readonly string _connectionString = "server=127.0.0.1;uid=root;pwd=root;database=pp022;port=3306;";
+        private readonly string _connectionString = Connect.Connect.GetConnectionString();
 
         // 🔹 Текущая запись для редактирования
         private PersonViewModel _currentPerson;

@@ -72,7 +72,7 @@ namespace PP02.Label
     public partial class ImportExcelPage : Page
     {
         // Строка подключения к БД
-        private readonly string _connectionString = "server=127.0.0.1;uid=root;pwd=root;database=pp02;port=3306;";
+        private readonly string _connectionString = "server=127.0.0.1;uid=root;pwd=root;database=pp022;port=3306;";
 
         // Список всех возможных полей БД для маппинга
         private readonly List<string> _databaseFields = new List<string>
@@ -626,7 +626,7 @@ namespace PP02.Label
         /// </summary>
         private bool IsDuplicate(MySqlConnection connection, string fullName, MySqlTransaction transaction)
         {
-            const string sql = "SELECT COUNT(*) FROM people WHERE full_name = @full_name";
+            const string sql = "SELECT COUNT(*) FROM persons WHERE full_name = @full_name";
             using (var command = new MySqlCommand(sql, connection, transaction))
             {
                 command.Parameters.AddWithValue("@full_name", fullName);
@@ -730,33 +730,19 @@ namespace PP02.Label
                     groupId = GetOrCreateGroupId(connection, groupCodeFromExcel, specialtyId, transaction);
                 }
 
-                const string sql = @"
-INSERT INTO people (
-    full_name, role, specialty_id, group_id, education_id,
-    social_origin_id, social_status_id, party_id,
-    graduation_year, gender, nationality, birth_year, birth_place,
-    address, diploma_date, work_after, source
+                // Сначала вставляем запись в таблицу persons
+                const string personSql = @"
+INSERT INTO persons (
+    full_name, role, gender, nationality, birth_year, birth_place, address, source
 ) VALUES (
-    @full_name, @role, @specialty_id, @group_id, @education_id,
-    @social_origin_id, @social_status_id, @party_id,
-    @graduation_year, @gender, @nationality, @birth_year, @birth_place,
-    @address, @diploma_date, @work_after, @source
+    @full_name, @role, @gender, @nationality, @birth_year, @birth_place, @address, @source
 )";
 
-                using (var command = new MySqlCommand(sql, connection, transaction))
+                int personId;
+                using (var command = new MySqlCommand(personSql, connection, transaction))
                 {
                     command.Parameters.AddWithValue("@full_name", (object)fullName ?? DBNull.Value);
                     command.Parameters.AddWithValue("@role", (object)GetMappedValueInternal(rowData, mappingsCopy, "role") ?? "Студент");
-                    command.Parameters.AddWithValue("@specialty_id", GetDbValue(specialtyId));
-                    command.Parameters.AddWithValue("@group_id", GetDbValue(groupId));
-                    command.Parameters.AddWithValue("@education_id", GetDbValue(educationId));
-                    command.Parameters.AddWithValue("@social_origin_id", GetDbValue(socialOriginId));
-                    command.Parameters.AddWithValue("@social_status_id", GetDbValue(socialStatusId));
-                    command.Parameters.AddWithValue("@party_id", GetDbValue(partyId));
-
-                    var gradYear = GetMappedValueInternal(rowData, mappingsCopy, "graduation_year");
-                    command.Parameters.AddWithValue("@graduation_year", !string.IsNullOrEmpty(gradYear) && int.TryParse(gradYear, out int gy) ? (object)gy : DBNull.Value);
-
                     command.Parameters.AddWithValue("@gender", (object)GetMappedValueInternal(rowData, mappingsCopy, "gender") ?? DBNull.Value);
                     command.Parameters.AddWithValue("@nationality", (object)GetMappedValueInternal(rowData, mappingsCopy, "nationality") ?? DBNull.Value);
 
@@ -765,14 +751,76 @@ INSERT INTO people (
 
                     command.Parameters.AddWithValue("@birth_place", (object)GetMappedValueInternal(rowData, mappingsCopy, "birth_place") ?? DBNull.Value);
                     command.Parameters.AddWithValue("@address", (object)GetMappedValueInternal(rowData, mappingsCopy, "address") ?? DBNull.Value);
-
-                    var diplomaDate = GetMappedValueInternal(rowData, mappingsCopy, "diploma_date");
-                    command.Parameters.AddWithValue("@diploma_date", !string.IsNullOrEmpty(diplomaDate) && DateTime.TryParse(diplomaDate, out DateTime dd) ? (object)dd : DBNull.Value);
-
-                    command.Parameters.AddWithValue("@work_after", (object)GetMappedValueInternal(rowData, mappingsCopy, "work_after") ?? DBNull.Value);
                     command.Parameters.AddWithValue("@source", (object)GetMappedValueInternal(rowData, mappingsCopy, "source") ?? DBNull.Value);
 
                     command.ExecuteNonQuery();
+
+                    // Получаем ID newly inserted person
+                    command.CommandText = "SELECT LAST_INSERT_ID()";
+                    command.Parameters.Clear();
+                    personId = Convert.ToInt32(command.ExecuteScalar());
+                }
+
+                // Вставляем запись в academic_records
+                var gradYear = GetMappedValueInternal(rowData, mappingsCopy, "graduation_year");
+                var diplomaDate = GetMappedValueInternal(rowData, mappingsCopy, "diploma_date");
+
+                const string academicSql = @"
+INSERT INTO academic_records (
+    person_id, group_id, specialty_id, education_id, graduation_year, diploma_date
+) VALUES (
+    @person_id, @group_id, @specialty_id, @education_id, @graduation_year, @diploma_date
+)";
+
+                using (var command = new MySqlCommand(academicSql, connection, transaction))
+                {
+                    command.Parameters.AddWithValue("@person_id", personId);
+                    command.Parameters.AddWithValue("@group_id", GetDbValue(groupId));
+                    command.Parameters.AddWithValue("@specialty_id", GetDbValue(specialtyId));
+                    command.Parameters.AddWithValue("@education_id", GetDbValue(educationId));
+                    command.Parameters.AddWithValue("@graduation_year", !string.IsNullOrEmpty(gradYear) && int.TryParse(gradYear, out int gy) ? (object)gy : DBNull.Value);
+                    command.Parameters.AddWithValue("@diploma_date", !string.IsNullOrEmpty(diplomaDate) && DateTime.TryParse(diplomaDate, out DateTime dd) ? (object)dd : DBNull.Value);
+
+                    command.ExecuteNonQuery();
+                }
+
+                // Вставляем запись в career_records (если есть данные о работе)
+                var workAfter = GetMappedValueInternal(rowData, mappingsCopy, "work_after");
+                if (!string.IsNullOrEmpty(workAfter))
+                {
+                    const string careerSql = @"
+INSERT INTO career_records (
+    person_id, work_after
+) VALUES (
+    @person_id, @work_after
+)";
+
+                    using (var command = new MySqlCommand(careerSql, connection, transaction))
+                    {
+                        command.Parameters.AddWithValue("@person_id", personId);
+                        command.Parameters.AddWithValue("@work_after", (object)workAfter ?? DBNull.Value);
+                        command.ExecuteNonQuery();
+                    }
+                }
+
+                // Вставляем запись в social_profiles (если есть социальные данные)
+                if (socialOriginId.HasValue || socialStatusId.HasValue || partyId.HasValue)
+                {
+                    const string socialSql = @"
+INSERT INTO social_profiles (
+    person_id, social_origin_id, social_status_id, party_id
+) VALUES (
+    @person_id, @social_origin_id, @social_status_id, @party_id
+)";
+
+                    using (var command = new MySqlCommand(socialSql, connection, transaction))
+                    {
+                        command.Parameters.AddWithValue("@person_id", personId);
+                        command.Parameters.AddWithValue("@social_origin_id", GetDbValue(socialOriginId));
+                        command.Parameters.AddWithValue("@social_status_id", GetDbValue(socialStatusId));
+                        command.Parameters.AddWithValue("@party_id", GetDbValue(partyId));
+                        command.ExecuteNonQuery();
+                    }
                 }
 
                 return true;
@@ -889,7 +937,7 @@ INSERT INTO people (
 
             try
             {
-                const string sql = "SELECT id FROM specialties WHERE name = @name OR code = @name LIMIT 1";
+                const string sql = "SELECT id FROM specialties WHERE name = @name OR short_name = @name LIMIT 1";
                 using (var command = new MySqlCommand(sql, connection, transaction))
                 {
                     command.Parameters.AddWithValue("@name", specialtyName);
@@ -1031,12 +1079,21 @@ INSERT INTO people (
                 // Группы не существует, создаем новую
                 Console.WriteLine($"[INFO] Creating new group '{groupCode}'...");
 
-                // Извлекаем short_name из кода группы (например, "Х-Ш" из "Х-Ш 36")
+                // Извлекаем short_name из кода группы (например, "ИТ" из "101-ИТ")
                 string shortName = groupCode;
                 var spaceIndex = groupCode.IndexOf(' ');
                 if (spaceIndex > 0)
                 {
                     shortName = groupCode.Substring(0, spaceIndex);
+                }
+                else
+                {
+                    // Если нет пробела, пытаемся извлечь часть после дефиса (например, "ИТ" из "101-ИТ")
+                    var dashIndex = groupCode.IndexOf('-');
+                    if (dashIndex > 0 && dashIndex < groupCode.Length - 1)
+                    {
+                        shortName = groupCode.Substring(dashIndex + 1);
+                    }
                 }
 
                 // Если specialtyId не указан, пытаемся определить его по коду группы

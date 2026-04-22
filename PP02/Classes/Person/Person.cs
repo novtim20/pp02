@@ -14,6 +14,7 @@ namespace PP02.Classes.Person
         // "Студент" или "Преподаватель"
 
         // ID связей со справочниками
+        public int? GroupId { get; set; }         // ID группы из academic_records
         public int? SpecialtyId { get; set; }
         public int? EducationId { get; set; }
         public int? SocialOriginId { get; set; }
@@ -22,7 +23,7 @@ namespace PP02.Classes.Person
 
         // Основные данные
         public int? GraduationYear { get; set; }
-        public string GroupName { get; set; }
+        public string GroupName { get; set; }     // Код группы для отображения
         public string Gender { get; set; }
         public string Nationality { get; set; }
         public int? BirthYear { get; set; }
@@ -33,7 +34,7 @@ namespace PP02.Classes.Person
         public string Source { get; set; }
 
         // Конструктор
-        public Person(int id, string fullName, string role, int? specialtyId, int? educationId,
+        public Person(int id, string fullName, string role, int? groupId, int? specialtyId, int? educationId,
             int? socialOriginId, int? socialStatusId, int? partyId, int? graduationYear,
             string groupName, string gender, string nationality, int? birthYear,
             string birthPlace, string address, DateTime? diplomaDate, string workAfter,
@@ -42,6 +43,7 @@ namespace PP02.Classes.Person
             Id = id;
             FullName = fullName;
             Role = role;
+            GroupId = groupId;
             SpecialtyId = specialtyId;
             EducationId = educationId;
             SocialOriginId = socialOriginId;
@@ -57,6 +59,11 @@ namespace PP02.Classes.Person
             DiplomaDate = diplomaDate;
             WorkAfter = workAfter;
             Source = source;
+        }
+
+        // Пустой конструктор для инициализации
+        public Person()
+        {
         }
     }
 }

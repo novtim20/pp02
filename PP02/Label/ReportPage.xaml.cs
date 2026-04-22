@@ -11,6 +11,7 @@ using PP02.Classes.Person;
 using PP02.Connect;
 using PP02.Classes.Dictionaries;
 using PP02.Classes.Specialties;
+using ClosedXML.Excel; // Для работы с Excel
 
 namespace PP02.Label
 {
@@ -177,7 +178,7 @@ namespace PP02.Label
                 }
                 catch (Exception ex)
                 {
-                   // MessageBox.Show($"Ошибка при создании Word файла: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    // MessageBox.Show($"Ошибка при создании Word файла: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -190,8 +191,24 @@ namespace PP02.Label
                 return;
             }
 
-            MessageBox.Show("Функция экспорта в Excel будет добавлена позже. Используйте Word.", "Инфо", MessageBoxButton.OK, MessageBoxImage.Information);
-            // Здесь можно реализовать экспорт в CSV или через EPPlus, если нужно
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Документ Excel (*.xlsx)|*.xlsx",
+                Title = "Сохранить отчет в Excel"
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    ExportToExcel(saveFileDialog.FileName, _filteredPeople);
+                    MessageBox.Show("Отчет успешно создан!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при создании Excel файла: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         private void ExportToWord(string filePath, List<PersonViewModel> people)
@@ -311,6 +328,58 @@ namespace PP02.Label
             }
 
             return cell;
+        }
+
+        private void ExportToExcel(string filePath, List<PersonViewModel> people)
+        {
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Отчет");
+
+                // Заголовок отчета
+                worksheet.Cell(1, 1).Value = "Отчет по базе данных людей";
+                worksheet.Cell(1, 1).Style.Font.SetBold();
+                worksheet.Cell(1, 1).Style.Font.SetFontSize(16);
+
+                worksheet.Cell(2, 1).Value = $"Дата формирования: {DateTime.Now.ToShortDateString()}";
+                worksheet.Cell(3, 1).Value = $"Всего записей: {people.Count}";
+
+                // Заголовки таблицы
+                int headerRow = 5;
+                string[] headers = { "ФИО", "Роль", "Специальность", "Образование", "Год выпуска", "Группа" };
+
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    var cell = worksheet.Cell(headerRow, i + 1);
+                    cell.Value = headers[i];
+                    cell.Style.Font.SetBold();
+                    cell.Style.Fill.BackgroundColor = XLColor.LightGray;
+                    cell.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+                }
+
+                // Данные
+                int dataRow = headerRow + 1;
+                foreach (var person in people)
+                {
+                    worksheet.Cell(dataRow, 1).Value = person.FullName ?? "-";
+                    worksheet.Cell(dataRow, 2).Value = person.Role ?? "-";
+                    worksheet.Cell(dataRow, 3).Value = person.SpecialtyName ?? "-";
+                    worksheet.Cell(dataRow, 4).Value = person.EducationName ?? "-";
+                    worksheet.Cell(dataRow, 5).Value = person.GraduationYear?.ToString() ?? "-";
+                    worksheet.Cell(dataRow, 6).Value = person.GroupName ?? "-";
+                    dataRow++;
+                }
+
+                // Автоподбор ширины колонок
+                worksheet.Columns().AdjustToContents();
+
+                // Границы для всей таблицы
+                var range = worksheet.Range(headerRow, 1, dataRow - 1, headers.Length);
+                range.Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
+                range.Style.Border.SetInsideBorder(XLBorderStyleValues.Thin);
+
+                workbook.SaveAs(filePath);
+            }
         }
     }
 }

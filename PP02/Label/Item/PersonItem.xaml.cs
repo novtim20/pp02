@@ -9,6 +9,14 @@ using PP02.Classes.Specialties;
 using PP02.Classes.Person;
 using System.Windows.Media;
 using PP02.Label.Dialogs;
+using System.IO;
+using Microsoft.Win32;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using A = DocumentFormat.OpenXml.Drawing;
+using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
+using PIC = DocumentFormat.OpenXml.Drawing.Pictures;
 
 namespace PP02.Label.Item
 {
@@ -470,6 +478,199 @@ namespace PP02.Label.Item
             if (BtnExpand != null) BtnExpand.Visibility = Visibility.Visible;
             if (BtnSave != null) BtnSave.Visibility = Visibility.Collapsed;
             if (BtnCancel != null) BtnCancel.Visibility = Visibility.Collapsed;
+        }
+
+        // === 🔹 ЭКСПОРТ В WORD (ОТЧЕТ О ВЫПУСКНИКЕ) ===
+
+        // Кнопка "📄 Экспорт в отчет"
+        private void BtnExportReport_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentPerson == null)
+            {
+                MessageBox.Show("Нет данных для экспорта", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                // Диалог сохранения файла
+                var saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "Документ Word (*.docx)|*.docx",
+                    FileName = $"Отчет_{_currentPerson.FullName.Replace(" ", "_")}.docx",
+                    Title = "Сохранение отчета о выпускнике"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    GenerateGraduateReport(_currentPerson, saveFileDialog.FileName);
+                    MessageBox.Show($"Отчет успешно сохранен:\n{saveFileDialog.FileName}", "Успех",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка экспорта: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Метод генерации отчета в формате Word
+        private void GenerateGraduateReport(PersonViewModel person, string filePath)
+        {
+            // Получаем данные из справочников
+            var educationName = DataProvider.EducationList.FirstOrDefault(e => e.Id == person.EducationId)?.Name ?? "Не указано";
+            var socialOriginName = DataProvider.SocialOriginList.FirstOrDefault(s => s.Id == person.SocialOriginId)?.Name ?? "Не указано";
+            var socialStatusName = DataProvider.SocialStatusList.FirstOrDefault(s => s.Id == person.SocialStatusId)?.Name ?? "Не указано";
+            var partyName = DataProvider.PartyList.FirstOrDefault(p => p.Id == person.PartyId)?.Name ?? "Не указано";
+            var groupName = person.GroupName ?? "Не указана";
+            var specialtyName = person.CurrentSpecialtyName ?? person.SpecialtyName ?? "Не указана";
+
+            using (var document = WordprocessingDocument.Create(filePath, WordprocessingDocumentType.Document))
+            {
+                // Добавляем основную часть документа
+                MainDocumentPart mainPart = document.AddMainDocumentPart();
+                mainPart.Document = new Document();
+                Body body = mainPart.Document.AppendChild(new Body());
+
+                // Заголовок отчета
+                body.AppendChild(new Paragraph(
+                    new Run(new Text("ОТЧЕТ О ВЫПУСКНИКЕ"))
+                    {
+                        RunProperties = new RunProperties(new Bold())
+                    })
+                {
+                    ParagraphProperties = new ParagraphProperties(new SpacingBetweenLines { After = "200" })
+                });
+
+                // Учебное заведение
+                body.AppendChild(new Paragraph(
+                    new Run(new Text("Учебное заведение: Пермский авиационный техникум")))
+                {
+                    ParagraphProperties = new ParagraphProperties(new SpacingBetweenLines { After = "100" })
+                });
+
+                // Документ
+                body.AppendChild(new Paragraph(
+                    new Run(new Text("Документ: Анкета выпускника")))
+                {
+                    ParagraphProperties = new ParagraphProperties(new SpacingBetweenLines { After = "100" })
+                });
+
+                // Дата формирования
+                body.AppendChild(new Paragraph(
+                    new Run(new Text($"Дата формирования отчета: {DateTime.Now:dd.MM.yyyy}")))
+                {
+                    ParagraphProperties = new ParagraphProperties(new SpacingBetweenLines { After = "200" })
+                });
+
+                // Раздел 1: Персональные данные
+                AddSectionHeader(body, "1. Персональные данные");
+                AddParameterRow(body, "Фамилия, Имя, Отчество", person.FullName);
+                AddParameterRow(body, "Дата рождения", person.BirthYear?.ToString() ?? "Не указана");
+                AddParameterRow(body, "Год выпуска", person.GraduationYear?.ToString() ?? "Не указан");
+
+                // Раздел 2: Образование и Квалификация
+                AddSectionHeader(body, "2. Образование и Квалификация");
+                AddParameterRow(body, "Специальность", specialtyName);
+                AddParameterRow(body, "Группа", groupName);
+                AddParameterRow(body, "Образование до техникума", educationName);
+                AddParameterRow(body, "Пол", person.Gender == "М" ? "Мужской" : person.Gender == "Ж" ? "Женский" : "Не указан");
+
+                // Раздел 3: Социальные данные
+                AddSectionHeader(body, "3. Социальные данные");
+                AddParameterRow(body, "Национальность", person.Nationality ?? "Не указана");
+                AddParameterRow(body, "Место рождения", person.BirthPlace ?? "Не указано");
+                AddParameterRow(body, "Соц. происхождение", socialOriginName);
+                AddParameterRow(body, "Соц. положение", socialStatusName);
+                AddParameterRow(body, "Партийность", partyName);
+                AddParameterRow(body, "Домашний адрес", person.Address ?? "Не указан");
+
+                // Раздел 4: Трудовая деятельность
+                AddSectionHeader(body, "4. Трудовая деятельность");
+                AddParameterRow(body, "Где работал после техникума", person.WorkAfter ?? "Не указано");
+
+                // Раздел 5: Дополнительная информация
+                AddSectionHeader(body, "5. Дополнительная информация");
+                AddParameterRow(body, "Источник информации", person.Source ?? "Не указан");
+                AddParameterRow(body, "Роль в базе", person.Role ?? "Не указана");
+
+                // Подвал с подписями
+                body.AppendChild(new Paragraph(
+                    new Run(new Text("\n\nОтчет сформирован автоматически на основе данных архива.")))
+                {
+                    ParagraphProperties = new ParagraphProperties(new SpacingBetweenLines { After = "100" })
+                });
+
+                body.AppendChild(new Paragraph(
+                    new Run(new Text($"Дата формирования: {DateTime.Now:dd.MM.yyyy HH:mm}")))
+                {
+                    ParagraphProperties = new ParagraphProperties(new SpacingBetweenLines { After = "200" })
+                });
+
+                mainPart.Document.Save();
+            }
+        }
+
+        // Вспомогательный метод: добавление заголовка раздела
+        private void AddSectionHeader(Body body, string text)
+        {
+            body.AppendChild(new Paragraph(
+                new Run(new Text(text))
+                {
+                    RunProperties = new RunProperties(new Bold())
+                })
+            {
+                ParagraphProperties = new ParagraphProperties(new SpacingBetweenLines { Before = "200", After = "100" })
+            });
+        }
+
+        // Вспомогательный метод: добавление строки параметра (таблица из 2 ячеек)
+        private void AddParameterRow(Body body, string parameter, string value)
+        {
+            var table = new Table();
+
+            // Настройки таблицы
+            var tblBorders = new TableBorders(
+                new TopBorder { Val = BorderValues.Single, Size = 4 },
+                new BottomBorder { Val = BorderValues.Single, Size = 4 },
+                new LeftBorder { Val = BorderValues.Single, Size = 4 },
+                new RightBorder { Val = BorderValues.Single, Size = 4 },
+                new InsideHorizontalBorder { Val = BorderValues.Single, Size = 4 },
+                new InsideVerticalBorder { Val = BorderValues.Single, Size = 4 }
+            );
+            table.AppendChild(tblBorders);
+
+            // Ширина таблицы
+            table.AppendChild(new TableWidth { Type = TableWidthUnitValues.Pct, Width = "100%" });
+
+            // Строка таблицы
+            var tr = new TableRow();
+
+            // Ячейка с названием параметра
+            var tc1 = new TableCell(
+                new Paragraph(new Run(new Text(parameter))
+                {
+                    RunProperties = new RunProperties(new Bold())
+                })
+            );
+            tc1.AppendChild(new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = "40%" });
+
+            // Ячейка со значением
+            var tc2 = new TableCell(
+                new Paragraph(new Run(new Text(value)))
+            );
+            tc2.AppendChild(new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = "60%" });
+
+            tr.AppendChild(tc1);
+            tr.AppendChild(tc2);
+            table.AppendChild(tr);
+
+            body.AppendChild(table);
+
+            // Отступ после таблицы
+            body.AppendChild(new Paragraph(new Run(new Text(""))));
         }
 
         // === 🔹 ОБНОВЛЕНИЕ ДАННЫХ В БАЗЕ (реальный SQL UPDATE) ===

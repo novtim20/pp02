@@ -60,29 +60,23 @@
                                 </Grid.RowDefinitions>
 
                                 <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,10">
-                                    <TextBlock Text="Код *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
-                                    <TextBox x:Name="NewSpecialtyCodeTextBox" Height="35" Padding="8,0,0,0"
-                                             BorderBrush="#DDD" BorderThickness="1"/>
-                                </StackPanel>
-
-                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,0,10">
                                     <TextBlock Text="Название *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                     <TextBox x:Name="NewSpecialtyNameTextBox" Height="35" Padding="8,0,0,0"
                                              BorderBrush="#DDD" BorderThickness="1"/>
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,10">
+                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,0,10">
                                     <TextBlock Text="Сокращённое название" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                     <TextBox x:Name="NewSpecialtyShortNameTextBox" Height="35" Padding="8,0,0,0"
                                              BorderBrush="#DDD" BorderThickness="1"/>
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,0,0,10">
+                                <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,10">
                                     <CheckBox x:Name="NewSpecialtyIsActiveCheckBox" Content="Активная специальность"
                                               IsChecked="True" FontSize="12" Foreground="#555"/>
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
                                     <Button Content="💾 Сохранить специальность" Width="180" Height="40"
                                             Background="#4CAF50" Foreground="White" FontWeight="Bold" BorderThickness="0"
                                             Click="AddSpecialtyButton_Click"/>
@@ -109,7 +103,6 @@
                                       HeadersVisibility="Column" GridLinesVisibility="Horizontal"
                                       Background="White" BorderBrush="#EEE" BorderThickness="0">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Код" Binding="{Binding Code}" Width="100"/>
                                     <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
                                     <DataGridTextColumn Header="Сокращение" Binding="{Binding ShortName}" Width="150"/>
                                     <DataGridCheckBoxColumn Header="Активна" Binding="{Binding IsActive}" Width="60"/>

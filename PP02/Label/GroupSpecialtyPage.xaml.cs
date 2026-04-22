@@ -60,14 +60,6 @@ namespace PP02.Label
             try
             {
                 // Валидация
-                if (string.IsNullOrWhiteSpace(NewSpecialtyCodeTextBox.Text))
-                {
-                    MessageBox.Show("Введите код специальности", "Ошибка",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                    NewSpecialtyCodeTextBox.Focus();
-                    return;
-                }
-
                 if (string.IsNullOrWhiteSpace(NewSpecialtyNameTextBox.Text))
                 {
                     MessageBox.Show("Введите название специальности", "Ошибка",
@@ -81,13 +73,12 @@ namespace PP02.Label
                     connection.Open();
 
                     const string sql = @"
-INSERT INTO `specialties` (code, name, is_active)
-VALUES (@code, @name, @is_active);
+INSERT INTO `specialties` (name, is_active)
+VALUES (@name, @is_active);
 SELECT LAST_INSERT_ID();";
 
                     using (var command = new MySqlCommand(sql, connection))
                     {
-                        command.Parameters.AddWithValue("@code", NewSpecialtyCodeTextBox.Text.Trim());
                         command.Parameters.AddWithValue("@name", NewSpecialtyNameTextBox.Text.Trim());
                         command.Parameters.AddWithValue("@is_active", NewSpecialtyIsActiveCheckBox.IsChecked == true);
 
@@ -191,11 +182,10 @@ SELECT LAST_INSERT_ID();";
         // Очистка полей специальности
         private void ClearSpecialtyFields()
         {
-            NewSpecialtyCodeTextBox.Clear();
             NewSpecialtyNameTextBox.Clear();
             NewSpecialtyShortNameTextBox.Clear();
             NewSpecialtyIsActiveCheckBox.IsChecked = true;
-            NewSpecialtyCodeTextBox.Focus();
+            NewSpecialtyNameTextBox.Focus();
         }
 
         // Очистка полей группы

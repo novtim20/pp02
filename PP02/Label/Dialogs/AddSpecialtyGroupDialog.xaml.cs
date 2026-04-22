@@ -84,14 +84,6 @@ namespace PP02.Label.Dialogs
         private void SaveSpecialty()
         {
             // Валидация
-            if (string.IsNullOrWhiteSpace(SpecialtyCodeTextBox.Text))
-            {
-                MessageBox.Show("Введите код специальности", "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                SpecialtyCodeTextBox.Focus();
-                return;
-            }
-
             if (string.IsNullOrWhiteSpace(SpecialtyNameTextBox.Text))
             {
                 MessageBox.Show("Введите название специальности", "Ошибка",
@@ -105,15 +97,14 @@ namespace PP02.Label.Dialogs
                 connection.Open();
 
                 const string sql = @"
-INSERT INTO `specialties` (code, name, is_active)
-VALUES (@code, @name, @is_active);
+INSERT INTO `specialties` (name, active)
+VALUES (@name, @active);
 SELECT LAST_INSERT_ID();";
 
                 using (var command = new MySqlCommand(sql, connection))
                 {
-                    command.Parameters.AddWithValue("@code", SpecialtyCodeTextBox.Text.Trim());
                     command.Parameters.AddWithValue("@name", SpecialtyNameTextBox.Text.Trim());
-                    command.Parameters.AddWithValue("@is_active", SpecialtyIsActiveCheckBox.IsChecked == true);
+                    command.Parameters.AddWithValue("@active", SpecialtyIsActiveCheckBox.IsChecked == true);
 
                     var result = command.ExecuteScalar();
                     NewSpecialtyId = Convert.ToInt32(result);

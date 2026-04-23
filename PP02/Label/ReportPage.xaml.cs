@@ -482,27 +482,26 @@ namespace PP02.Label
                             }
                         });
 
-                    static IContainer CellStyle(IContainer container)
-                    {
-                        return container
-                            .BorderBottom(1)
-                            .BorderColor(Colors.Grey.Lighten2)
-                            .Padding(5);
-                    }
+                    // Нумерация страниц
+                    page.Footer()
+                        .AlignCenter()
+                        .Text(text =>
+                        {
+                            text.CurrentPageNumber();
+                            text.Span(" / ");
+                            text.TotalPages();
+                        });
                 });
+            })
+                .GeneratePdf(filePath);
+        }
 
-                // Нумерация страниц
-                page.Footer()
-                    .AlignCenter()
-                    .Text(text =>
-                    {
-                        text.CurrentPageNumber();
-                        text.Span(" / ");
-                        text.TotalPages();
-                    });
-            });
-        })
-            .GeneratePdf(filePath);
+        private static IContainer CellStyle(IContainer container)
+        {
+            return container
+                .BorderBottom(1)
+                .BorderColor(Colors.Grey.Lighten2)
+                .Padding(5);
+        }
     }
-}
 }

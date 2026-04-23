@@ -7,7 +7,8 @@
       mc:Ignorable="d"
       d:DesignHeight="900" d:DesignWidth="1100"
       Background="#F5F5F5"
-      Title="Добавление студента">
+      Title="Добавление студента"
+      Loaded="Page_Loaded">
 
     <ScrollViewer x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto">
         <Grid Margin="20">

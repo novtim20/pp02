@@ -29,10 +29,9 @@ namespace PP02.Label
             LoadAllPeople(); // 🔹 Загружаем всю БД при открытии
         }
 
-        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
+        private void Page_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            base.OnNavigatedTo(e);
-            // Перезагружаем справочники и данные при каждом переходе на страницу
+            // Перезагружаем справочники и данные при загрузке страницы
             LoadDictionaries();
             LoadAllPeople();
         }

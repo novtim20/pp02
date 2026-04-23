@@ -25,6 +25,13 @@ namespace PP02.Label
             LoadDictionaries();
         }
 
+        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            // Перезагружаем справочники при каждом переходе на страницу
+            LoadDictionaries();
+        }
+
         // === 🔹 ЗАГРУЗКА СПРАВОЧНИКОВ ===
         private void LoadDictionaries()
         {

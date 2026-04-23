@@ -120,6 +120,12 @@ SELECT LAST_INSERT_ID();";
                 .Where(s => s.IsActive)
                 .ToList();
 
+            // Выбираем только что созданную специальность
+            if (NewSpecialtyId.HasValue)
+            {
+                GroupSpecialtyComboBox.SelectedValue = NewSpecialtyId.Value;
+            }
+
             MessageBox.Show($"Специальность \"{SpecialtyNameTextBox.Text}\" успешно добавлена!",
                 "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
 

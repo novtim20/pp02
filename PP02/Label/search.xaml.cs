@@ -29,6 +29,14 @@ namespace PP02.Label
             LoadAllPeople(); // 🔹 Загружаем всю БД при открытии
         }
 
+        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            // Перезагружаем справочники и данные при каждом переходе на страницу
+            LoadDictionaries();
+            LoadAllPeople();
+        }
+
         // === 🔹 ЗАГРУЗКА ВСЕЙ БАЗЫ ДАННЫХ ПРИ ОТКРЫТИИ ===
         private void LoadAllPeople()
         {

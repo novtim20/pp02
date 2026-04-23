@@ -354,7 +354,8 @@ namespace PP02.Label
         // === 🔹 КНОПКА "ДОБАВИТЬ СТУДЕНТА" (переход на AddStudentPage) ===
         private void AddStudentButton_Click(object sender, RoutedEventArgs e)
         {
-            NavigationService?.Navigate(new AddStudentPage());
+            var addStudentPage = new AddStudentPage();
+            NavigationService?.Navigate(addStudentPage);
         }
 
         // === 🔹 КНОПКА "ИМПОРТ ИЗ EXCEL" (переход на ImportExcelPage) ===
@@ -377,33 +378,23 @@ namespace PP02.Label
                 Owner = Application.Current.MainWindow
             };
 
-            if (dialog.ShowDialog() == true)
+            if (dialog.ShowDialog() == true && dialog.NewGroupId.HasValue)
             {
                 // Перезагружаем справочник групп
                 var db = new DataProvider();
                 db.DataGroups(_connectionString);
 
-                // Обновляем ComboBox, сохраняя текущий выбранный элемент
-                var currentSelected = GroupComboBox.SelectedItem;
-
+                // Обновляем ComboBox
                 GroupComboBox.ItemsSource = new List<Group>
                     { new Group { Id = -1, Code = "Все", ShortName = "", Name = "Все", SpecialtyId = -1, IsActive = true, SpecialtyName = "" } }
                     .Concat(DataProvider.GroupList)
                     .ToList();
 
                 // Если была добавлена группа - выбираем её
-                if (dialog.NewGroupId.HasValue)
+                var newGroup = DataProvider.GroupList.FirstOrDefault(g => g.Id == dialog.NewGroupId.Value);
+                if (newGroup != null)
                 {
-                    var newGroup = DataProvider.GroupList.FirstOrDefault(g => g.Id == dialog.NewGroupId.Value);
-                    if (newGroup != null)
-                    {
-                        GroupComboBox.SelectedItem = newGroup;
-                    }
-                }
-                else if (currentSelected != null)
-                {
-                    // Пытаемся восстановить предыдущий выбор
-                    GroupComboBox.SelectedItem = currentSelected;
+                    GroupComboBox.SelectedItem = newGroup;
                 }
             }
         }
@@ -438,33 +429,23 @@ namespace PP02.Label
                 Owner = Application.Current.MainWindow
             };
 
-            if (dialog.ShowDialog() == true)
+            if (dialog.ShowDialog() == true && dialog.NewSpecialtyId.HasValue)
             {
                 // Перезагружаем справочник специальностей
                 var db = new DataProvider();
                 db.DataSpecialties(_connectionString);
 
-                // Обновляем ComboBox, сохраняя текущий выбранный элемент
-                var currentSelected = SpecialtyComboBox.SelectedItem;
-
+                // Обновляем ComboBox
                 SpecialtyComboBox.ItemsSource = new List<Specialty>
                     { new Specialty { Id = -1, Name = "Все", IsActive = true } }
                     .Concat(DataProvider.SpecialtyList)
                     .ToList();
 
                 // Если была добавлена специальность - выбираем её
-                if (dialog.NewSpecialtyId.HasValue)
+                var newSpecialty = DataProvider.SpecialtyList.FirstOrDefault(s => s.Id == dialog.NewSpecialtyId.Value);
+                if (newSpecialty != null)
                 {
-                    var newSpecialty = DataProvider.SpecialtyList.FirstOrDefault(s => s.Id == dialog.NewSpecialtyId.Value);
-                    if (newSpecialty != null)
-                    {
-                        SpecialtyComboBox.SelectedItem = newSpecialty;
-                    }
-                }
-                else if (currentSelected != null)
-                {
-                    // Пытаемся восстановить предыдущий выбор
-                    SpecialtyComboBox.SelectedItem = currentSelected;
+                    SpecialtyComboBox.SelectedItem = newSpecialty;
                 }
             }
         }

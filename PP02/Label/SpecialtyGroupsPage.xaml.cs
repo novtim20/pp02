@@ -25,6 +25,12 @@ namespace PP02.Label
             LoadData();
         }
 
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Перезагружаем данные при загрузке страницы
+            LoadData();
+        }
+
         // Загрузка данных
         private void LoadData()
         {

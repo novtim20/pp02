@@ -25,6 +25,14 @@ namespace PP02.Label
             LoadDictionaries();
         }
 
+        /// <summary>
+        /// Публичный метод для принудительного обновления справочников
+        /// </summary>
+        public void RefreshDictionaries()
+        {
+            LoadDictionaries();
+        }
+
         private void Page_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
             // Перезагружаем справочники при загрузке страницы
@@ -119,7 +127,7 @@ namespace PP02.Label
                 Owner = Application.Current.MainWindow
             };
 
-            if (dialog.ShowDialog() == true)
+            if (dialog.ShowDialog() == true && dialog.NewGroupId.HasValue)
             {
                 // Перезагружаем справочник групп
                 var db = new DataProvider();
@@ -132,10 +140,7 @@ namespace PP02.Label
                     .ToList();
 
                 // Если была добавлена группа - выбираем её
-                if (dialog.NewGroupId.HasValue)
-                {
-                    GroupComboBox.SelectedValue = dialog.NewGroupId.Value;
-                }
+                GroupComboBox.SelectedValue = dialog.NewGroupId.Value;
             }
         }
 
@@ -147,7 +152,7 @@ namespace PP02.Label
                 Owner = Application.Current.MainWindow
             };
 
-            if (dialog.ShowDialog() == true)
+            if (dialog.ShowDialog() == true && dialog.NewSpecialtyId.HasValue)
             {
                 // Перезагружаем справочник специальностей
                 var db = new DataProvider();
@@ -160,10 +165,7 @@ namespace PP02.Label
                     .ToList();
 
                 // Если была добавлена специальность - выбираем её
-                if (dialog.NewSpecialtyId.HasValue)
-                {
-                    SpecialtyComboBox.SelectedValue = dialog.NewSpecialtyId.Value;
-                }
+                SpecialtyComboBox.SelectedValue = dialog.NewSpecialtyId.Value;
             }
         }
 

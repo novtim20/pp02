@@ -115,6 +115,11 @@ SELECT LAST_INSERT_ID();";
             var db = new DataProvider();
             db.DataSpecialties(_connectionString);
 
+            // Обновляем ComboBox специальностей во вкладке "Группа"
+            GroupSpecialtyComboBox.ItemsSource = DataProvider.SpecialtyList
+                .Where(s => s.IsActive)
+                .ToList();
+
             MessageBox.Show($"Специальность \"{SpecialtyNameTextBox.Text}\" успешно добавлена!",
                 "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
 
@@ -188,7 +193,7 @@ SELECT LAST_INSERT_ID();";
                 }
             }
 
-            // Перезагружаем справочник
+            // Перезагружаем справочник групп
             var db = new DataProvider();
             db.DataGroups(_connectionString);
 

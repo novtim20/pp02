@@ -110,7 +110,7 @@ SELECT LAST_INSERT_ID();";
                 }
 
                 // Очищаем поля
-                ClearGroupFields();
+                ClearSpecialtyGroupFields();
 
                 // Перезагружаем данные
                 LoadData();
@@ -122,8 +122,8 @@ SELECT LAST_INSERT_ID();";
             }
         }
 
-        // Очистка полей группы
-        private void ClearGroupFields()
+        // Очистка полей группы специальностей
+        private void ClearSpecialtyGroupFields()
         {
             NewGroupNameTextBox.Clear();
             NewGroupShortNameTextBox.Clear();

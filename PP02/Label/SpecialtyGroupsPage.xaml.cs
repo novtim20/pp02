@@ -18,6 +18,8 @@ namespace PP02.Label
         private readonly string _connectionString = Connect.Connect.GetConnectionString();
         private bool _isEditingSpecialty = false;
         private int? _editingSpecialtyId = null;
+        private bool _isEditingGroup = false;
+        private int? _editingGroupId = null;
 
         public SpecialtyGroupsPage()
         {
@@ -39,12 +41,21 @@ namespace PP02.Label
                 var db = new DataProvider();
                 db.DataSpecialtyGroups(_connectionString);
                 db.DataSpecialties(_connectionString);
+                db.DataGroups(_connectionString);
 
                 // Заполняем ItemsControl списком групп специальностей
                 SpecialtyGroupsItemsControl.ItemsSource = DataProvider.SpecialtyGroupList.ToList();
 
                 // Заполняем DataGrid специальностей
                 SpecialtiesDataGrid.ItemsSource = DataProvider.SpecialtyList.ToList();
+
+                // Заполняем DataGrid групп (учебных)
+                GroupsDataGrid.ItemsSource = DataProvider.GroupList.ToList();
+
+                // Заполняем ComboBox специальностей для группы
+                NewGroupSpecialtyComboBox.ItemsSource = DataProvider.SpecialtyList
+                    .Where(s => s.IsActive)
+                    .ToList();
 
                 // Устанавливаем DataContext для ComboBox в DataGrid
                 this.DataContext = this;
@@ -117,6 +128,17 @@ SELECT LAST_INSERT_ID();";
             NewGroupNameTextBox.Clear();
             NewGroupShortNameTextBox.Clear();
             NewGroupNameTextBox.Focus();
+        }
+
+        // Очистка полей группы (учебной)
+        private void ClearGroupFields()
+        {
+            NewGroupCodeTextBox.Clear();
+            NewGroupShortNameTextBox2.Clear();
+            NewGroupNameTextBox2.Clear();
+            NewGroupSpecialtyComboBox.SelectedIndex = -1;
+            NewGroupIsActiveCheckBox.IsChecked = true;
+            NewGroupCodeTextBox.Focus();
         }
 
         // Очистка полей специальности
@@ -382,6 +404,247 @@ WHERE id = @id";
 
             // Перезагружаем данные
             LoadData();
+        }
+
+        // ============================================================================
+        // МЕТОДЫ ДЛЯ УПРАВЛЕНИЯ ГРУППАМИ (groups)
+        // ============================================================================
+
+        // Добавление новой группы (учебной)
+        private void AddNewGroupButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (_isEditingGroup && _editingGroupId.HasValue)
+                {
+                    UpdateGroup(_editingGroupId.Value);
+                }
+                else
+                {
+                    AddNewGroup();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка сохранения: {ex.Message}",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Добавление новой группы (учебной) в БД
+        private void AddNewGroup()
+        {
+            // Валидация
+            if (string.IsNullOrWhiteSpace(NewGroupCodeTextBox.Text))
+            {
+                MessageBox.Show("Введите код группы", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                NewGroupCodeTextBox.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(NewGroupShortNameTextBox2.Text))
+            {
+                MessageBox.Show("Введите сокращение группы", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                NewGroupShortNameTextBox2.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(NewGroupNameTextBox2.Text))
+            {
+                MessageBox.Show("Введите отображаемое название группы", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                NewGroupNameTextBox2.Focus();
+                return;
+            }
+
+            if (NewGroupSpecialtyComboBox.SelectedValue == null)
+            {
+                MessageBox.Show("Выберите специальность", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                NewGroupSpecialtyComboBox.Focus();
+                return;
+            }
+
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                const string sql = @"
+INSERT INTO `groups` (code, short_name, name, specialty_id, is_active)
+VALUES (@code, @short_name, @name, @specialty_id, @is_active);
+SELECT LAST_INSERT_ID();";
+
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@code", NewGroupCodeTextBox.Text.Trim());
+                    command.Parameters.AddWithValue("@short_name", NewGroupShortNameTextBox2.Text.Trim());
+                    command.Parameters.AddWithValue("@name", NewGroupNameTextBox2.Text.Trim());
+                    command.Parameters.AddWithValue("@specialty_id", NewGroupSpecialtyComboBox.SelectedValue);
+                    command.Parameters.AddWithValue("@is_active", NewGroupIsActiveCheckBox.IsChecked == true);
+
+                    var result = command.ExecuteScalar();
+                    int newId = Convert.ToInt32(result);
+
+                    MessageBox.Show($"Группа \"{NewGroupNameTextBox2.Text}\" успешно добавлена!\nID: {newId}",
+                        "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+
+            ClearGroupFields();
+            LoadData();
+        }
+
+        // Обновление существующей группы
+        private void UpdateGroup(int groupId)
+        {
+            // Валидация
+            if (string.IsNullOrWhiteSpace(NewGroupCodeTextBox.Text))
+            {
+                MessageBox.Show("Введите код группы", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                NewGroupCodeTextBox.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(NewGroupShortNameTextBox2.Text))
+            {
+                MessageBox.Show("Введите сокращение группы", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                NewGroupShortNameTextBox2.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(NewGroupNameTextBox2.Text))
+            {
+                MessageBox.Show("Введите отображаемое название группы", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                NewGroupNameTextBox2.Focus();
+                return;
+            }
+
+            if (NewGroupSpecialtyComboBox.SelectedValue == null)
+            {
+                MessageBox.Show("Выберите специальность", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                NewGroupSpecialtyComboBox.Focus();
+                return;
+            }
+
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                const string sql = @"
+UPDATE `groups`
+SET code = @code,
+    short_name = @short_name,
+    name = @name,
+    specialty_id = @specialty_id,
+    is_active = @is_active
+WHERE id = @id";
+
+                using (var command = new MySqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@code", NewGroupCodeTextBox.Text.Trim());
+                    command.Parameters.AddWithValue("@short_name", NewGroupShortNameTextBox2.Text.Trim());
+                    command.Parameters.AddWithValue("@name", NewGroupNameTextBox2.Text.Trim());
+                    command.Parameters.AddWithValue("@specialty_id", NewGroupSpecialtyComboBox.SelectedValue);
+                    command.Parameters.AddWithValue("@is_active", NewGroupIsActiveCheckBox.IsChecked == true);
+                    command.Parameters.AddWithValue("@id", groupId);
+
+                    command.ExecuteNonQuery();
+
+                    MessageBox.Show($"Группа успешно обновлена!",
+                        "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+
+            _isEditingGroup = false;
+            _editingGroupId = null;
+
+            ClearGroupFields();
+            LoadData();
+        }
+
+        // Редактирование группы (кнопка ✏️)
+        private void BtnEditGroup_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (sender is Button button && button.Tag is Group group)
+                {
+                    NewGroupCodeTextBox.Text = group.Code;
+                    NewGroupShortNameTextBox2.Text = group.ShortName;
+                    NewGroupNameTextBox2.Text = group.Name;
+                    NewGroupSpecialtyComboBox.SelectedValue = group.SpecialtyId;
+                    NewGroupIsActiveCheckBox.IsChecked = group.IsActive;
+
+                    _isEditingGroup = true;
+                    _editingGroupId = group.Id;
+
+                    MessageBox.Show($"Редактирование группы \"{group.Name}\".\nЗаполните поля и нажмите \"Сохранить группу\".",
+                        "Редактирование", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    NewGroupCodeTextBox.Focus();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при подготовке к редактированию: {ex.Message}",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Удаление группы (кнопка 🗑)
+        private void BtnDeleteGroup_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (sender is Button button && button.Tag is int groupId)
+                {
+                    var group = DataProvider.GroupList.FirstOrDefault(g => g.Id == groupId);
+                    if (group == null)
+                    {
+                        MessageBox.Show("Группа не найдена", "Ошибка",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    var result = MessageBox.Show(
+                        $"Вы уверены, что хотите удалить группу \"{group.Name}\"?\n\n" +
+                        "Внимание: это действие нельзя отменить!",
+                        "Подтверждение удаления",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Warning);
+
+                    if (result != MessageBoxResult.Yes) return;
+
+                    using (var connection = new MySqlConnection(_connectionString))
+                    {
+                        connection.Open();
+
+                        const string sql = @"DELETE FROM `groups` WHERE id = @id";
+
+                        using (var command = new MySqlCommand(sql, connection))
+                        {
+                            command.Parameters.AddWithValue("@id", groupId);
+                            command.ExecuteNonQuery();
+                        }
+                    }
+
+                    MessageBox.Show("Группа успешно удалена", "Успех",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    LoadData();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

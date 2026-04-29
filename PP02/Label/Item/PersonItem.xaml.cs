@@ -332,6 +332,9 @@ namespace PP02.Label.Item
             if (BtnEdit != null) BtnEdit.Visibility = Visibility.Visible;
             if (BtnCancel != null) BtnCancel.Visibility = Visibility.Visible;
             if (BtnSave != null) BtnSave.Visibility = Visibility.Collapsed;
+
+            // Скрываем стрелочку при раскрытии, показываем кнопки "Изменить" и "Отменить"
+            // Стрелочка будет показана снова при нажатии на "Отменить" или других действиях
         }
 
         // Кнопка "✏️ Изменить" — включение режима редактирования
@@ -376,6 +379,12 @@ namespace PP02.Label.Item
 
                 // 4. Возврат в режим просмотра
                 SetViewMode();
+                if (BtnExpand != null) BtnExpand.Visibility = Visibility.Visible;
+                if (ExpDetails != null)
+                {
+                    ExpDetails.IsExpanded = false;
+                    ExpDetails.Visibility = Visibility.Collapsed;
+                }
 
                 _isDirty = false;
                 MessageBox.Show("Данные успешно сохранены", "Успех",
@@ -388,7 +397,7 @@ namespace PP02.Label.Item
             }
         }
 
-        // Кнопка "✕ Отмена"
+        // Кнопка "✕ Отмена" - только скрывает кнопку отмены и возвращает режим просмотра, не закрывая карточку
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
             if (_isDirty)
@@ -400,6 +409,16 @@ namespace PP02.Label.Item
             // Перезагружаем данные из модели (отменяем изменения в UI)
             LoadDataToUI();
             SetViewMode();
+            // Скрываем кнопку "Отменить" при нажатии на неё
+            if (BtnCancel != null) BtnCancel.Visibility = Visibility.Collapsed;
+            // Показываем стрелочку для повторного раскрытия
+            if (BtnExpand != null) BtnExpand.Visibility = Visibility.Visible;
+            // Сворачиваем ExpDetails
+            if (ExpDetails != null)
+            {
+                ExpDetails.IsExpanded = false;
+                ExpDetails.Visibility = Visibility.Collapsed;
+            }
         }
 
         // === 🔹 УДАЛЕНИЕ СТУДЕНТА ИЗ БАЗЫ ДАННЫХ ===
@@ -428,8 +447,20 @@ namespace PP02.Label.Item
                 // Уведомляем родительский контрол об удалении
                 PersonDeleted?.Invoke(this, deletedPersonId);
 
-                // После удаления переключаем в режим просмотра (кнопки "Изменить" + "Отменить")
+                // После удаления переключаем в режим просмотра и показываем стрелочку
                 SetViewMode();
+                if (BtnExpand != null) BtnExpand.Visibility = Visibility.Visible;
+                if (ExpDetails != null)
+                {
+                    ExpDetails.IsExpanded = false;
+                    ExpDetails.Visibility = Visibility.Collapsed;
+                }
+                if (BtnExpand != null) BtnExpand.Visibility = Visibility.Visible;
+                if (ExpDetails != null)
+                {
+                    ExpDetails.IsExpanded = false;
+                    ExpDetails.Visibility = Visibility.Collapsed;
+                }
             }
             catch (Exception ex)
             {
@@ -500,8 +531,8 @@ namespace PP02.Label.Item
             // Скрываем кнопку "Сохранить", показываем "Изменить" и "Отменить"
             if (BtnEdit != null) BtnEdit.Visibility = Visibility.Visible;
             if (BtnSave != null) BtnSave.Visibility = Visibility.Collapsed;
-            // Кнопка "Отменить" остаётся видимой (уже была показана)
-            if (BtnCancel != null) BtnCancel.Visibility = Visibility.Visible;
+            // Кнопка "Отменить" скрывается в режиме просмотра (показывается только после раскрытия стрелочки или при редактировании)
+            if (BtnCancel != null) BtnCancel.Visibility = Visibility.Collapsed;
 
             // Блокируем все поля для просмотра
             SetFieldsEnabled(false);
@@ -555,8 +586,14 @@ namespace PP02.Label.Item
                     MessageBox.Show($"Отчет успешно сохранен:\n{saveFileDialog.FileName}", "Успех",
                         MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    // После экспорта переключаем в режим просмотра (кнопки "Изменить" + "Отменить")
+                    // После экспорта переключаем в режим просмотра и показываем стрелочку
                     SetViewMode();
+                    if (BtnExpand != null) BtnExpand.Visibility = Visibility.Visible;
+                    if (ExpDetails != null)
+                    {
+                        ExpDetails.IsExpanded = false;
+                        ExpDetails.Visibility = Visibility.Collapsed;
+                    }
                 }
             }
             catch (Exception ex)

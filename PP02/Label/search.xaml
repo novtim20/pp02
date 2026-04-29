@@ -75,7 +75,7 @@
                                               IsEditable="True"
                                               IsTextSearchEnabled="True"
                                               TextSearch.TextPath="Code"
-                                              SelectionChanged="GroupComboBox_SelectionChanged">
+                                              SelectionChanged="FilterComboBox_SelectionChanged">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal">

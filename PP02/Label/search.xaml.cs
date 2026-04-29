@@ -402,6 +402,24 @@ namespace PP02.Label
         // === 🔹 ИНТЕРАКТИВНЫЙ ПОИСК (АВТОМАТИЧЕСКАЯ ФИЛЬТРАЦИЯ ПРИ ВВОДЕ) ===
         private void FilterTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            ApplyFilter();
+        }
+
+        // === 🔹 ОБРАБОТЧИК ИЗМЕНЕНИЯ ВЫБОРА В COMBOBOX ===
+        private void FilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ApplyFilter();
+        }
+
+        // === 🔹 ОБРАБОТЧИК ИЗМЕНЕНИЯ ДАТЫ В DATEPICKER ===
+        private void FilterDatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ApplyFilter();
+        }
+
+        // === 🔹 ПРИМЕНЕНИЕ ФИЛЬТРА ===
+        private void ApplyFilter()
+        {
             try
             {
                 // Получаем критерии поиска

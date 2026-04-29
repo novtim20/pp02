@@ -21,15 +21,21 @@
             </Grid.RowDefinitions>
 
             <!-- ЗАГОЛОВОК С КНОПКАМИ ПЕРЕКЛЮЧЕНИЯ -->
-            <StackPanel Grid.Row="0" Margin="0,0,0,20">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="SpaceBetween">
-                    <StackPanel>
+            <Border Grid.Row="0" Margin="0,0,0,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
                         <TextBlock Text="📥 Импорт данных из Excel"
                                    FontSize="24" FontWeight="Bold" Foreground="#333"/>
                         <TextBlock Text="Загрузите файл Excel и настройте соответствие столбцов полям базы данных"
                                    FontSize="14" Foreground="#666" Margin="0,5,0,0"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="50,0,0,0">
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button x:Name="ImportStudentsButton" Content="👥 Импорт студентов" Width="160" Height="35"
                                 Background="#2196F3" Foreground="White" FontWeight="Bold"
                                 BorderThickness="0" Click="ImportStudentsButton_Click" Margin="0,0,10,0"/>
@@ -37,8 +43,8 @@
                                 Background="#E0E0E0" Foreground="#333" FontWeight="Bold"
                                 BorderThickness="0" Click="ImportDocumentsButton_Click"/>
                     </StackPanel>
-                </StackPanel>
-            </StackPanel>
+                </Grid>
+            </Border>
 
             <!-- ШАГ 1: ЗАГРУЗКА ФАЙЛА -->
             <Border Grid.Row="1" Background="White" CornerRadius="5" Padding="20"

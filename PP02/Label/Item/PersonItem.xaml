@@ -45,7 +45,7 @@
                         Background="#2196F3" Foreground="White" FontWeight="Bold"
                         x:Name="BtnEdit" Visibility="Collapsed" Click="BtnEdit_Click" Margin="5,0,0,0"/>
 
-                <!-- Кнопка отмены (скрыта по умолчанию, показывается рядом с Изменить/Сохранить) -->
+                <!-- Кнопка отмены (скрыта по умолчанию, показывается рядом с Изменить после раскрытия) -->
                 <Button Grid.Column="3" Content="✕" Width="30" Height="30"
                         x:Name="BtnCancel" Visibility="Collapsed" Click="BtnCancel_Click" Margin="5,0,0,0" ToolTip="Отменить"/>
 

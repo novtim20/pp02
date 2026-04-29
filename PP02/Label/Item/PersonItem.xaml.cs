@@ -328,10 +328,10 @@ namespace PP02.Label.Item
                 ExpDetails.IsExpanded = true;
             }
             if (BtnExpand != null) BtnExpand.Visibility = Visibility.Collapsed;
-            // Показываем кнопку "Изменить" после раскрытия
+            // Показываем кнопку "Изменить" и кнопку "Отменить" после раскрытия
             if (BtnEdit != null) BtnEdit.Visibility = Visibility.Visible;
+            if (BtnCancel != null) BtnCancel.Visibility = Visibility.Visible;
             if (BtnSave != null) BtnSave.Visibility = Visibility.Collapsed;
-            if (BtnCancel != null) BtnCancel.Visibility = Visibility.Collapsed;
         }
 
         // Кнопка "✏️ Изменить" — включение режима редактирования
@@ -427,6 +427,9 @@ namespace PP02.Label.Item
 
                 // Уведомляем родительский контрол об удалении
                 PersonDeleted?.Invoke(this, deletedPersonId);
+
+                // После удаления переключаем в режим просмотра (кнопки "Изменить" + "Отменить")
+                SetViewMode();
             }
             catch (Exception ex)
             {
@@ -493,16 +496,12 @@ namespace PP02.Label.Item
         // === 🔹 ПЕРЕКЛЮЧЕНИЕ В РЕЖИМ ПРОСМОТРА ===
         private void SetViewMode()
         {
-            if (ExpDetails != null)
-            {
-                ExpDetails.Visibility = Visibility.Collapsed;
-                ExpDetails.IsExpanded = false;
-            }
-            if (BtnExpand != null) BtnExpand.Visibility = Visibility.Visible;
-            // Скрываем кнопку "Изменить" и крестик отмены при возврате в режим просмотра
-            if (BtnEdit != null) BtnEdit.Visibility = Visibility.Collapsed;
+            // Не закрываем ExpDetails, просто переключаем кнопки на "Изменить" + "Отменить"
+            // Скрываем кнопку "Сохранить", показываем "Изменить" и "Отменить"
+            if (BtnEdit != null) BtnEdit.Visibility = Visibility.Visible;
             if (BtnSave != null) BtnSave.Visibility = Visibility.Collapsed;
-            if (BtnCancel != null) BtnCancel.Visibility = Visibility.Collapsed;
+            // Кнопка "Отменить" остаётся видимой (уже была показана)
+            if (BtnCancel != null) BtnCancel.Visibility = Visibility.Visible;
 
             // Блокируем все поля для просмотра
             SetFieldsEnabled(false);
@@ -556,6 +555,8 @@ namespace PP02.Label.Item
                     MessageBox.Show($"Отчет успешно сохранен:\n{saveFileDialog.FileName}", "Успех",
                         MessageBoxButton.OK, MessageBoxImage.Information);
 
+                    // После экспорта переключаем в режим просмотра (кнопки "Изменить" + "Отменить")
+                    SetViewMode();
                 }
             }
             catch (Exception ex)

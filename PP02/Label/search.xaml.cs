@@ -158,48 +158,62 @@ namespace PP02.Label
         private SearchCriteria GetSearchCriteria()
         {
             // Получаем выбранную группу из ComboBox
-            var selectedGroup = GroupComboBox.SelectedItem as Group;
-            int? groupId = (selectedGroup != null && selectedGroup.Id != -1) ? selectedGroup.Id : (int?)null;
-            string groupText = (selectedGroup != null && selectedGroup.Id == -1) ? "" : (GroupComboBox.Text ?? "");
+            Group selectedGroup = null;
+            int? groupId = null;
+            string groupText = "";
+
+            if (GroupComboBox != null)
+            {
+                selectedGroup = GroupComboBox.SelectedItem as Group;
+                groupId = (selectedGroup != null && selectedGroup.Id != -1) ? selectedGroup.Id : (int?)null;
+                groupText = (selectedGroup != null && selectedGroup.Id == -1) ? "" : (GroupComboBox.Text ?? "");
+            }
 
             // Получаем выбранную специальность из ComboBox
-            var selectedSpecialty = SpecialtyComboBox.SelectedItem as Specialty;
-            int? specialtyId = (selectedSpecialty != null && selectedSpecialty.Id != -1) ? selectedSpecialty.Id : (int?)null;
-            string specialtyText = (selectedSpecialty != null && selectedSpecialty.Id == -1) ? "" : (SpecialtyComboBox.Text ?? "");
+            Specialty selectedSpecialty = null;
+            int? specialtyId = null;
+            string specialtyText = "";
+
+            if (SpecialtyComboBox != null)
+            {
+                selectedSpecialty = SpecialtyComboBox.SelectedItem as Specialty;
+                specialtyId = (selectedSpecialty != null && selectedSpecialty.Id != -1) ? selectedSpecialty.Id : (int?)null;
+                specialtyText = (selectedSpecialty != null && selectedSpecialty.Id == -1) ? "" : (SpecialtyComboBox.Text ?? "");
+            }
 
             return new SearchCriteria
             {
-                FullName = FullNameTextBox.Text.Trim(),
-                IsStudent = IsStudentComboBox.SelectedIndex > 0
+                FullName = FullNameTextBox?.Text?.Trim() ?? "",
+                IsStudent = IsStudentComboBox?.SelectedIndex > 0
                     ? IsStudentComboBox.SelectedIndex == 1
                     : (bool?)null,
                 GroupId = groupId,
                 Group = groupText,
-                GraduationYearStart = GraduationYearDatePicker.SelectedDate?.Year,
-                SearchByGraduationPeriod = PeriodCheckBox.IsChecked == true,
-                GraduationYearEnd = PeriodCheckBox.IsChecked == true
-                    ? EndDatePicker.SelectedDate?.Year
+                GraduationYearStart = GraduationYearDatePicker?.SelectedDate?.Year,
+                SearchByGraduationPeriod = PeriodCheckBox?.IsChecked == true,
+                GraduationYearEnd = PeriodCheckBox?.IsChecked == true
+                    ? EndDatePicker?.SelectedDate?.Year
                     : null,
                 SpecialtyId = specialtyId,
                 Specialty = specialtyText,
-                Gender = GenderComboBox.SelectedIndex > 0
+                Gender = GenderComboBox?.SelectedIndex > 0
                     ? ((ComboBoxItem)GenderComboBox.SelectedItem)?.Content?.ToString()
                     : null,
-                Nationality = NationalityTextBox.Text.Trim(),
-                BirthYear = BirthYearTextBox.Text.Trim(),
-                PartyId = (PartyComboBox.SelectedValue as Party)?.Id,
-                BirthPlace = BirthPlaceTextBox.Text.Trim(),
-                EducationId = (EducationComboBox.SelectedValue as Education)?.Id,
-                SocialPosition = SocialPositionTextBox.Text.Trim(),
-                LastWorkplace = LastWorkplaceTextBox.Text.Trim(),
-                SocialOriginId = (SocialOriginComboBox.SelectedValue as SocialOrigin)?.Id,
-                Address = AddressTextBox.Text.Trim(),
-                DiplomaDateStart = DiplomaStartDatePicker.SelectedDate,
-                SearchByDiplomaPeriod = DiplomaPeriodCheckBox.IsChecked == true,
-                DiplomaDateEnd = DiplomaPeriodCheckBox.IsChecked == true
-                    ? DiplomaEndDatePicker.SelectedDate
+                Nationality = NationalityTextBox?.Text?.Trim() ?? "",
+                BirthYear = BirthYearTextBox?.Text?.Trim() ?? "",
+                PartyId = (PartyComboBox?.SelectedValue as Party)?.Id,
+                BirthPlace = BirthPlaceTextBox?.Text?.Trim() ?? "",
+                EducationId = (EducationComboBox?.SelectedValue as Education)?.Id,
+                SocialPosition = SocialPositionTextBox?.Text?.Trim() ?? "",
+                LastWorkplace = LastWorkplaceTextBox?.Text?.Trim() ?? "",
+                SocialOriginId = (SocialOriginComboBox?.SelectedValue as SocialOrigin)?.Id,
+                Address = AddressTextBox?.Text?.Trim() ?? "",
+                DiplomaDateStart = DiplomaStartDatePicker?.SelectedDate,
+                SearchByDiplomaPeriod = DiplomaPeriodCheckBox?.IsChecked == true,
+                DiplomaDateEnd = DiplomaPeriodCheckBox?.IsChecked == true
+                    ? DiplomaEndDatePicker?.SelectedDate
                     : null,
-                Source = SourceTextBox.Text.Trim()
+                Source = SourceTextBox?.Text?.Trim() ?? ""
             };
         }
 

@@ -220,7 +220,7 @@
                                   IsChecked="True" VerticalContentAlignment="Center" Margin="0,0,20,0"/>
                         <CheckBox x:Name="ValidateDataCheckBox" Content="Проверять корректность данных"
                                   IsChecked="True" VerticalContentAlignment="Center"/>
-                        <CheckBox x:Name="LinkToPersonCheckBox" Content="Привязывать к существующим лицам (по ФИО)"
+                        <CheckBox x:Name="LinkToPersonCheckBox" Content="Привязывать к лицам (создавать новых, если не найдены)"
                                   IsChecked="True" VerticalContentAlignment="Center" Margin="20,0,0,0"/>
                     </StackPanel>
 

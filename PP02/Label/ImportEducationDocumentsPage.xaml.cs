@@ -342,6 +342,9 @@ namespace PP02.Label
         /// <summary>
         /// Автоматическая настройка маппинга на основе имен столбцов
         /// </summary>
+        /// <summary>
+        /// Автоматическая настройка маппинга с приоритетом точных совпадений
+        /// </summary>
         private void AutoMapButton_Click(object sender, RoutedEventArgs e)
         {
             if (_excelColumns.Count == 0)
@@ -351,28 +354,132 @@ namespace PP02.Label
                 return;
             }
 
+            // Отслеживаем, какие столбцы Excel уже заняты
+            var usedExcelColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             int mappedCount = 0;
+
             foreach (var mapping in _mappings)
             {
-                var matchedColumn = _excelColumns.FirstOrDefault(col =>
-                    col.ToLower().Contains(GetSearchKey(mapping.DatabaseField)) ||
-                    GetSearchKey(mapping.DatabaseField).Contains(col.ToLower().Replace(" ", "").Replace("_", "")));
+                // Пропускаем, если это поле уже замапплено вручную
+                if (!string.IsNullOrEmpty(mapping.ExcelColumn)) continue;
 
-                if (matchedColumn != null)
+                var searchKeys = GetSearchKey(mapping.DatabaseField)
+                    .ToLower()
+                    .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Distinct()
+                    .ToArray();
+
+                // Ищем лучший свободный столбец для этого поля
+                var bestMatch = FindBestMatch(mapping.DatabaseField, searchKeys, usedExcelColumns);
+
+                if (bestMatch != null)
                 {
-                    mapping.ExcelColumn = matchedColumn;
+                    mapping.ExcelColumn = bestMatch;
                     mapping.UseForImport = true;
+                    usedExcelColumns.Add(bestMatch); // ⚠️ Помечаем столбец как занятый!
                     mappedCount++;
 
-                    if (_excelData.Count > 0 && _excelData[0].ContainsKey(matchedColumn))
+                    if (_excelData.Count > 0 && _excelData[0].ContainsKey(bestMatch))
                     {
-                        mapping.SampleValue = _excelData[0][matchedColumn];
+                        mapping.SampleValue = _excelData[0][bestMatch];
                     }
                 }
             }
 
-            MappingStatusText.Text = $"Автоматически сопоставлено полей: {mappedCount}";
+            MappingStatusText.Text = $"✅ Сопоставлено: {mappedCount} из {_databaseFields.Count}";
             UpdatePreview();
+        }
+
+        /// <summary>
+        /// Поиск лучшего совпадения с системой очков
+        /// </summary>
+        private string FindBestMatch(string dbField, string[] searchKeys, HashSet<string> usedColumns)
+        {
+            string bestColumn = null;
+            int bestScore = -1;
+
+            foreach (var excelCol in _excelColumns)
+            {
+                // Пропускаем уже использованные столбцы
+                if (usedColumns.Contains(excelCol)) continue;
+
+                int score = CalculateMatchScore(excelCol, searchKeys);
+
+                // Если нашли лучший вариант — запоминаем его
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestColumn = excelCol;
+                }
+            }
+
+            // Возвращаем только если найдено хоть какое-то совпадение (порог > 0)
+            return bestScore > 0 ? bestColumn : null;
+        }
+
+        /// <summary>
+        /// Расчёт очков за совпадение: чем точнее — тем больше баллов
+        /// </summary>
+        private int CalculateMatchScore(string excelColumn, string[] searchKeys)
+        {
+            var cleanCol = CleanHeader(excelColumn);
+            int score = 0;
+
+            foreach (var key in searchKeys)
+            {
+                if (string.IsNullOrWhiteSpace(key)) continue;
+
+                // 🔥 100 очков: полное совпадение после очистки (идеальный матч)
+                if (cleanCol == key)
+                    return 1000;
+
+                // 🔥 50 очков: заголовок содержит ключевое слово целиком (по границам слов)
+                if (ContainsWholeWord(cleanCol, key))
+                    score += 50;
+
+                // 🔥 10 очков: простое вхождение (на всякий случай)
+                else if (cleanCol.Contains(key))
+                    score += 10;
+            }
+
+            // Бонус за длину совпадения: "наименование документа" лучше, чем просто "док"
+            if (score > 0)
+            {
+                var matchedLength = searchKeys.Sum(k =>
+                    ContainsWholeWord(cleanCol, k) || cleanCol.Contains(k) ? k.Length : 0);
+                score += matchedLength / 2;
+            }
+
+            return score;
+        }
+
+        /// <summary>
+        /// Проверка: содержит ли текст целое слово (а не часть другого слова)
+        /// </summary>
+        private bool ContainsWholeWord(string text, string word)
+        {
+            // Добавляем пробелы по краям для поиска по границам слов
+            var paddedText = " " + text + " ";
+            var paddedWord = " " + word + " ";
+            return paddedText.Contains(paddedWord);
+        }
+
+        /// <summary>
+        /// Очистка заголовка от лишних символов
+        /// </summary>
+        private string CleanHeader(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return "";
+            return input.ToLower()
+                        .Replace("_", " ")
+                        .Replace("-", " ")
+                        .Replace(",", " ")
+                        .Replace(".", " ")
+                        .Replace("(", "")
+                        .Replace(")", "")
+                        .Replace("/", " ")
+                        .Replace("  ", " ")
+                        .Trim();
         }
 
         /// <summary>
@@ -635,6 +742,17 @@ namespace PP02.Label
                                     var firstName = GetMappedValueInternal(rowData, mappingsCopy, "recipient_first_name");
                                     var middleName = GetMappedValueInternal(rowData, mappingsCopy, "recipient_middle_name");
                                     personId = FindPersonId(connection, lastName, firstName, middleName, transaction);
+
+                                    // Если лицо не найдено, создаем новое
+                                    if (!personId.HasValue)
+                                    {
+                                        var snils = GetMappedValueInternal(rowData, mappingsCopy, "snils");
+                                        var birthDateStr = GetMappedValueInternal(rowData, mappingsCopy, "recipient_birth_date");
+                                        var gender = GetMappedValueInternal(rowData, mappingsCopy, "recipient_gender");
+                                        var citizenship = GetMappedValueInternal(rowData, mappingsCopy, "citizenship_country_code");
+
+                                        personId = CreateNewPerson(connection, lastName, firstName, middleName, snils, birthDateStr, gender, citizenship, transaction);
+                                    }
                                 }
 
                                 if (InsertEducationDocument(connection, rowData, transaction, mappingsCopy, personId))
@@ -707,6 +825,53 @@ namespace PP02.Label
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Создание нового лица в таблице persons
+        /// </summary>
+        private int? CreateNewPerson(MySqlConnection connection, string lastName, string firstName,
+            string middleName, string snils, string birthDateStr, string gender, string citizenship, MySqlTransaction transaction)
+        {
+            if (string.IsNullOrEmpty(lastName) && string.IsNullOrEmpty(firstName))
+                return null;
+
+            // Формируем полное ФИО
+            var fullName = new List<string>();
+            if (!string.IsNullOrEmpty(lastName)) fullName.Add(lastName.Trim());
+            if (!string.IsNullOrEmpty(firstName)) fullName.Add(firstName.Trim());
+            if (!string.IsNullOrEmpty(middleName)) fullName.Add(middleName.Trim());
+
+            if (fullName.Count == 0)
+                return null;
+
+            var fullNameStr = string.Join(" ", fullName);
+
+            // Определяем год рождения из даты
+            object birthYearParam = DBNull.Value;
+            if (!string.IsNullOrEmpty(birthDateStr) && DateTime.TryParse(birthDateStr, out DateTime birthDate))
+            {
+                birthYearParam = birthDate.Year;
+            }
+
+            const string sql = @"INSERT INTO persons (full_name, role, gender, nationality, birth_year, source)
+                                 VALUES (@fullName, 'Студент', @gender, @nationality, @birthYear, 'Импорт из Excel')";
+
+            using (var command = new MySqlCommand(sql, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@fullName", fullNameStr);
+                command.Parameters.AddWithValue("@gender", string.IsNullOrEmpty(gender) ? (object)DBNull.Value : gender);
+                command.Parameters.AddWithValue("@nationality", string.IsNullOrEmpty(citizenship) ? (object)DBNull.Value : citizenship);
+                command.Parameters.AddWithValue("@birthYear", birthYearParam);
+
+                command.ExecuteNonQuery();
+
+                // Получаем ID newly созданной записи
+                command.CommandText = "SELECT LAST_INSERT_ID()";
+                command.Parameters.Clear();
+                var result = command.ExecuteScalar();
+                return result != null ? (int?)Convert.ToInt32(result) : null;
+            }
         }
 
         /// <summary>

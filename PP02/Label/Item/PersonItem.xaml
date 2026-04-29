@@ -202,7 +202,7 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="6" Margin="5">
-                            <TextBlock Text="Источник:" FontWeight="Bold" FontSize="11"/>
+                            <TextBlock Text="Описание:" FontWeight="Bold" FontSize="11"/>
                             <TextBox x:Name="TxtEditSource" Height="25"/>
                         </StackPanel>
                     </Grid>

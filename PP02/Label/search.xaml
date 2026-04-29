@@ -45,14 +45,16 @@
                         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,15">
                             <TextBlock Text="Фамилия Имя Отчество" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                             <TextBox x:Name="FullNameTextBox" Height="35" Padding="8,0,0,0"
-                                     BorderBrush="#DDD" BorderThickness="1"/>
+                                     BorderBrush="#DDD" BorderThickness="1"
+                                     TextChanged="FilterTextBox_TextChanged"/>
                         </StackPanel>
 
                         <!-- Студент -->
                         <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,10,15">
                             <TextBlock Text="Студент" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                             <ComboBox x:Name="IsStudentComboBox" Height="35"
-                                      BorderBrush="#DDD" BorderThickness="1">
+                                      BorderBrush="#DDD" BorderThickness="1"
+                                      SelectionChanged="FilterComboBox_SelectionChanged">
                                 <ComboBoxItem Content="Все" IsSelected="True"/>
                                 <ComboBoxItem Content="Да"/>
                                 <ComboBoxItem Content="Нет"/>
@@ -110,7 +112,8 @@
                                     <TextBlock Text="Год выпуска" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                     <DatePicker x:Name="GraduationYearDatePicker" Height="35"
                                                 BorderBrush="#DDD" BorderThickness="1" Background="White"
-                                                Padding="8,0,0,0"/>
+                                                Padding="8,0,0,0"
+                                                SelectedDateChanged="FilterDatePicker_SelectedDateChanged"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Bottom" MinWidth="280">
                                     <CheckBox x:Name="PeriodCheckBox" Content="Поиск по периоду"
@@ -148,7 +151,7 @@
                                               IsEditable="True"
                                               IsTextSearchEnabled="True"
                                               TextSearch.TextPath="Name"
-                                              SelectionChanged="SpecialtyComboBox_SelectionChanged">
+                                              SelectionChanged="FilterComboBox_SelectionChanged">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal">
@@ -201,7 +204,8 @@
 
                                 <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,15">
                                     <TextBlock Text="Пол" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
-                                    <ComboBox x:Name="GenderComboBox" Height="35" BorderBrush="#DDD" BorderThickness="1">
+                                    <ComboBox x:Name="GenderComboBox" Height="35" BorderBrush="#DDD" BorderThickness="1"
+                                              SelectionChanged="FilterComboBox_SelectionChanged">
                                         <ComboBoxItem Content="Все" IsSelected="True"/>
                                         <ComboBoxItem Content="М"/>
                                         <ComboBoxItem Content="Ж"/>
@@ -211,31 +215,36 @@
                                 <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,10,15">
                                     <TextBlock Text="Национальность" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                     <TextBox x:Name="NationalityTextBox" Height="35" Padding="8,0,0,0"
-                                             BorderBrush="#DDD" BorderThickness="1"/>
+                                             BorderBrush="#DDD" BorderThickness="1"
+                                             TextChanged="FilterTextBox_TextChanged"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,15">
                                     <TextBlock Text="Год рождения" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                     <TextBox x:Name="BirthYearTextBox" Height="35" Padding="8,0,0,0"
-                                             BorderBrush="#DDD" BorderThickness="1"/>
+                                             BorderBrush="#DDD" BorderThickness="1"
+                                             TextChanged="FilterTextBox_TextChanged"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,10,15">
                                     <TextBlock Text="Партийность" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                     <ComboBox x:Name="PartyComboBox" Height="35" BorderBrush="#DDD" BorderThickness="1"
-                                              SelectedValuePath="Id" DisplayMemberPath="Name"/>
+                                              SelectedValuePath="Id" DisplayMemberPath="Name"
+                                              SelectionChanged="FilterComboBox_SelectionChanged"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,10,15">
                                     <TextBlock Text="Место рождения" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                     <TextBox x:Name="BirthPlaceTextBox" Height="35" Padding="8,0,0,0"
-                                             BorderBrush="#DDD" BorderThickness="1"/>
+                                             BorderBrush="#DDD" BorderThickness="1"
+                                             TextChanged="FilterTextBox_TextChanged"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,0,0,15">
                                     <TextBlock Text="Образование" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                     <ComboBox x:Name="EducationComboBox" Height="35" BorderBrush="#DDD" BorderThickness="1"
-                                              SelectedValuePath="Id" DisplayMemberPath="Name"/>
+                                              SelectedValuePath="Id" DisplayMemberPath="Name"
+                                              SelectionChanged="FilterComboBox_SelectionChanged"/>
                                 </StackPanel>
                             </Grid>
                         </Border>
@@ -264,25 +273,29 @@
                                 <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,15">
                                     <TextBlock Text="Соц.пол." FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                     <TextBox x:Name="SocialPositionTextBox" Height="35" Padding="8,0,0,0"
-                                             BorderBrush="#DDD" BorderThickness="1"/>
+                                             BorderBrush="#DDD" BorderThickness="1"
+                                             TextChanged="FilterTextBox_TextChanged"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,10,15">
                                     <TextBlock Text="Где работал посл.вр." FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                     <TextBox x:Name="LastWorkplaceTextBox" Height="35" Padding="8,0,0,0"
-                                             BorderBrush="#DDD" BorderThickness="1"/>
+                                             BorderBrush="#DDD" BorderThickness="1"
+                                             TextChanged="FilterTextBox_TextChanged"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,15">
                                     <TextBlock Text="Соц.проис." FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                     <ComboBox x:Name="SocialOriginComboBox" Height="35" BorderBrush="#DDD" BorderThickness="1"
-                                              SelectedValuePath="Id" DisplayMemberPath="Name"/>
+                                              SelectedValuePath="Id" DisplayMemberPath="Name"
+                                              SelectionChanged="FilterComboBox_SelectionChanged"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,15">
                                     <TextBlock Text="Откуда прибыл, адрес" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                     <TextBox x:Name="AddressTextBox" Height="35" Padding="8,0,0,0"
-                                             BorderBrush="#DDD" BorderThickness="1"/>
+                                             BorderBrush="#DDD" BorderThickness="1"
+                                             TextChanged="FilterTextBox_TextChanged"/>
                                 </StackPanel>
                             </Grid>
                         </Border>
@@ -315,7 +328,8 @@
                                             <TextBlock Text="Дата выдачи диплома" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                             <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="3" Background="White">
                                                 <DatePicker x:Name="DiplomaStartDatePicker" BorderThickness="0"
-                                                            Height="35" Padding="8,0,0,0"/>
+                                                            Height="35" Padding="8,0,0,0"
+                                                            SelectedDateChanged="FilterDatePicker_SelectedDateChanged"/>
                                             </Border>
                                         </StackPanel>
                                         <Grid Grid.Column="1">
@@ -339,7 +353,8 @@
                                 <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,15">
                                     <TextBlock Text="Источник" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                     <TextBox x:Name="SourceTextBox" Height="35" Padding="8,0,0,0"
-                                             BorderBrush="#DDD" BorderThickness="1"/>
+                                             BorderBrush="#DDD" BorderThickness="1"
+                                             TextChanged="FilterTextBox_TextChanged"/>
                                 </StackPanel>
                             </Grid>
                         </Border>

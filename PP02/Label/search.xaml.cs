@@ -399,6 +399,27 @@ namespace PP02.Label
             }
         }
 
+        // === 🔹 ИНТЕРАКТИВНЫЙ ПОИСК (АВТОМАТИЧЕСКАЯ ФИЛЬТРАЦИЯ ПРИ ВВОДЕ) ===
+        private void FilterTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                // Получаем критерии поиска
+                var criteria = GetSearchCriteria();
+
+                // Фильтруем уже загруженный список
+                var filtered = FilterPeople(DataProvider.PeopleVMList, criteria);
+
+                // Отображаем результаты в PersonItem
+                DisplayResults(filtered);
+            }
+            catch (Exception ex)
+            {
+                // Тихо игнорируем ошибки при вводе (чтобы не прерывать ввод пользователя)
+                System.Diagnostics.Debug.WriteLine($"Ошибка фильтрации: {ex.Message}");
+            }
+        }
+
         // === 🔹 ОБРАБОТЧИК УДАЛЕНИЯ СТУДЕНТА ИЗ PersonItem ===
         private void PersonItem_PersonDeleted(object sender, int personId)
         {

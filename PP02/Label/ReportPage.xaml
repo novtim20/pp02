@@ -15,6 +15,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            
         </Grid.RowDefinitions>
 
         <!-- Кнопка Назад -->
@@ -29,6 +30,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -71,8 +73,24 @@
                     <ComboBox x:Name="CbParty" Width="200" HorizontalAlignment="Left"/>
                 </StackPanel>
 
+                <!-- Группа -->
+                <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,15,10">
+                    <TextBlock Text="Группа:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <ComboBox x:Name="CbGroup" Width="200" HorizontalAlignment="Left"/>
+                </StackPanel>
+
+                <!-- Временной промежуток -->
+                <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,0,0,10">
+                    <TextBlock Text="Временной промежуток (год выпуска):" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <StackPanel Orientation="Horizontal">
+                        <DatePicker x:Name="DpStartDate" Width="150" SelectedDateChanged="DateFilter_Changed"/>
+                        <TextBlock Text=" — " VerticalAlignment="Center" FontWeight="Bold" Margin="5,0"/>
+                        <DatePicker x:Name="DpEndDate" Width="150" SelectedDateChanged="DateFilter_Changed"/>
+                    </StackPanel>
+                </StackPanel>
+
                 <!-- Поиск по ФИО -->
-                <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,0">
+                <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,0">
                     <TextBlock Text="Поиск по ФИО:" FontWeight="Bold" Margin="0,0,0,5"/>
                     <TextBox x:Name="TbNameSearch" Width="400" HorizontalAlignment="Left" TextChanged="TbNameSearch_TextChanged"/>
                 </StackPanel>
@@ -92,7 +110,7 @@
         </StackPanel>
 
         <!-- Предпросмотр данных -->
-        <Border Grid.Row="3" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="5" Padding="15" Margin="0,0,0,15">
+        <Border Grid.Row="4" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="5" Padding="15" Margin="0,0,0,15">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>

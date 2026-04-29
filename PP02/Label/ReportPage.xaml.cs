@@ -32,6 +32,7 @@ namespace PP02.Label
         private List<string> _socialOrigins;
         private List<string> _socialStatuses;
         private List<string> _parties;
+        private List<string> _groups;
 
         public ReportPage()
         {
@@ -52,6 +53,7 @@ namespace PP02.Label
                 var originsList = dataProvider.GetSocialOrigins();
                 var statusesList = dataProvider.GetSocialStatuses();
                 var partiesList = dataProvider.GetParties();
+                var groupsList = DataProvider.GroupList;
 
                 // Формируем списки для ComboBox (добавляем пункт "Все")
                 _specialties = new List<string> { "Все" };
@@ -69,6 +71,9 @@ namespace PP02.Label
                 _parties = new List<string> { "Все" };
                 _parties.AddRange(partiesList.Select(p => p.Name));
 
+                _groups = new List<string> { "Все" };
+                _groups.AddRange(groupsList.Select(g => g.Code));
+
                 _roles = new List<string> { "Все", "Студент", "Преподаватель" };
 
                 // Привязываем к ComboBox
@@ -78,6 +83,7 @@ namespace PP02.Label
                 CbOrigin.ItemsSource = _socialOrigins;
                 CbStatus.ItemsSource = _socialStatuses;
                 CbParty.ItemsSource = _parties;
+                CbGroup.ItemsSource = _groups;
 
                 // Выбираем "Все" по умолчанию
                 CbRole.SelectedIndex = 0;
@@ -86,6 +92,7 @@ namespace PP02.Label
                 CbOrigin.SelectedIndex = 0;
                 CbStatus.SelectedIndex = 0;
                 CbParty.SelectedIndex = 0;
+                CbGroup.SelectedIndex = 0;
             }
             catch (Exception ex)
             {
@@ -117,7 +124,12 @@ namespace PP02.Label
             var originFilter = CbOrigin.SelectedItem?.ToString() ?? "Все";
             var statusFilter = CbStatus.SelectedItem?.ToString() ?? "Все";
             var partyFilter = CbParty.SelectedItem?.ToString() ?? "Все";
+            var groupFilter = CbGroup.SelectedItem?.ToString() ?? "Все";
             var nameFilter = TbNameSearch.Text.ToLower();
+
+            // Фильтр по временному промежутку (год выпуска)
+            int? startYear = DpStartDate.SelectedDate?.Year;
+            int? endYear = DpEndDate.SelectedDate?.Year;
 
             _filteredPeople = _allPeople.Where(p =>
             {
@@ -127,10 +139,13 @@ namespace PP02.Label
                 bool matchOrigin = originFilter == "Все" || p.SocialOriginName == originFilter;
                 bool matchStatus = statusFilter == "Все" || p.SocialStatusName == statusFilter;
                 bool matchParty = partyFilter == "Все" || p.PartyName == partyFilter;
+                bool matchGroup = groupFilter == "Все" || p.GroupName == groupFilter;
                 bool matchName = string.IsNullOrEmpty(nameFilter) ||
                                  (!string.IsNullOrEmpty(p.FullName) && p.FullName.ToLower().Contains(nameFilter));
+                bool matchDate = (!startYear.HasValue || (p.GraduationYear.HasValue && p.GraduationYear >= startYear.Value)) &&
+                                 (!endYear.HasValue || (p.GraduationYear.HasValue && p.GraduationYear <= endYear.Value));
 
-                return matchRole && matchSpecialty && matchEducation && matchOrigin && matchStatus && matchParty && matchName;
+                return matchRole && matchSpecialty && matchEducation && matchOrigin && matchStatus && matchParty && matchGroup && matchName && matchDate;
             }).ToList();
 
             ResultsItemsControl.ItemsSource = _filteredPeople;
@@ -143,6 +158,11 @@ namespace PP02.Label
         }
 
         private void TbNameSearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ApplyFilters();
+        }
+
+        private void DateFilter_Changed(object sender, SelectionChangedEventArgs e)
         {
             ApplyFilters();
         }

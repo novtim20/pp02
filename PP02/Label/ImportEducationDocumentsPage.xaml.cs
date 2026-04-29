@@ -1008,6 +1008,22 @@ namespace PP02.Label
                             else
                                 paramValue = false; // По умолчанию false
                         }
+                        else if (mapping.DatabaseField.Contains("ogrn"))
+                        {
+                            // Обрезка ОГРН до 15 символов (максимальная длина ОГРН/ОГРНИП)
+                            var cleanedValue = value.Trim().Replace(" ", "").Replace("-", "");
+                            if (cleanedValue.Length > 15)
+                                cleanedValue = cleanedValue.Substring(0, 15);
+                            paramValue = cleanedValue;
+                        }
+                        else if (mapping.DatabaseField.Contains("kpp"))
+                        {
+                            // Обрезка КПП до 9 символов
+                            var cleanedValue = value.Trim().Replace(" ", "").Replace("-", "");
+                            if (cleanedValue.Length > 9)
+                                cleanedValue = cleanedValue.Substring(0, 9);
+                            paramValue = cleanedValue;
+                        }
 
                         parameterValues[paramName] = paramValue;
                     }
@@ -1036,7 +1052,7 @@ namespace PP02.Label
             catch (Exception ex)
             {
                 Console.WriteLine($"[ERROR] InsertEducationDocument failed: {ex.Message}");
-                Console.WriteLine($"[DEBUG] Row  {string.Join(", ", rowData.Select(kv => $"{kv.Key}={kv.Value}").Take(5))}");
+                Console.WriteLine($"[DEBUG] Row data: {string.Join(", ", rowData.Select(kv => $"{kv.Key}={kv.Value}").Take(5))}");
                 MessageBox.Show($"Ошибка вставки записи: {ex.Message}\n\nПроверьте, что все поля существуют в таблице education_documents.",
                     "Ошибка импорта", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;

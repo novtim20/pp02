@@ -215,6 +215,7 @@ SELECT LAST_INSERT_ID();";
                     // Заполняем поля редактирования данными специальности
                     NewSpecialtyNameTextBox.Text = specialty.Name;
                     NewSpecialtyShortNameTextBox.Text = specialty.ShortName;
+                    NewSpecialtyYearTextBox.Text = specialty.ValidFrom?.Year.ToString();
                     NewSpecialtyIsActiveCheckBox.IsChecked = specialty.IsActive;
 
                     _isEditingSpecialty = true;
@@ -331,8 +332,8 @@ SELECT LAST_INSERT_ID();";
                 connection.Open();
 
                 const string sql = @"
-INSERT INTO `specialties` (name, short_name, active)
-VALUES (@name, @short_name, 1);
+INSERT INTO `specialties` (name, short_name, active, data)
+VALUES (@name, @short_name, 1, @data);
 SELECT LAST_INSERT_ID();";
 
                 using (var command = new MySqlCommand(sql, connection))
@@ -342,6 +343,16 @@ SELECT LAST_INSERT_ID();";
                         string.IsNullOrWhiteSpace(NewSpecialtyShortNameTextBox.Text)
                             ? (object)DBNull.Value
                             : NewSpecialtyShortNameTextBox.Text.Trim());
+
+                    // Обработка года добавления
+                    if (int.TryParse(NewSpecialtyYearTextBox.Text, out int year) && year > 0)
+                    {
+                        command.Parameters.AddWithValue("@data", new DateTime(year, 1, 1));
+                    }
+                    else
+                    {
+                        command.Parameters.AddWithValue("@data", DBNull.Value);
+                    }
 
                     var result = command.ExecuteScalar();
                     int newId = Convert.ToInt32(result);
@@ -369,7 +380,8 @@ SELECT LAST_INSERT_ID();";
 UPDATE `specialties`
 SET name = @name,
     short_name = @short_name,
-    active = 1
+    active = 1,
+    data = @data
 WHERE id = @id";
 
                 using (var command = new MySqlCommand(sql, connection))
@@ -379,6 +391,17 @@ WHERE id = @id";
                         string.IsNullOrWhiteSpace(NewSpecialtyShortNameTextBox.Text)
                             ? (object)DBNull.Value
                             : NewSpecialtyShortNameTextBox.Text.Trim());
+
+                    // Обработка года добавления
+                    if (int.TryParse(NewSpecialtyYearTextBox.Text, out int year) && year > 0)
+                    {
+                        command.Parameters.AddWithValue("@data", new DateTime(year, 1, 1));
+                    }
+                    else
+                    {
+                        command.Parameters.AddWithValue("@data", DBNull.Value);
+                    }
+
                     command.Parameters.AddWithValue("@id", specialtyId);
 
                     command.ExecuteNonQuery();

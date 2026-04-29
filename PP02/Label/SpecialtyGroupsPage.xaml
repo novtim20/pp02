@@ -73,7 +73,13 @@
                                              BorderBrush="#DDD" BorderThickness="1"/>
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,10">
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,10">
+                                    <TextBlock Text="Год добавления" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                                    <TextBox x:Name="NewSpecialtyYearTextBox" Height="35" Padding="8,0,0,0"
+                                             BorderBrush="#DDD" BorderThickness="1"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,10">
                                     <CheckBox x:Name="NewSpecialtyIsActiveCheckBox" Content="Активная специальность"
                                               IsChecked="True" FontSize="12" Foreground="#555"/>
                                 </StackPanel>
@@ -108,6 +114,7 @@
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
                                     <DataGridTextColumn Header="Сокращение" Binding="{Binding ShortName}" Width="150"/>
+                                    <DataGridTextColumn Header="Год" Binding="{Binding ValidFrom, StringFormat={}{0:yyyy}}" Width="80"/>
                                     <DataGridCheckBoxColumn Header="Активна" Binding="{Binding IsActive}" Width="60"/>
                                     <DataGridTemplateColumn Header="Группа" Width="200">
                                         <DataGridTemplateColumn.CellTemplate>

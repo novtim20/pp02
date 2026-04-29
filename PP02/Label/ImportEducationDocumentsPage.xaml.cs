@@ -19,6 +19,7 @@ namespace PP02.Label
     public class EducationDocColumnMapping : INotifyPropertyChanged
     {
         private string _databaseField;
+        private string _databaseFieldRussian;
         private string _excelColumn;
         private bool _useForImport;
         private string _sampleValue;
@@ -27,6 +28,12 @@ namespace PP02.Label
         {
             get => _databaseField;
             set { _databaseField = value; OnPropertyChanged(nameof(DatabaseField)); }
+        }
+
+        public string DatabaseFieldRussian
+        {
+            get => _databaseFieldRussian;
+            set { _databaseFieldRussian = value; OnPropertyChanged(nameof(DatabaseFieldRussian)); }
         }
 
         public string ExcelColumn
@@ -83,7 +90,10 @@ namespace PP02.Label
             "funding_source", "has_target_contract", "target_contract_number",
             "target_contract_date", "contract_org_name", "contract_org_ogrn",
             "contract_org_kpp", "employer_org_name", "employer_org_ogrn",
-            "employer_org_kpp", "employer_federal_subject"
+            "employer_org_kpp", "employer_federal_subject",
+            "original_doc_name", "original_doc_series", "original_doc_number",
+            "original_reg_number", "original_issue_date",
+            "original_recipient_last_name", "original_recipient_first_name", "original_recipient_middle_name"
         };
 
         // Столбцы из Excel файла
@@ -118,12 +128,72 @@ namespace PP02.Label
                 _mappings.Add(new EducationDocColumnMapping
                 {
                     DatabaseField = field,
+                    DatabaseFieldRussian = GetRussianFieldName(field),
                     ExcelColumn = null,
                     UseForImport = false,
                     SampleValue = "-"
                 });
             }
             MappingDataGrid.ItemsSource = _mappings;
+        }
+
+        /// <summary>
+        /// Получение русского названия для поля базы данных
+        /// </summary>
+        private string GetRussianFieldName(string dbField)
+        {
+            var russianNames = new Dictionary<string, string>
+            {
+                { "person_id", "ID лица" },
+                { "doc_name", "Наименование документа" },
+                { "doc_type", "Вид документа" },
+                { "doc_status", "Статус документа" },
+                { "loss_confirmed", "Подтверждение утраты" },
+                { "exchange_confirmed", "Подтверждение обмена" },
+                { "destruction_confirmed", "Подтверждение уничтожения" },
+                { "education_level", "Уровень образования" },
+                { "doc_series", "Серия документа" },
+                { "doc_number", "Номер документа" },
+                { "issue_date", "Дата выдачи" },
+                { "reg_number", "Регистрационный номер" },
+                { "specialty_code", "Код профессии, специальности" },
+                { "specialty_name", "Наименование профессии, специальности" },
+                { "qualification_name", "Наименование квалификации" },
+                { "program_name", "Наименование образовательной программы" },
+                { "enrollment_year", "Год поступления" },
+                { "graduation_year", "Год окончания" },
+                { "study_duration_years", "Срок обучения, лет" },
+                { "recipient_last_name", "Фамилия получателя" },
+                { "recipient_first_name", "Имя получателя" },
+                { "recipient_middle_name", "Отчество получателя" },
+                { "recipient_birth_date", "Дата рождения получателя" },
+                { "recipient_gender", "Пол получателя" },
+                { "snils", "СНИЛС" },
+                { "citizenship_country_code", "Гражданство получателя (код страны по ОКСМ)" },
+                { "study_form", "Форма обучения" },
+                { "education_form_at_termination", "Форма получения образования на момент прекращения образовательных отношений" },
+                { "funding_source", "Источник финансирования обучения" },
+                { "has_target_contract", "Наличие договора о целевом обучении" },
+                { "target_contract_number", "Номер договора о целевом обучении" },
+                { "target_contract_date", "Дата заключения договора о целевом обучении" },
+                { "contract_org_name", "Наименование организации с которой заключён договор о целевом обучении" },
+                { "contract_org_ogrn", "ОГРН организации с которой заключён договор о целевом обучении" },
+                { "contract_org_kpp", "КПП организации с которой заключён договор о целевом обучении" },
+                { "employer_org_name", "Наименование организации работодателя" },
+                { "employer_org_ogrn", "ОГРН организации работодателя" },
+                { "employer_org_kpp", "КПП организации работодателя" },
+                { "employer_federal_subject", "Субъект федерации в котором расположена организация работодатель" },
+                { "original_doc_name", "Наименование документа об образовании (оригинала)" },
+                { "original_doc_series", "Серия (оригинала)" },
+                { "original_doc_number", "Номер (оригинала)" },
+                { "original_reg_number", "Регистрационный N (оригинала)" },
+                { "original_issue_date", "Дата выдачи (оригинала)" },
+                { "original_recipient_last_name", "Фамилия получателя (оригинала)" },
+                { "original_recipient_first_name", "Имя получателя (оригинала)" },
+                { "original_recipient_middle_name", "Отчество получателя (оригинала)" }
+            };
+
+            return russianNames.ContainsKey(dbField) ? russianNames[dbField] : dbField;
         }
 
         /// <summary>
@@ -350,7 +420,15 @@ namespace PP02.Label
                 { "employer_org_name", "организация работодатель работодатель орг" },
                 { "employer_org_ogrn", "огрн работодателя огрн работ" },
                 { "employer_org_kpp", "кпп работодателя кпп работ" },
-                { "employer_federal_subject", "субъект федерации работодатель субъект регион" }
+                { "employer_federal_subject", "субъект федерации работодатель субъект регион" },
+                { "original_doc_name", "оригинал наименование документа" },
+                { "original_doc_series", "оригинал серия" },
+                { "original_doc_number", "оригинал номер" },
+                { "original_reg_number", "оригинал регистрационный номер" },
+                { "original_issue_date", "оригинал дата выдачи" },
+                { "original_recipient_last_name", "оригинал фамилия получателя" },
+                { "original_recipient_first_name", "оригинал имя получателя" },
+                { "original_recipient_middle_name", "оригинал отчество получателя" }
             };
 
             return keyMap.ContainsKey(dbField) ? keyMap[dbField] : dbField.Replace("_", " ");

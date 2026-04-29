@@ -24,6 +24,7 @@ namespace PP02.Label
     public class ColumnMapping : INotifyPropertyChanged
     {
         private string _databaseField;
+        private string _databaseFieldRussian;
         private string _excelColumn;
         private bool _useForImport;
         private string _sampleValue;
@@ -32,6 +33,12 @@ namespace PP02.Label
         {
             get => _databaseField;
             set { _databaseField = value; OnPropertyChanged(nameof(DatabaseField)); }
+        }
+
+        public string DatabaseFieldRussian
+        {
+            get => _databaseFieldRussian;
+            set { _databaseFieldRussian = value; OnPropertyChanged(nameof(DatabaseFieldRussian)); }
         }
 
         public string ExcelColumn
@@ -115,12 +122,42 @@ namespace PP02.Label
                 _mappings.Add(new ColumnMapping
                 {
                     DatabaseField = field,
+                    DatabaseFieldRussian = GetRussianFieldName(field),
                     ExcelColumn = null,
                     UseForImport = false,
                     SampleValue = "-"
                 });
             }
             MappingDataGrid.ItemsSource = _mappings;
+        }
+
+        /// <summary>
+        /// Получение русского названия для поля базы данных
+        /// </summary>
+        private string GetRussianFieldName(string dbField)
+        {
+            var russianNames = new Dictionary<string, string>
+            {
+                { "full_name", "ФИО" },
+                { "role", "Роль" },
+                { "group_code", "Код группы" },
+                { "specialty_name", "Наименование специальности" },
+                { "graduation_year", "Год выпуска" },
+                { "gender", "Пол" },
+                { "birth_year", "Год рождения" },
+                { "birth_place", "Место рождения" },
+                { "nationality", "Национальность" },
+                { "address", "Адрес" },
+                { "diploma_date", "Дата диплома" },
+                { "work_after", "Работа после" },
+                { "source", "Источник" },
+                { "education_name", "Образование" },
+                { "social_origin_name", "Социальное происхождение" },
+                { "social_status_name", "Социальный статус" },
+                { "party_name", "Партийность" }
+            };
+
+            return russianNames.ContainsKey(dbField) ? russianNames[dbField] : dbField;
         }
 
         /// <summary>

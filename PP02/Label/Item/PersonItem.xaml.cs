@@ -545,20 +545,6 @@ namespace PP02.Label.Item
             }
         }
 
-        // === 🔹 ПЕРЕКЛЮЧЕНИЕ В РЕЖИМ ПРОСМОТРА ===
-        private void SetViewMode()
-        {
-            // Не закрываем ExpDetails, просто переключаем кнопки на "Изменить" + "Отменить"
-            // Скрываем кнопку "Сохранить", показываем "Изменить" и "Отменить"
-            if (BtnEdit != null) BtnEdit.Visibility = Visibility.Visible;
-            if (BtnSave != null) BtnSave.Visibility = Visibility.Collapsed;
-            // Кнопка "Отменить" остается видимой после раскрытия стрелочки
-            if (BtnCancel != null) BtnCancel.Visibility = Visibility.Visible;
-
-            // Блокируем все поля для просмотра
-            SetFieldsEnabled(false);
-        }
-
         // === 🔹 ВКЛЮЧЕНИЕ/ВЫКЛЮЧЕНИЕ ПОЛЕЙ РЕДАКТИРОВАНИЯ ===
         private void SetFieldsEnabled(bool enabled)
         {

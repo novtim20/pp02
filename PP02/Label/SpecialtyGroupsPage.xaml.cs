@@ -78,7 +78,7 @@ namespace PP02.Label
                 // Валидация
                 if (string.IsNullOrWhiteSpace(NewGroupNameTextBox.Text))
                 {
-                    MessageBox.Show("Введите название группы специальностей", "Ошибка",
+                    MessageBox.Show("Введите название Отделения специальностей", "Ошибка",
                         MessageBoxButton.OK, MessageBoxImage.Warning);
                     NewGroupNameTextBox.Focus();
                     return;
@@ -104,7 +104,7 @@ SELECT LAST_INSERT_ID();";
                         var result = command.ExecuteScalar();
                         int newId = Convert.ToInt32(result);
 
-                        MessageBox.Show($"Группа специальностей \"{NewGroupNameTextBox.Text}\" успешно добавлена!\nID: {newId}",
+                        MessageBox.Show($"Отделение специальностей \"{NewGroupNameTextBox.Text}\" успешно добавлена!\nID: {newId}",
                             "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }

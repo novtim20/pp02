@@ -116,7 +116,7 @@
                                     <DataGridTextColumn Header="Сокращение" Binding="{Binding ShortName}" Width="150"/>
                                     <DataGridTextColumn Header="Год" Binding="{Binding ValidFrom, StringFormat={}{0:yyyy}}" Width="80"/>
                                     <DataGridCheckBoxColumn Header="Активна" Binding="{Binding IsActive}" Width="60"/>
-                                    <DataGridTemplateColumn Header="Группа" Width="200">
+                                    <DataGridTemplateColumn Header="Отделение" Width="200">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Margin="5,0,0,0">
@@ -177,7 +177,7 @@
             </TabItem>
 
             <!-- Вкладка: Группы специальностей -->
-            <TabItem Header="📁 Группы специальностей">
+            <TabItem Header="📁 Отделения специальностей">
                 <Grid Margin="15">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -188,7 +188,7 @@
                     <Border Grid.Row="0" Background="#FAFAFA" CornerRadius="5" Padding="15" Margin="0,0,0,15"
                             BorderBrush="#EEE" BorderThickness="1">
                         <StackPanel>
-                            <TextBlock Text="➕ Добавить группу специальностей" FontSize="16" FontWeight="Bold"
+                            <TextBlock Text="➕ Добавить Отделения специальностей" FontSize="16" FontWeight="Bold"
                                        Foreground="#333" Margin="0,0,0,10"/>
 
                             <Grid>

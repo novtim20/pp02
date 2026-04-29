@@ -1,4 +1,4 @@
-﻿<Page x:Class="PP02.Label.ImportExcelPage"
+﻿<Page x:Class="PP02.Label.ImportEducationDocumentsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -7,7 +7,7 @@
       mc:Ignorable="d"
       d:DesignHeight="900" d:DesignWidth="1200"
       Background="#F5F5F5"
-      Title="Импорт студентов из Excel">
+      Title="Импорт образовательных документов из Excel">
 
     <ScrollViewer x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto">
         <Grid Margin="20">
@@ -24,17 +24,17 @@
             <StackPanel Grid.Row="0" Margin="0,0,0,20">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="SpaceBetween">
                     <StackPanel>
-                        <TextBlock Text="📥 Импорт данных из Excel"
+                        <TextBlock Text="📥 Импорт образовательных документов из Excel"
                                    FontSize="24" FontWeight="Bold" Foreground="#333"/>
-                        <TextBlock Text="Загрузите файл Excel и настройте соответствие столбцов полям базы данных"
+                        <TextBlock Text="Загрузите файл Excel с данными об образовательных документах и настройте соответствие столбцов полям базы данных"
                                    FontSize="14" Foreground="#666" Margin="0,5,0,0"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="50,0,0,0">
                         <Button x:Name="ImportStudentsButton" Content="👥 Импорт студентов" Width="160" Height="35"
-                                Background="#2196F3" Foreground="White" FontWeight="Bold"
+                                Background="#E0E0E0" Foreground="#333" FontWeight="Bold"
                                 BorderThickness="0" Click="ImportStudentsButton_Click" Margin="0,0,10,0"/>
                         <Button x:Name="ImportDocumentsButton" Content="📄 Импорт документов" Width="160" Height="35"
-                                Background="#E0E0E0" Foreground="#333" FontWeight="Bold"
+                                Background="#2196F3" Foreground="White" FontWeight="Bold"
                                 BorderThickness="0" Click="ImportDocumentsButton_Click"/>
                     </StackPanel>
                 </StackPanel>
@@ -106,7 +106,7 @@
 
                             <!-- Поле БД -->
                             <DataGridTextColumn Header="Поле базы данных" Binding="{Binding DatabaseField}"
-                                                Width="180" IsReadOnly="True">
+                                                Width="200" IsReadOnly="True">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -186,13 +186,13 @@
                               BorderBrush="#DDD" BorderThickness="1"
                               MaxHeight="250">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="ФИО" Binding="{Binding FullName}" Width="200"/>
-                            <DataGridTextColumn Header="Роль" Binding="{Binding Role}" Width="80"/>
-                            <DataGridTextColumn Header="Группа" Binding="{Binding GroupName}" Width="100"/>
+                            <DataGridTextColumn Header="ФИО получателя" Binding="{Binding RecipientFullName}" Width="200"/>
+                            <DataGridTextColumn Header="Тип документа" Binding="{Binding DocType}" Width="150"/>
+                            <DataGridTextColumn Header="Серия" Binding="{Binding DocSeries}" Width="80"/>
+                            <DataGridTextColumn Header="Номер" Binding="{Binding DocNumber}" Width="100"/>
+                            <DataGridTextColumn Header="Дата выдачи" Binding="{Binding IssueDate}" Width="100"/>
                             <DataGridTextColumn Header="Специальность" Binding="{Binding SpecialtyName}" Width="150"/>
-                            <DataGridTextColumn Header="Год выпуска" Binding="{Binding GraduationYear}" Width="80"/>
-                            <DataGridTextColumn Header="Пол" Binding="{Binding Gender}" Width="50"/>
-                            <DataGridTextColumn Header="Год рождения" Binding="{Binding BirthYear}" Width="80"/>
+                            <DataGridTextColumn Header="Квалификация" Binding="{Binding QualificationName}" Width="150"/>
                         </DataGrid.Columns>
                     </DataGrid>
 
@@ -210,10 +210,12 @@
                                Foreground="#333"/>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <CheckBox x:Name="SkipDuplicatesCheckBox" Content="Пропускать дубликаты по ФИО"
+                        <CheckBox x:Name="SkipDuplicatesCheckBox" Content="Пропускать дубликаты по номеру документа"
                                   IsChecked="True" VerticalContentAlignment="Center" Margin="0,0,20,0"/>
                         <CheckBox x:Name="ValidateDataCheckBox" Content="Проверять корректность данных"
                                   IsChecked="True" VerticalContentAlignment="Center"/>
+                        <CheckBox x:Name="LinkToPersonCheckBox" Content="Привязывать к существующим лицам (по ФИО)"
+                                  IsChecked="True" VerticalContentAlignment="Center" Margin="20,0,0,0"/>
                     </StackPanel>
 
                     <ProgressBar x:Name="ImportProgressBar" Height="20" Minimum="0" Maximum="100"

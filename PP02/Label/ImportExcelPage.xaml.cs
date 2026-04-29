@@ -1145,6 +1145,24 @@ VALUES (@code, @short_name, @name, @specialty_id, 1)";
         {
             NavigationService?.Navigate(new search());
         }
+
+        /// <summary>
+        /// Переключение на импорт студентов
+        /// </summary>
+        private void ImportStudentsButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Уже находимся на странице импорта студентов
+            MessageBox.Show("Вы уже находитесь на странице импорта студентов", "Информация",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        /// <summary>
+        /// Переключение на импорт документов
+        /// </summary>
+        private void ImportDocumentsButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService?.Navigate(new ImportEducationDocumentsPage());
+        }
     }
 
     /// <summary>

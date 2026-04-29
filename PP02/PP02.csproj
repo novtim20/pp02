@@ -195,6 +195,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Label\ImportEducationDocumentsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Label\ImportExcelPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -246,6 +250,9 @@
     </Compile>
     <Compile Include="Label\Dialogs\AddSpecialtyGroupDialog.xaml.cs">
       <DependentUpon>AddSpecialtyGroupDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Label\ImportEducationDocumentsPage.xaml.cs">
+      <DependentUpon>ImportEducationDocumentsPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Label\ImportExcelPage.xaml.cs">
       <DependentUpon>ImportExcelPage.xaml</DependentUpon>

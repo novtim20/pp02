@@ -90,10 +90,7 @@ namespace PP02.Label
             "funding_source", "has_target_contract", "target_contract_number",
             "target_contract_date", "contract_org_name", "contract_org_ogrn",
             "contract_org_kpp", "employer_org_name", "employer_org_ogrn",
-            "employer_org_kpp", "employer_federal_subject",
-            "original_doc_name", "original_doc_series", "original_doc_number",
-            "original_reg_number", "original_issue_date",
-            "original_recipient_last_name", "original_recipient_first_name", "original_recipient_middle_name"
+            "employer_org_kpp", "employer_federal_subject"
         };
 
         // Столбцы из Excel файла
@@ -182,15 +179,7 @@ namespace PP02.Label
                 { "employer_org_name", "Наименование организации работодателя" },
                 { "employer_org_ogrn", "ОГРН организации работодателя" },
                 { "employer_org_kpp", "КПП организации работодателя" },
-                { "employer_federal_subject", "Субъект федерации в котором расположена организация работодатель" },
-                { "original_doc_name", "Наименование документа об образовании (оригинала)" },
-                { "original_doc_series", "Серия (оригинала)" },
-                { "original_doc_number", "Номер (оригинала)" },
-                { "original_reg_number", "Регистрационный N (оригинала)" },
-                { "original_issue_date", "Дата выдачи (оригинала)" },
-                { "original_recipient_last_name", "Фамилия получателя (оригинала)" },
-                { "original_recipient_first_name", "Имя получателя (оригинала)" },
-                { "original_recipient_middle_name", "Отчество получателя (оригинала)" }
+                { "employer_federal_subject", "Субъект федерации в котором расположена организация работодатель" }
             };
 
             return russianNames.ContainsKey(dbField) ? russianNames[dbField] : dbField;
@@ -527,15 +516,7 @@ namespace PP02.Label
                 { "employer_org_name", "организация работодатель работодатель орг" },
                 { "employer_org_ogrn", "огрн работодателя огрн работ" },
                 { "employer_org_kpp", "кпп работодателя кпп работ" },
-                { "employer_federal_subject", "субъект федерации работодатель субъект регион" },
-                { "original_doc_name", "оригинал наименование документа" },
-                { "original_doc_series", "оригинал серия" },
-                { "original_doc_number", "оригинал номер" },
-                { "original_reg_number", "оригинал регистрационный номер" },
-                { "original_issue_date", "оригинал дата выдачи" },
-                { "original_recipient_last_name", "оригинал фамилия получателя" },
-                { "original_recipient_first_name", "оригинал имя получателя" },
-                { "original_recipient_middle_name", "оригинал отчество получателя" }
+                { "employer_federal_subject", "субъект федерации работодатель субъект регион" }
             };
 
             return keyMap.ContainsKey(dbField) ? keyMap[dbField] : dbField.Replace("_", " ");

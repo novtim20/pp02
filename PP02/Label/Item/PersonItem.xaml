@@ -20,6 +20,8 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- ФИО, Год, Группа, Специальность -->
@@ -38,22 +40,27 @@
                 <Button  x:Name="BtnExpand" Grid.Column="1" Content="▼" Width="30" Height="30"
                         Click="BtnExpand_Click" ToolTip="Развернуть"/>
 
+                <!-- Кнопка изменения (видима по умолчанию) -->
+                <Button Grid.Column="2" Content="✏️ Изменить" Width="100" Height="30"
+                        Background="#2196F3" Foreground="White" FontWeight="Bold"
+                        x:Name="BtnEdit" Visibility="Visible" Click="BtnEdit_Click" Margin="5,0,0,0"/>
+
                 <!-- Кнопка сохранения (скрыта по умолчанию) -->
-                <Button Grid.Column="2" Content="💾 Сохранить" Width="100" Height="30"
+                <Button Grid.Column="3" Content="💾 Сохранить" Width="100" Height="30"
                         Background="#4CAF50" Foreground="White" FontWeight="Bold"
                         x:Name="BtnSave" Visibility="Collapsed" Click="BtnSave_Click" Margin="5,0,0,0"/>
 
                 <!-- Кнопка отмены -->
-                <Button Grid.Column="3" Content="✕" Width="30" Height="30"
+                <Button Grid.Column="4" Content="✕" Width="30" Height="30"
                         x:Name="BtnCancel" Visibility="Collapsed" Click="BtnCancel_Click" Margin="5,0,0,0" ToolTip="Отменить"/>
 
                 <!-- Кнопка удаления -->
-                <Button Grid.Column="4" Content="🗑" Width="30" Height="30"
+                <Button Grid.Column="5" Content="🗑" Width="30" Height="30"
                         x:Name="BtnDelete" Background="#FF5252" Foreground="White" FontWeight="Bold"
                         Click="BtnDelete_Click" Margin="5,0,0,0" ToolTip="Удалить студента"/>
 
                 <!-- Кнопка экспорта отчета -->
-                <Button Grid.Column="5" Content="📄" Width="30" Height="30"
+                <Button Grid.Column="6" Content="📄" Width="30" Height="30"
                         x:Name="BtnExportReport" Background="#2196F3" Foreground="White" FontWeight="Bold"
                         Click="BtnExportReport_Click" Margin="5,0,0,0" ToolTip="Экспорт в отчет о выпускнике"/>
             </Grid>
@@ -84,7 +91,7 @@
                         <!-- Левая колонка -->
                         <StackPanel Grid.Column="0" Grid.Row="0" Margin="5">
                             <TextBlock Text="Роль:" FontWeight="Bold" FontSize="11"/>
-                            <ComboBox x:Name="CmbRole" Height="25">
+                            <ComboBox x:Name="CmbRole" Height="25" IsEnabled="False">
                                 <ComboBoxItem Content="Студент"/>
                                 <ComboBoxItem Content="Преподаватель"/>
                             </ComboBox>
@@ -92,7 +99,7 @@
 
                         <StackPanel Grid.Column="0" Grid.Row="1" Margin="5">
                             <TextBlock Text="Год выпуска:" FontWeight="Bold" FontSize="11"/>
-                            <TextBox x:Name="TxtEditGradYear" Height="25"/>
+                            <TextBox x:Name="TxtEditGradYear" Height="25" IsEnabled="False"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="0" Grid.Row="2" Margin="5">
@@ -105,7 +112,7 @@
                                     <TextBlock Text="Группа:" FontWeight="Bold" FontSize="11"/>
                                     <ComboBox x:Name="CmbGroup" Height="25" IsEditable="True"
                                               SelectedValuePath="Id"
-                                              StaysOpenOnEdit="True">
+                                              StaysOpenOnEdit="True" IsEnabled="False">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal">
@@ -129,7 +136,7 @@
                                 <StackPanel Grid.Column="0" Margin="0,0,5,0">
                                     <TextBlock Text="Специальность:" FontWeight="Bold" FontSize="11"/>
                                     <ComboBox x:Name="CmbSpecialty" Height="25" SelectedValuePath="Id"
-                                              IsEditable="True" StaysOpenOnEdit="True">
+                                              IsEditable="True" StaysOpenOnEdit="True" IsEnabled="False">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal">
@@ -148,7 +155,7 @@
                         <!-- Центральная колонка -->
                         <StackPanel Grid.Column="1" Grid.Row="0" Margin="5">
                             <TextBlock Text="Пол:" FontWeight="Bold" FontSize="11"/>
-                            <ComboBox x:Name="CmbGender" Height="25">
+                            <ComboBox x:Name="CmbGender" Height="25" IsEnabled="False">
                                 <ComboBoxItem Content="Мужской"/>
                                 <ComboBoxItem Content="Женский"/>
                             </ComboBox>
@@ -156,54 +163,54 @@
 
                         <StackPanel Grid.Column="1" Grid.Row="1" Margin="5">
                             <TextBlock Text="Год рождения:" FontWeight="Bold" FontSize="11"/>
-                            <TextBox x:Name="TxtEditBirthYear" Height="25"/>
+                            <TextBox x:Name="TxtEditBirthYear" Height="25" IsEnabled="False"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Grid.Row="2" Margin="5">
                             <TextBlock Text="Место рождения:" FontWeight="Bold" FontSize="11"/>
-                            <TextBox x:Name="TxtEditBirthPlace" Height="25"/>
+                            <TextBox x:Name="TxtEditBirthPlace" Height="25" IsEnabled="False"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Grid.Row="3" Margin="5">
                             <TextBlock Text="Национальность:" FontWeight="Bold" FontSize="11"/>
-                            <TextBox x:Name="TxtEditNationality" Height="25"/>
+                            <TextBox x:Name="TxtEditNationality" Height="25" IsEnabled="False"/>
                         </StackPanel>
 
                         <!-- Правая колонка -->
                         <StackPanel Grid.Column="2" Grid.Row="0" Margin="5">
                             <TextBlock Text="Образование:" FontWeight="Bold" FontSize="11"/>
-                            <ComboBox x:Name="CmbEducation" Height="25" DisplayMemberPath="Name" SelectedValuePath="Id"/>
+                            <ComboBox x:Name="CmbEducation" Height="25" DisplayMemberPath="Name" SelectedValuePath="Id" IsEnabled="False"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="2" Grid.Row="1" Margin="5">
                             <TextBlock Text="Соц. происхождение:" FontWeight="Bold" FontSize="11"/>
-                            <ComboBox x:Name="CmbSocialOrigin" Height="25" DisplayMemberPath="Name" SelectedValuePath="Id"/>
+                            <ComboBox x:Name="CmbSocialOrigin" Height="25" DisplayMemberPath="Name" SelectedValuePath="Id" IsEnabled="False"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="2" Grid.Row="2" Margin="5">
                             <TextBlock Text="Соц. положение:" FontWeight="Bold" FontSize="11"/>
-                            <ComboBox x:Name="CmbSocialStatus" Height="25" DisplayMemberPath="Name" SelectedValuePath="Id"/>
+                            <ComboBox x:Name="CmbSocialStatus" Height="25" DisplayMemberPath="Name" SelectedValuePath="Id" IsEnabled="False"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="2" Grid.Row="3" Margin="5">
                             <TextBlock Text="Партийность:" FontWeight="Bold" FontSize="11"/>
-                            <ComboBox x:Name="CmbParty" Height="25" DisplayMemberPath="Name" SelectedValuePath="Id"/>
+                            <ComboBox x:Name="CmbParty" Height="25" DisplayMemberPath="Name" SelectedValuePath="Id" IsEnabled="False"/>
                         </StackPanel>
 
                         <!-- Адрес и остальные поля на всю ширину -->
                         <StackPanel Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="4" Margin="5">
                             <TextBlock Text="Домашний адрес:" FontWeight="Bold" FontSize="11"/>
-                            <TextBox x:Name="TxtEditAddress" Height="25"/>
+                            <TextBox x:Name="TxtEditAddress" Height="25" IsEnabled="False"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="5" Margin="5">
                             <TextBlock Text="Где работал после:" FontWeight="Bold" FontSize="11"/>
-                            <TextBox x:Name="TxtEditWorkAfter" Height="25"/>
+                            <TextBox x:Name="TxtEditWorkAfter" Height="25" IsEnabled="False"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="6" Margin="5">
                             <TextBlock Text="Описание:" FontWeight="Bold" FontSize="11"/>
-                            <TextBox x:Name="TxtEditSource" Height="25"/>
+                            <TextBox x:Name="TxtEditSource" Height="25" IsEnabled="False"/>
                         </StackPanel>
                     </Grid>
                 </Border>

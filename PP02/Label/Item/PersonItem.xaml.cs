@@ -211,6 +211,9 @@ namespace PP02.Label.Item
             TxtEditSource.Text = _currentPerson.Source;
 
             _isDirty = false;
+
+            // При загрузке данных поля должны быть заблокированы (режим просмотра)
+            SetFieldsEnabled(false);
         }
 
         // === 🔹 СБОР ДАННЫХ ИЗ ИНТЕРФЕЙСА В МОДЕЛЬ ===
@@ -325,8 +328,27 @@ namespace PP02.Label.Item
                 ExpDetails.IsExpanded = true;
             }
             if (BtnExpand != null) BtnExpand.Visibility = Visibility.Collapsed;
+            if (BtnEdit != null) BtnEdit.Visibility = Visibility.Visible;
+            if (BtnSave != null) BtnSave.Visibility = Visibility.Collapsed;
+            if (BtnCancel != null) BtnCancel.Visibility = Visibility.Collapsed;
+        }
+
+        // Кнопка "✏️ Изменить" — включение режима редактирования
+        private void BtnEdit_Click(object sender, RoutedEventArgs e)
+        {
+            SetEditMode();
+        }
+
+        // === 🔹 ПЕРЕКЛЮЧЕНИЕ В РЕЖИМ РЕДАКТИРОВАНИЯ ===
+        private void SetEditMode()
+        {
+            // Показываем кнопку сохранения, скрываем кнопку изменения
+            if (BtnEdit != null) BtnEdit.Visibility = Visibility.Collapsed;
             if (BtnSave != null) BtnSave.Visibility = Visibility.Visible;
             if (BtnCancel != null) BtnCancel.Visibility = Visibility.Visible;
+
+            // Разблокируем все поля для редактирования
+            SetFieldsEnabled(true);
         }
 
         // Событие Expanded (опционально)
@@ -476,8 +498,32 @@ namespace PP02.Label.Item
                 ExpDetails.IsExpanded = false;
             }
             if (BtnExpand != null) BtnExpand.Visibility = Visibility.Visible;
+            if (BtnEdit != null) BtnEdit.Visibility = Visibility.Visible;
             if (BtnSave != null) BtnSave.Visibility = Visibility.Collapsed;
             if (BtnCancel != null) BtnCancel.Visibility = Visibility.Collapsed;
+
+            // Блокируем все поля для просмотра
+            SetFieldsEnabled(false);
+        }
+
+        // === 🔹 ВКЛЮЧЕНИЕ/ВЫКЛЮЧЕНИЕ ПОЛЕЙ РЕДАКТИРОВАНИЯ ===
+        private void SetFieldsEnabled(bool enabled)
+        {
+            CmbRole.IsEnabled = enabled;
+            TxtEditGradYear.IsEnabled = enabled;
+            CmbGroup.IsEnabled = enabled;
+            CmbSpecialty.IsEnabled = enabled;
+            CmbGender.IsEnabled = enabled;
+            TxtEditBirthYear.IsEnabled = enabled;
+            TxtEditBirthPlace.IsEnabled = enabled;
+            TxtEditNationality.IsEnabled = enabled;
+            CmbEducation.IsEnabled = enabled;
+            CmbSocialOrigin.IsEnabled = enabled;
+            CmbSocialStatus.IsEnabled = enabled;
+            CmbParty.IsEnabled = enabled;
+            TxtEditAddress.IsEnabled = enabled;
+            TxtEditWorkAfter.IsEnabled = enabled;
+            TxtEditSource.IsEnabled = enabled;
         }
 
         // === 🔹 ЭКСПОРТ В WORD (ОТЧЕТ О ВЫПУСКНИКЕ) ===

@@ -319,7 +319,7 @@ namespace PP02.Label.Item
             }
         }
 
-        // Кнопка "▼" — переход в режим редактирования
+        // Кнопка "▼" — раскрытие подробной информации
         private void BtnExpand_Click(object sender, RoutedEventArgs e)
         {
             if (ExpDetails != null)
@@ -328,6 +328,7 @@ namespace PP02.Label.Item
                 ExpDetails.IsExpanded = true;
             }
             if (BtnExpand != null) BtnExpand.Visibility = Visibility.Collapsed;
+            // Показываем кнопку "Изменить" после раскрытия
             if (BtnEdit != null) BtnEdit.Visibility = Visibility.Visible;
             if (BtnSave != null) BtnSave.Visibility = Visibility.Collapsed;
             if (BtnCancel != null) BtnCancel.Visibility = Visibility.Collapsed;
@@ -342,7 +343,7 @@ namespace PP02.Label.Item
         // === 🔹 ПЕРЕКЛЮЧЕНИЕ В РЕЖИМ РЕДАКТИРОВАНИЯ ===
         private void SetEditMode()
         {
-            // Показываем кнопку сохранения, скрываем кнопку изменения
+            // Показываем кнопку сохранения и крестик отмены рядом, скрываем кнопку изменения
             if (BtnEdit != null) BtnEdit.Visibility = Visibility.Collapsed;
             if (BtnSave != null) BtnSave.Visibility = Visibility.Visible;
             if (BtnCancel != null) BtnCancel.Visibility = Visibility.Visible;
@@ -498,7 +499,8 @@ namespace PP02.Label.Item
                 ExpDetails.IsExpanded = false;
             }
             if (BtnExpand != null) BtnExpand.Visibility = Visibility.Visible;
-            if (BtnEdit != null) BtnEdit.Visibility = Visibility.Visible;
+            // Скрываем кнопку "Изменить" и крестик отмены при возврате в режим просмотра
+            if (BtnEdit != null) BtnEdit.Visibility = Visibility.Collapsed;
             if (BtnSave != null) BtnSave.Visibility = Visibility.Collapsed;
             if (BtnCancel != null) BtnCancel.Visibility = Visibility.Collapsed;
 
@@ -553,6 +555,7 @@ namespace PP02.Label.Item
                     GenerateGraduateReport(_currentPerson, saveFileDialog.FileName);
                     MessageBox.Show($"Отчет успешно сохранен:\n{saveFileDialog.FileName}", "Успех",
                         MessageBoxButton.OK, MessageBoxImage.Information);
+
                 }
             }
             catch (Exception ex)

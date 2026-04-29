@@ -40,19 +40,19 @@
                 <Button  x:Name="BtnExpand" Grid.Column="1" Content="▼" Width="30" Height="30"
                         Click="BtnExpand_Click" ToolTip="Развернуть"/>
 
-                <!-- Кнопка изменения (видима по умолчанию) -->
+                <!-- Кнопка изменения (скрыта по умолчанию, показывается под стрелочкой) -->
                 <Button Grid.Column="2" Content="✏️ Изменить" Width="100" Height="30"
                         Background="#2196F3" Foreground="White" FontWeight="Bold"
-                        x:Name="BtnEdit" Visibility="Visible" Click="BtnEdit_Click" Margin="5,0,0,0"/>
+                        x:Name="BtnEdit" Visibility="Collapsed" Click="BtnEdit_Click" Margin="5,0,0,0"/>
+
+                <!-- Кнопка отмены (скрыта по умолчанию, показывается рядом с Изменить/Сохранить) -->
+                <Button Grid.Column="3" Content="✕" Width="30" Height="30"
+                        x:Name="BtnCancel" Visibility="Collapsed" Click="BtnCancel_Click" Margin="5,0,0,0" ToolTip="Отменить"/>
 
                 <!-- Кнопка сохранения (скрыта по умолчанию) -->
-                <Button Grid.Column="3" Content="💾 Сохранить" Width="100" Height="30"
+                <Button Grid.Column="4" Content="💾 Сохранить" Width="100" Height="30"
                         Background="#4CAF50" Foreground="White" FontWeight="Bold"
                         x:Name="BtnSave" Visibility="Collapsed" Click="BtnSave_Click" Margin="5,0,0,0"/>
-
-                <!-- Кнопка отмены -->
-                <Button Grid.Column="4" Content="✕" Width="30" Height="30"
-                        x:Name="BtnCancel" Visibility="Collapsed" Click="BtnCancel_Click" Margin="5,0,0,0" ToolTip="Отменить"/>
 
                 <!-- Кнопка удаления -->
                 <Button Grid.Column="5" Content="🗑" Width="30" Height="30"

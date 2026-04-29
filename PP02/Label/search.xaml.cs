@@ -271,8 +271,12 @@ namespace PP02.Label
         private void DisplayResults(List<PersonViewModel> results)
         {
             _searchResults = new ObservableCollection<PersonViewModel>(results);
-            ResultsItemsControl.ItemsSource = _searchResults;
-            ResultsCountText.Text = $"{results.Count} записей";
+
+            if (ResultsItemsControl != null)
+                ResultsItemsControl.ItemsSource = _searchResults;
+
+            if (ResultsCountText != null)
+                ResultsCountText.Text = $"{results.Count} записей";
 
             if (results.Count == 0)
             {

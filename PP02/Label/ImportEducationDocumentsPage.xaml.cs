@@ -757,19 +757,40 @@ namespace PP02.Label
                         catch (Exception ex)
                         {
                             Console.WriteLine($"[ERROR] Transaction failed during import: {ex.Message}");
+                            MessageBox.Show($"Критическая ошибка транзакции: {ex.Message}",
+                                "Ошибка импорта", MessageBoxButton.OK, MessageBoxImage.Error);
                             transaction.Rollback();
                             throw;
                         }
                     }
                 });
 
-                MessageBox.Show(
-                    $"Импорт завершен!\n\n✅ Успешно импортировано: {importedCount}\n⚠️ Пропущено (дубликаты): {skippedCount}\n❌ Ошибки: {errorCount}",
-                    "Результат импорта",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                if (errorCount > 0 && importedCount == 0)
+                {
+                    MessageBox.Show(
+                        $"Импорт завершен с ошибками!\n\n✅ Успешно импортировано: {importedCount}\n⚠️ Пропущено (дубликаты): {skippedCount}\n❌ Ошибки: {errorCount}\n\nПроверьте консоль output для деталей ошибок.",
+                        "Результат импорта",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                }
+                else if (errorCount > 0)
+                {
+                    MessageBox.Show(
+                        $"Импорт завершен частично!\n\n✅ Успешно импортировано: {importedCount}\n⚠️ Пропущено (дубликаты): {skippedCount}\n❌ Ошибки: {errorCount}\n\nПроверьте консоль output для деталей ошибок.",
+                        "Результат импорта",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        $"Импорт завершен!\n\n✅ Успешно импортировано: {importedCount}\n⚠️ Пропущено (дубликаты): {skippedCount}\n❌ Ошибки: {errorCount}",
+                        "Результат импорта",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
 
-                NavigationService?.Navigate(new search());
+                    NavigationService?.Navigate(new search());
+                }
             }
             catch (Exception ex)
             {
@@ -927,11 +948,13 @@ namespace PP02.Label
             {
                 var fields = new List<string>();
                 var parameters = new List<string>();
+                var parameterValues = new Dictionary<string, object>();
 
                 if (personId.HasValue)
                 {
                     fields.Add("person_id");
                     parameters.Add("@person_id");
+                    parameterValues["@person_id"] = personId.Value;
                 }
 
                 foreach (var mapping in mappingsCopy)
@@ -943,6 +966,50 @@ namespace PP02.Label
                     {
                         fields.Add(mapping.DatabaseField);
                         parameters.Add("@" + mapping.DatabaseField);
+
+                        var paramName = "@" + mapping.DatabaseField;
+                        object paramValue = value;
+
+                        if (mapping.DatabaseField.EndsWith("_date") && DateTime.TryParse(value, out DateTime dateValue))
+                        {
+                            paramValue = dateValue;
+                        }
+                        else if (mapping.DatabaseField.EndsWith("_year") && int.TryParse(value, out int yearValue))
+                        {
+                            paramValue = yearValue;
+                        }
+                        else if (mapping.DatabaseField.EndsWith("_confirmed"))
+                        {
+                            // Обработка текстовых значений для полей подтверждения
+                            var normalizedValue = value.Trim().ToLower();
+                            if (normalizedValue == "да" || normalizedValue == "yes" || normalizedValue == "1" || normalizedValue == "true")
+                                paramValue = true;
+                            else if (normalizedValue == "нет" || normalizedValue == "no" || normalizedValue == "0" || normalizedValue == "false" || normalizedValue == "")
+                                paramValue = false;
+                            else if (int.TryParse(value, out int confirmedValue))
+                                paramValue = confirmedValue == 1;
+                            else
+                                paramValue = false; // По умолчанию false для непонятных значений
+                        }
+                        else if (mapping.DatabaseField == "study_duration_years" && decimal.TryParse(value, out decimal durationValue))
+                        {
+                            paramValue = durationValue;
+                        }
+                        else if (mapping.DatabaseField == "has_target_contract")
+                        {
+                            // Обработка текстовых значений для поля договора
+                            var normalizedValue = value.Trim().ToLower();
+                            if (normalizedValue == "да" || normalizedValue == "yes" || normalizedValue == "1" || normalizedValue == "true")
+                                paramValue = true;
+                            else if (normalizedValue == "нет" || normalizedValue == "no" || normalizedValue == "0" || normalizedValue == "false" || normalizedValue == "")
+                                paramValue = false;
+                            else if (int.TryParse(value, out int contractValue))
+                                paramValue = contractValue == 1;
+                            else
+                                paramValue = false; // По умолчанию false
+                        }
+
+                        parameterValues[paramName] = paramValue;
                     }
                 }
 
@@ -951,47 +1018,14 @@ namespace PP02.Label
 
                 var sql = $"INSERT INTO education_documents ({string.Join(", ", fields)}) VALUES ({string.Join(", ", parameters)})";
 
+                Console.WriteLine($"[DEBUG] Executing SQL: {sql}");
+                Console.WriteLine($"[DEBUG] Parameters: {string.Join(", ", parameterValues.Select(kv => $"{kv.Key}={kv.Value}"))}");
+
                 using (var command = new MySqlCommand(sql, connection, transaction))
                 {
-                    if (personId.HasValue)
+                    foreach (var param in parameterValues)
                     {
-                        command.Parameters.AddWithValue("@person_id", personId.Value);
-                    }
-
-                    foreach (var mapping in mappingsCopy)
-                    {
-                        if (mapping.DatabaseField == "person_id") continue;
-
-                        var value = GetMappedValueInternal(rowData, mappingsCopy, mapping.DatabaseField);
-                        if (!string.IsNullOrEmpty(value))
-                        {
-                            var paramName = "@" + mapping.DatabaseField;
-
-                            if (mapping.DatabaseField.EndsWith("_date") && DateTime.TryParse(value, out DateTime dateValue))
-                            {
-                                command.Parameters.AddWithValue(paramName, dateValue);
-                            }
-                            else if (mapping.DatabaseField.EndsWith("_year") && int.TryParse(value, out int yearValue))
-                            {
-                                command.Parameters.AddWithValue(paramName, yearValue);
-                            }
-                            else if (mapping.DatabaseField.EndsWith("_confirmed") && int.TryParse(value, out int boolValue))
-                            {
-                                command.Parameters.AddWithValue(paramName, boolValue == 1);
-                            }
-                            else if (mapping.DatabaseField == "study_duration_years" && decimal.TryParse(value, out decimal durationValue))
-                            {
-                                command.Parameters.AddWithValue(paramName, durationValue);
-                            }
-                            else if (mapping.DatabaseField == "has_target_contract" && int.TryParse(value, out int contractValue))
-                            {
-                                command.Parameters.AddWithValue(paramName, contractValue == 1);
-                            }
-                            else
-                            {
-                                command.Parameters.AddWithValue(paramName, value);
-                            }
-                        }
+                        command.Parameters.AddWithValue(param.Key, param.Value);
                     }
 
                     command.ExecuteNonQuery();
@@ -1002,6 +1036,9 @@ namespace PP02.Label
             catch (Exception ex)
             {
                 Console.WriteLine($"[ERROR] InsertEducationDocument failed: {ex.Message}");
+                Console.WriteLine($"[DEBUG] Row  {string.Join(", ", rowData.Select(kv => $"{kv.Key}={kv.Value}").Take(5))}");
+                MessageBox.Show($"Ошибка вставки записи: {ex.Message}\n\nПроверьте, что все поля существуют в таблице education_documents.",
+                    "Ошибка импорта", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
         }

@@ -367,6 +367,8 @@ namespace PP02.Label.Item
                 MessageBox.Show("Документ успешно сохранён!", "Сохранение", MessageBoxButton.OK, MessageBoxImage.Information);
                 _isDirty = false;
                 SetViewMode();
+                // Уведомляем родительскую страницу об изменении для обновления списка
+                DocumentDeleted?.Invoke(this, _currentDocument.Id);
             }
             catch (Exception ex)
             {

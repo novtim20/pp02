@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using PP02.Connect;
 using PP02.Classes.Person;
 using MySql.Data.MySqlClient;
@@ -20,6 +21,66 @@ namespace PP02.Label
         {
             InitializeComponent();
             LoadDocuments();
+            // Подписываемся на события удаления документов от всех элементов
+            ItemsDocuments.ItemContainerGenerator.StatusChanged += ItemContainerGenerator_StatusChanged;
+        }
+
+        /// <summary>
+        /// Обработчик изменения статуса генератора контейнеров для подписки на события элементов
+        /// </summary>
+        private void ItemContainerGenerator_StatusChanged(object sender, EventArgs e)
+        {
+            if (ItemsDocuments.ItemContainerGenerator.Status == System.Windows.Controls.Primitives.GeneratorStatus.ContainersGenerated)
+            {
+                SubscribeToItemEvents();
+            }
+        }
+
+        /// <summary>
+        /// Подписка на события DocumentDeleted от всех элементов списка
+        /// </summary>
+        private void SubscribeToItemEvents()
+        {
+            for (int i = 0; i < ItemsDocuments.Items.Count; i++)
+            {
+                var container = ItemsDocuments.ItemContainerGenerator.ContainerFromIndex(i) as FrameworkElement;
+                if (container != null)
+                {
+                    var itemControl = FindChild<PP02.Label.Item.EducationDocumentItem>(container);
+                    if (itemControl != null)
+                    {
+                        // Отписываемся от предыдущих событий, чтобы избежать дублирования
+                        itemControl.DocumentDeleted -= ItemControl_DocumentDeleted;
+                        // Подписываемся на событие удаления
+                        itemControl.DocumentDeleted += ItemControl_DocumentDeleted;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Обработчик события удаления документа из элемента списка
+        /// </summary>
+        private void ItemControl_DocumentDeleted(object sender, int documentId)
+        {
+            // Перезагружаем список документов после удаления
+            LoadDocuments();
+        }
+
+        /// <summary>
+        /// Рекурсивный поиск дочернего элемента типа T
+        /// </summary>
+        private static T FindChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) return null;
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T t) return t;
+                var result = FindChild<T>(child);
+                if (result != null) return result;
+            }
+            return null;
         }
 
         /// <summary>
@@ -229,6 +290,14 @@ namespace PP02.Label
             {
                 LoadDocuments();
             }
+        }
+
+        /// <summary>
+        /// Кнопка Назад - переход на страницу search
+        /// </summary>
+        private void BtnBack_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService?.Navigate(new search());
         }
     }
 }

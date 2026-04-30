@@ -66,6 +66,11 @@
                 <Button Grid.Column="6" Content="📄" Width="30" Height="30"
                         x:Name="BtnExportReport" Background="#2196F3" Foreground="White" FontWeight="Bold"
                         Click="BtnExportReport_Click" Margin="5,0,0,0" ToolTip="Экспорт в отчет о выпускнике"/>
+
+                <!-- Кнопка просмотра документов -->
+                <Button Grid.Column="7" Content="📋" Width="30" Height="30"
+                        x:Name="BtnViewDocuments" Background="#9C27B0" Foreground="White" FontWeight="Bold"
+                        Click="BtnViewDocuments_Click" Margin="5,0,0,0" ToolTip="Просмотреть документы об образовании"/>
             </Grid>
 
             <!-- === РАСКРЫВАЕМАЯ ПАНЕЛЬ С РЕДАКТИРОВАНИЕМ === -->

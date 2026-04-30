@@ -14,11 +14,21 @@ namespace PP02.Label
     {
         private readonly string _connectionString = Connect.Connect.GetConnectionString();
         private List<EducationDocument> _allDocuments = new List<EducationDocument>();
+        private int? _filterByPersonId = null;
 
         public EducationDocumentsPage()
         {
             InitializeComponent();
             LoadDocuments();
+        }
+
+        /// <summary>
+        /// Конструктор с фильтром по person_id
+        /// </summary>
+        /// <param name="personId">ID человека для фильтрации документов</param>
+        public EducationDocumentsPage(int personId) : this()
+        {
+            _filterByPersonId = personId;
         }
 
         /// <summary>
@@ -34,28 +44,60 @@ namespace PP02.Label
                     using (var command = new MySqlCommand())
                     {
                         command.Connection = connection;
-                        command.CommandText = @"
-                            SELECT
-                                ed.id, ed.person_id, ed.doc_name, ed.doc_type, ed.doc_status,
-                                ed.loss_confirmed, ed.exchange_confirmed, ed.destruction_confirmed,
-                                ed.education_level, ed.doc_series, ed.doc_number, ed.issue_date,
-                                ed.reg_number, ed.specialty_code, ed.specialty_name, ed.qualification_name,
-                                ed.program_name, ed.enrollment_year, ed.graduation_year, ed.study_duration_years,
-                                ed.recipient_last_name, ed.recipient_first_name, ed.recipient_middle_name,
-                                ed.recipient_birth_date, ed.recipient_gender, ed.snils, ed.citizenship_country_code,
-                                ed.study_form, ed.education_form_at_termination, ed.funding_source,
-                                ed.has_target_contract, ed.target_contract_number, ed.target_contract_date,
-                                ed.contract_org_name, ed.contract_org_ogrn, ed.contract_org_kpp,
-                                ed.employer_org_name, ed.employer_org_ogrn, ed.employer_org_kpp,
-                                ed.employer_federal_subject,
-                                ed.original_doc_name, ed.original_series, ed.original_number,
-                                ed.original_reg_number, ed.original_issue_date,
-                                ed.original_recipient_last_name, ed.original_recipient_first_name,
-                                ed.original_recipient_middle_name,
-                                p.full_name as person_full_name
-                            FROM education_documents ed
-                            LEFT JOIN persons p ON ed.person_id = p.id
-                            ORDER BY ed.recipient_last_name, ed.recipient_first_name, ed.doc_name";
+
+                        // Если задан фильтр по person_id, добавляем WHERE clause
+                        if (_filterByPersonId.HasValue)
+                        {
+                            command.CommandText = @"
+                                SELECT
+                                    ed.id, ed.person_id, ed.doc_name, ed.doc_type, ed.doc_status,
+                                    ed.loss_confirmed, ed.exchange_confirmed, ed.destruction_confirmed,
+                                    ed.education_level, ed.doc_series, ed.doc_number, ed.issue_date,
+                                    ed.reg_number, ed.specialty_code, ed.specialty_name, ed.qualification_name,
+                                    ed.program_name, ed.enrollment_year, ed.graduation_year, ed.study_duration_years,
+                                    ed.recipient_last_name, ed.recipient_first_name, ed.recipient_middle_name,
+                                    ed.recipient_birth_date, ed.recipient_gender, ed.snils, ed.citizenship_country_code,
+                                    ed.study_form, ed.education_form_at_termination, ed.funding_source,
+                                    ed.has_target_contract, ed.target_contract_number, ed.target_contract_date,
+                                    ed.contract_org_name, ed.contract_org_ogrn, ed.contract_org_kpp,
+                                    ed.employer_org_name, ed.employer_org_ogrn, ed.employer_org_kpp,
+                                    ed.employer_federal_subject,
+                                    ed.original_doc_name, ed.original_series, ed.original_number,
+                                    ed.original_reg_number, ed.original_issue_date,
+                                    ed.original_recipient_last_name, ed.original_recipient_first_name,
+                                    ed.original_recipient_middle_name,
+                                    p.full_name as person_full_name
+                                FROM education_documents ed
+                                LEFT JOIN persons p ON ed.person_id = p.id
+                                WHERE ed.person_id = @personId
+                                ORDER BY ed.recipient_last_name, ed.recipient_first_name, ed.doc_name";
+                            command.Parameters.AddWithValue("@personId", _filterByPersonId.Value);
+                        }
+                        else
+                        {
+                            command.CommandText = @"
+                                SELECT
+                                    ed.id, ed.person_id, ed.doc_name, ed.doc_type, ed.doc_status,
+                                    ed.loss_confirmed, ed.exchange_confirmed, ed.destruction_confirmed,
+                                    ed.education_level, ed.doc_series, ed.doc_number, ed.issue_date,
+                                    ed.reg_number, ed.specialty_code, ed.specialty_name, ed.qualification_name,
+                                    ed.program_name, ed.enrollment_year, ed.graduation_year, ed.study_duration_years,
+                                    ed.recipient_last_name, ed.recipient_first_name, ed.recipient_middle_name,
+                                    ed.recipient_birth_date, ed.recipient_gender, ed.snils, ed.citizenship_country_code,
+                                    ed.study_form, ed.education_form_at_termination, ed.funding_source,
+                                    ed.has_target_contract, ed.target_contract_number, ed.target_contract_date,
+                                    ed.contract_org_name, ed.contract_org_ogrn, ed.contract_org_kpp,
+                                    ed.employer_org_name, ed.employer_org_ogrn, ed.employer_org_kpp,
+                                    ed.employer_federal_subject,
+                                    ed.original_doc_name, ed.original_series, ed.original_number,
+                                    ed.original_reg_number, ed.original_issue_date,
+                                    ed.original_recipient_last_name, ed.original_recipient_first_name,
+                                    ed.original_recipient_middle_name,
+                                    p.full_name as person_full_name
+                                FROM education_documents ed
+                                LEFT JOIN persons p ON ed.person_id = p.id
+                                ORDER BY ed.recipient_last_name, ed.recipient_first_name, ed.doc_name";
+                        }
 
                         using (var reader = command.ExecuteReader())
                         {

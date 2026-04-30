@@ -610,6 +610,45 @@ namespace PP02.Label.Item
             }
         }
 
+        // === 🔹 ПРОСМОТР ДОКУМЕНТОВ ОБ ОБРАЗОВАНИИ ===
+
+        // Кнопка "📋 Просмотреть документы"
+        private void BtnViewDocuments_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentPerson == null)
+            {
+                MessageBox.Show("Нет данных человека для просмотра документов", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                // Открываем страницу документов с фильтром по person_id
+                var documentsPage = new EducationDocumentsPage(_currentPerson.Id);
+
+                // Используем NavigationService для перехода
+                if (this.NavigationService != null)
+                {
+                    this.NavigationService.Navigate(documentsPage);
+                }
+                else
+                {
+                    // Если NavigationService недоступен, пробуем найти окно и изменить контент
+                    var window = System.Windows.Application.Current.MainWindow;
+                    if (window is MainWindow mainWindow)
+                    {
+                        mainWindow.MainFrame?.Navigate(documentsPage);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при открытии документов: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         // Метод генерации отчета в формате Word
         private void GenerateGraduateReport(PersonViewModel person, string filePath)
         {

@@ -388,6 +388,12 @@ namespace PP02.Label
             NavigationService?.Navigate(new SpecialtyGroupsPage());
         }
 
+        // === 🔹 КНОПКА "ДОКУМЕНТЫ" (переход на EducationDocumentsPage) ===
+        private void EducationDocumentsButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService?.Navigate(new EducationDocumentsPage());
+        }
+
         // === 🔹 КНОПКА ДОБАВЛЕНИЯ ГРУППЫ ===
         private void AddGroupButton_Click(object sender, RoutedEventArgs e)
         {

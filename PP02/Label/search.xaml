@@ -367,6 +367,9 @@
                     <Button Content="🗂 Группы специальностей" Width="200" Height="45" FontSize="16" FontWeight="Bold"
                             Background="#607D8B" Foreground="White" BorderThickness="0"
                             Margin="0,0,10,0" Cursor="Hand" Click="SpecialtyGroupsButton_Click"/>
+                    <Button Content="📋 Документы" Width="150" Height="45" FontSize="16" FontWeight="Bold"
+                            Background="#9C27B0" Foreground="White" BorderThickness="0"
+                            Margin="0,0,10,0" Cursor="Hand" Click="EducationDocumentsButton_Click"/>
                     <Button Content="🔍 Найти" Width="150" Height="45" FontSize="16" FontWeight="Bold"
                             Background="#007ACC" Foreground="White" BorderThickness="0"
                             Margin="0,0,10,0" Cursor="Hand" Click="SearchButton_Click"/>

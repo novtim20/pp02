@@ -1027,10 +1027,10 @@ namespace PP02.Label
                             }
                             else
                             {
-                                column.Item().PaddingTop(5).Text("Нет документов об образовании").FontSize(10).Italic().FontColor(QuestPDF.Helpers.Placeholders.Color.Gray.Medium);
+                                column.Item().PaddingTop(5).Text("Нет документов об образовании").FontSize(10).Italic().FontColor(Colors.Grey.Medium);
                             }
 
-                            column.Item().PaddingTop(10).LineHorizontal(1).LineColor(QuestPDF.Helpers.Placeholders.Color.Gray.Light);
+                            column.Item().PaddingTop(10).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
                         }
                     });
 

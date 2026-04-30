@@ -20,8 +20,8 @@ namespace PP02.Label
         public EducationDocumentsPage()
         {
             InitializeComponent();
-            LoadDocuments();
-            // Подписываемся на события удаления документов от всех элементов
+            // LoadDocuments вызывается только при открытии без фильтра
+            // При использовании конструктора с personId загрузка происходит после установки фильтра
             ItemsDocuments.ItemContainerGenerator.StatusChanged += ItemContainerGenerator_StatusChanged;
         }
 
@@ -90,6 +90,7 @@ namespace PP02.Label
         public EducationDocumentsPage(int personId) : this()
         {
             _filterByPersonId = personId;
+            LoadDocuments(); // Загружаем документы после установки фильтра
         }
 
         /// <summary>

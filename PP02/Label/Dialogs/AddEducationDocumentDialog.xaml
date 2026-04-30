@@ -1,0 +1,424 @@
+﻿<Window x:Class="PP02.Label.Dialogs.AddEducationDocumentDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PP02.Label.Dialogs"
+        mc:Ignorable="d"
+        Title="Добавление документа об образовании"
+        Height="700" Width="900"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F5F5">
+
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ЗАГОЛОВОК -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+            <TextBlock Text="➕ Добавить документ об образовании"
+                       FontSize="18" FontWeight="Bold" Foreground="#333"/>
+            <TextBlock Text="Заполните данные о документе об образовании"
+                       FontSize="12" Foreground="#666" Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <!-- ОСНОВНАЯ ЧАСТЬ -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+
+                <!-- Выбор человека -->
+                <GroupBox Header="👤 Получатель документа" Margin="0,0,0,10" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="Выберите человека из списка:" FontWeight="Bold" FontSize="11" Margin="0,0,0,5"/>
+                            <ComboBox x:Name="CmbPerson" Height="30"
+                                      DisplayMemberPath="FullName"
+                                      SelectedValuePath="Id"
+                                      IsEditable="True"
+                                      StaysOpenOnEdit="True"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Bottom">
+                            <Button Content="➕ Создать нового" Click="BtnCreateNewPerson_Click"
+                                    Background="#2196F3" Foreground="White" FontWeight="Bold"
+                                    Padding="10,5" Height="30"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Блок 1: Информация о документе -->
+                <GroupBox Header="📄 Информация о документе" Margin="0,0,0,10" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Column="0" Grid.Row="0" Margin="5">
+                            <TextBlock Text="Наименование документа *" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtDocName" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Grid.Row="0" Margin="5">
+                            <TextBlock Text="Вид документа" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtDocType" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Grid.Row="0" Margin="5">
+                            <TextBlock Text="Статус документа" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtDocStatus" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="1" Margin="5">
+                            <TextBlock Text="Уровень образования" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtEducationLevel" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Grid.Row="1" Margin="5">
+                            <TextBlock Text="Серия" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtDocSeries" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Grid.Row="1" Margin="5">
+                            <TextBlock Text="Номер" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtDocNumber" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="2" Margin="5">
+                            <TextBlock Text="Дата выдачи" FontWeight="Bold" FontSize="11"/>
+                            <DatePicker x:Name="DpIssueDate" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Grid.Row="2" Margin="5">
+                            <TextBlock Text="Регистрационный номер" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtRegNumber" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Grid.Row="2" Margin="5">
+                            <TextBlock Text="Подтверждения:" FontWeight="Bold" FontSize="11"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                <CheckBox x:Name="ChkLossConfirmed" Content="Утрата" Margin="0,0,10,0"/>
+                                <CheckBox x:Name="ChkExchangeConfirmed" Content="Обмен" Margin="0,0,10,0"/>
+                                <CheckBox x:Name="ChkDestructionConfirmed" Content="Уничтожение"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Блок 2: Специальность и квалификация -->
+                <GroupBox Header="🎓 Специальность и квалификация" Margin="0,0,0,10" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Column="0" Grid.Row="0" Margin="5">
+                            <TextBlock Text="Код специальности" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtSpecialtyCode" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Margin="5">
+                            <TextBlock Text="Наименование специальности" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtSpecialtyName" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="5">
+                            <TextBlock Text="Квалификация" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtQualificationName" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="5">
+                            <TextBlock Text="Образовательная программа" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtProgramName" Height="25"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Блок 3: Сроки обучения -->
+                <GroupBox Header="📅 Сроки обучения" Margin="0,0,0,10" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="5">
+                            <TextBlock Text="Год поступления" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtEnrollmentYear" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="5">
+                            <TextBlock Text="Год окончания" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtGraduationYear" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Margin="5">
+                            <TextBlock Text="Срок обучения (лет)" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtStudyDurationYears" Height="25"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Блок 4: Данные получателя -->
+                <GroupBox Header="👤 Данные получателя" Margin="0,0,0,10" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Column="0" Grid.Row="0" Margin="5">
+                            <TextBlock Text="Фамилия *" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtRecipientLastName" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Grid.Row="0" Margin="5">
+                            <TextBlock Text="Имя *" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtRecipientFirstName" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Grid.Row="0" Margin="5">
+                            <TextBlock Text="Отчество" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtRecipientMiddleName" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="1" Margin="5">
+                            <TextBlock Text="Дата рождения" FontWeight="Bold" FontSize="11"/>
+                            <DatePicker x:Name="DpRecipientBirthDate" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Grid.Row="1" Margin="5">
+                            <TextBlock Text="Пол" FontWeight="Bold" FontSize="11"/>
+                            <ComboBox x:Name="CmbRecipientGender" Height="25">
+                                <ComboBoxItem Content="Мужской"/>
+                                <ComboBoxItem Content="Женский"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Grid.Row="1" Margin="5">
+                            <TextBlock Text="СНИЛС" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtSnils" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="5">
+                            <TextBlock Text="Гражданство (код ОКСМ)" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtCitizenshipCountryCode" Height="25"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Блок 5: Форма и финансирование -->
+                <GroupBox Header="💰 Форма и финансирование" Margin="0,0,0,10" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Column="0" Grid.Row="0" Margin="5">
+                            <TextBlock Text="Форма обучения" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtStudyForm" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Grid.Row="0" Margin="5">
+                            <TextBlock Text="Форма на момент прекращения" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtEducationFormAtTermination" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Grid.Row="0" Margin="5">
+                            <TextBlock Text="Источник финансирования" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtFundingSource" Height="25"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Блок 6: Целевое обучение -->
+                <GroupBox Header="📋 Целевое обучение" Margin="0,0,0,10" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="5">
+                            <CheckBox x:Name="ChkHasTargetContract" Content="Наличие договора о целевом обучении"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="1" Margin="5">
+                            <TextBlock Text="Номер договора" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtTargetContractNumber" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Grid.Row="1" Margin="5">
+                            <TextBlock Text="Дата договора" FontWeight="Bold" FontSize="11"/>
+                            <DatePicker x:Name="DpTargetContractDate" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="5">
+                            <TextBlock Text="Организация (договор)" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtContractOrgName" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="3" Margin="5">
+                            <TextBlock Text="ОГРН" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtContractOrgOgrn" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Grid.Row="3" Margin="5">
+                            <TextBlock Text="КПП" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtContractOrgKpp" Height="25"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Блок 7: Работодатель -->
+                <GroupBox Header="🏢 Работодатель" Margin="0,0,0,10" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="5">
+                            <TextBlock Text="Организация работодателя" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtEmployerOrgName" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="1" Margin="5">
+                            <TextBlock Text="ОГРН" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtEmployerOrgOgrn" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Grid.Row="1" Margin="5">
+                            <TextBlock Text="КПП" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtEmployerOrgKpp" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="5">
+                            <TextBlock Text="Субъект федерации" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtEmployerFederalSubject" Height="25"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Блок 8: Оригинал документа -->
+                <GroupBox Header="📜 Оригинал документа" Margin="0,0,0,10" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="5">
+                            <TextBlock Text="Наименование оригинала" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtOriginalDocName" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="1" Margin="5">
+                            <TextBlock Text="Серия (оригинал)" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtOriginalSeries" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Grid.Row="1" Margin="5">
+                            <TextBlock Text="Номер (оригинал)" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtOriginalNumber" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="2" Margin="5">
+                            <TextBlock Text="Рег. номер (оригинал)" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtOriginalRegNumber" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Grid.Row="2" Margin="5">
+                            <TextBlock Text="Дата выдачи (оригинал)" FontWeight="Bold" FontSize="11"/>
+                            <DatePicker x:Name="DpOriginalIssueDate" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="3" Margin="5">
+                            <TextBlock Text="Фамилия (оригинал)" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtOriginalRecipientLastName" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Grid.Row="3" Margin="5">
+                            <TextBlock Text="Имя (оригинал)" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtOriginalRecipientFirstName" Height="25"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="5">
+                            <TextBlock Text="Отчество (оригинал)" FontWeight="Bold" FontSize="11"/>
+                            <TextBox x:Name="TxtOriginalRecipientMiddleName" Height="25"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- КНОПКИ -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+            <Button Content="❌ Отмена" Width="120" Height="40"
+                    Background="#E0E0E0" Foreground="#333"
+                    FontWeight="Bold" BorderThickness="0"
+                    Click="CancelButton_Click" Margin="0,0,10,0"/>
+            <Button x:Name="SaveButton" Content="💾 Сохранить" Width="150" Height="40"
+                    Background="#4CAF50" Foreground="White"
+                    FontWeight="Bold" BorderThickness="0"
+                    Click="SaveButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -191,7 +191,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Label\Dialogs\AddEducationDocumentDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Label\Dialogs\AddSpecialtyGroupDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Label\EducationDocumentsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -200,6 +208,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Label\ImportExcelPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Label\Item\EducationDocumentItem.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -235,6 +247,7 @@
     <Compile Include="Classes\Dictionaries\Party.cs" />
     <Compile Include="Classes\Dictionaries\SocialOrigin.cs" />
     <Compile Include="Classes\Dictionaries\SocialStatus.cs" />
+    <Compile Include="Classes\Person\EducationDocument.cs" />
     <Compile Include="Classes\Person\Person.cs" />
     <Compile Include="Classes\Person\PersonViewModel.cs" />
     <Compile Include="Classes\Specialties\Specialty.cs" />
@@ -248,14 +261,23 @@
     <Compile Include="Label\authorization.xaml.cs">
       <DependentUpon>authorization.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Label\Dialogs\AddEducationDocumentDialog.xaml.cs">
+      <DependentUpon>AddEducationDocumentDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Label\Dialogs\AddSpecialtyGroupDialog.xaml.cs">
       <DependentUpon>AddSpecialtyGroupDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Label\EducationDocumentsPage.xaml.cs">
+      <DependentUpon>EducationDocumentsPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Label\ImportEducationDocumentsPage.xaml.cs">
       <DependentUpon>ImportEducationDocumentsPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Label\ImportExcelPage.xaml.cs">
       <DependentUpon>ImportExcelPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Label\Item\EducationDocumentItem.xaml.cs">
+      <DependentUpon>EducationDocumentItem.xaml</DependentUpon>
     </Compile>
     <Compile Include="Label\Item\PersonItem.xaml.cs">
       <DependentUpon>PersonItem.xaml</DependentUpon>

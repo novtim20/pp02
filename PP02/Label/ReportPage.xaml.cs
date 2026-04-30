@@ -602,7 +602,7 @@ namespace PP02.Label
                 Table table = AddTable(body);
 
                 // Заголовки таблицы
-                string[] headers = { "ФИО получателя", "Тип документа", "Уровень образования", "Серия", "Номер", "Дата выдачи", "Специальность", "Год окончания" };
+                string[] headers = { "ФИО получателя", "Тип документа", "Уровень образования", "Серия", "Номер", "Дата выдачи", "Специальность", "Год окончания", "Форма обучения", "Источник финансирования" };
                 TableRow headerRow = new TableRow();
                 foreach (var header in headers)
                 {
@@ -622,6 +622,8 @@ namespace PP02.Label
                     row.Append(CreateTableCell(doc.IssueDate?.ToShortDateString() ?? "-"));
                     row.Append(CreateTableCell(doc.SpecialtyName ?? "-"));
                     row.Append(CreateTableCell(doc.GraduationYear?.ToString() ?? "-"));
+                    row.Append(CreateTableCell(doc.StudyForm ?? "-"));
+                    row.Append(CreateTableCell(doc.FundingSource ?? "-"));
                     table.Append(row);
                 }
 
@@ -738,10 +740,12 @@ namespace PP02.Label
                                 columns.RelativeColumn(1); // Дата
                                 columns.RelativeColumn(1.5f); // Специальность
                                 columns.RelativeColumn(0.8f); // Год
+                                columns.RelativeColumn(1); // Форма обучения
+                                columns.RelativeColumn(1); // Источник финансирования
                             });
 
                             // Заголовки таблицы
-                            string[] headers = { "ФИО", "Тип", "Уровень", "Серия", "Номер", "Дата", "Специальность", "Год" };
+                            string[] headers = { "ФИО", "Тип", "Уровень", "Серия", "Номер", "Дата", "Специальность", "Год", "Форма обуч.", "Финанс." };
                             foreach (var header in headers)
                             {
                                 table.Cell().Element(CellStyle).Text(header);
@@ -758,6 +762,8 @@ namespace PP02.Label
                                 table.Cell().Element(CellStyle).Text(doc.IssueDate?.ToShortDateString() ?? "-");
                                 table.Cell().Element(CellStyle).Text(doc.SpecialtyName ?? "-");
                                 table.Cell().Element(CellStyle).Text(doc.GraduationYear?.ToString() ?? "-");
+                                table.Cell().Element(CellStyle).Text(doc.StudyForm ?? "-");
+                                table.Cell().Element(CellStyle).Text(doc.FundingSource ?? "-");
                             }
                         });
 
@@ -811,7 +817,7 @@ namespace PP02.Label
 
                         Table table = AddTable(body);
 
-                        string[] headers = { "Тип документа", "Уровень образования", "Серия", "Номер", "Дата выдачи", "Специальность", "Год окончания" };
+                        string[] headers = { "Тип документа", "Уровень образования", "Серия", "Номер", "Дата выдачи", "Специальность", "Год окончания", "Форма обучения", "Источник финансирования" };
                         TableRow headerRow = new TableRow();
                         foreach (var header in headers)
                         {
@@ -829,6 +835,8 @@ namespace PP02.Label
                             row.Append(CreateTableCell(doc.IssueDate?.ToShortDateString() ?? "-"));
                             row.Append(CreateTableCell(doc.SpecialtyName ?? "-"));
                             row.Append(CreateTableCell(doc.GraduationYear?.ToString() ?? "-"));
+                            row.Append(CreateTableCell(doc.StudyForm ?? "-"));
+                            row.Append(CreateTableCell(doc.FundingSource ?? "-"));
                             table.Append(row);
                         }
 
@@ -1005,9 +1013,11 @@ namespace PP02.Label
                                         cols.RelativeColumn(1); // Дата
                                         cols.RelativeColumn(1.5f); // Специальность
                                         cols.RelativeColumn(0.8f); // Год
+                                        cols.RelativeColumn(1); // Форма обучения
+                                        cols.RelativeColumn(1); // Источник финансирования
                                     });
 
-                                    string[] headers = { "Тип", "Уровень", "Серия", "Номер", "Дата", "Специальность", "Год" };
+                                    string[] headers = { "Тип", "Уровень", "Серия", "Номер", "Дата", "Специальность", "Год", "Форма обуч.", "Финанс." };
                                     foreach (var header in headers)
                                     {
                                         table.Cell().Element(CellStyle).Text(header);
@@ -1022,6 +1032,8 @@ namespace PP02.Label
                                         table.Cell().Element(CellStyle).Text(doc.IssueDate?.ToShortDateString() ?? "-");
                                         table.Cell().Element(CellStyle).Text(doc.SpecialtyName ?? "-");
                                         table.Cell().Element(CellStyle).Text(doc.GraduationYear?.ToString() ?? "-");
+                                        table.Cell().Element(CellStyle).Text(doc.StudyForm ?? "-");
+                                        table.Cell().Element(CellStyle).Text(doc.FundingSource ?? "-");
                                     }
                                 });
                             }
@@ -1030,7 +1042,7 @@ namespace PP02.Label
                                 column.Item().PaddingTop(5).Text("Нет документов об образовании").FontSize(10).Italic().FontColor(Colors.Grey.Medium);
                             }
 
-                            column.Item().PaddingTop(10).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
+                            column.Item().PaddingTop(10).LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
                         }
                     });
 

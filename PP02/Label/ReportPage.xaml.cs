@@ -225,13 +225,21 @@ namespace PP02.Label
             {
                 try
                 {
-                    ExportToWord(saveFileDialog.FileName, _filteredPeople);
-                    ExportEducationDocumentsToWord(saveFileDialog.FileName.Replace(".docx", "_EducationDocuments.docx"), _filteredEducationDocuments);
+                    // Экспорт документов об образовании вместе с людьми, если включен переключатель
+                    if (ChkIncludeEducationDocuments.IsChecked == true)
+                    {
+                        ExportPeopleWithEducationDocumentsToWord(saveFileDialog.FileName, _filteredPeople, _allEducationDocuments);
+                    }
+                    else
+                    {
+                        ExportToWord(saveFileDialog.FileName, _filteredPeople);
+                    }
+
                     MessageBox.Show("Отчет успешно создан!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
-                    // MessageBox.Show($"Ошибка при создании Word файла: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Ошибка при создании Word файла: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -254,8 +262,16 @@ namespace PP02.Label
             {
                 try
                 {
-                    ExportToExcel(saveFileDialog.FileName, _filteredPeople);
-                    ExportEducationDocumentsToExcel(saveFileDialog.FileName.Replace(".xlsx", "_EducationDocuments.xlsx"), _filteredEducationDocuments);
+                    // Экспорт документов об образовании вместе с людьми, если включен переключатель
+                    if (ChkIncludeEducationDocuments.IsChecked == true)
+                    {
+                        ExportPeopleWithEducationDocumentsToExcel(saveFileDialog.FileName, _filteredPeople, _allEducationDocuments);
+                    }
+                    else
+                    {
+                        ExportToExcel(saveFileDialog.FileName, _filteredPeople);
+                    }
+
                     MessageBox.Show("Отчет успешно создан!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
@@ -283,8 +299,16 @@ namespace PP02.Label
             {
                 try
                 {
-                    ExportToPdf(saveFileDialog.FileName, _filteredPeople);
-                    ExportEducationDocumentsToPdf(saveFileDialog.FileName.Replace(".pdf", "_EducationDocuments.pdf"), _filteredEducationDocuments);
+                    // Экспорт документов об образовании вместе с людьми, если включен переключатель
+                    if (ChkIncludeEducationDocuments.IsChecked == true)
+                    {
+                        ExportPeopleWithEducationDocumentsToPdf(saveFileDialog.FileName, _filteredPeople, _allEducationDocuments);
+                    }
+                    else
+                    {
+                        ExportToPdf(saveFileDialog.FileName, _filteredPeople);
+                    }
+
                     MessageBox.Show("Отчет успешно создан!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
@@ -750,5 +774,279 @@ namespace PP02.Label
             })
                 .GeneratePdf(filePath);
         }
+
+        /// <summary>
+        /// Экспорт людей с их документами об образовании в Word
+        /// </summary>
+        private void ExportPeopleWithEducationDocumentsToWord(string filePath, List<PersonViewModel> people, List<EducationDocument> allDocuments)
+        {
+            using (WordprocessingDocument wordDocument = WordprocessingDocument.Create(filePath, WordprocessingDocumentType.Document))
+            {
+                MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
+                mainPart.Document = new WordDocument();
+                Body body = mainPart.Document.AppendChild(new Body());
+
+                // Заголовок
+                AddParagraph(body, "Отчет по людям с документами об образовании", true, 16);
+                AddParagraph(body, $"Дата формирования: {DateTime.Now.ToShortDateString()}", false, 12);
+                AddParagraph(body, $"Всего записей: {people.Count}", false, 12);
+                AddParagraph(body, "", false, 12);
+
+                foreach (var person in people)
+                {
+                    // Информация о человеке
+                    AddParagraph(body, $"ФИО: {person.FullName}", true, 14);
+                    AddParagraph(body, $"Роль: {person.Role}", false, 12);
+                    AddParagraph(body, $"Специальность: {person.SpecialtyName ?? "-"}", false, 12);
+                    AddParagraph(body, $"Образование: {person.EducationName ?? "-"}", false, 12);
+                    AddParagraph(body, $"Год выпуска: {person.GraduationYear?.ToString() ?? "-"}", false, 12);
+                    AddParagraph(body, $"Группа: {person.GroupName ?? "-"}", false, 12);
+
+                    // Документы об образовании этого человека
+                    var personDocs = allDocuments?.Where(d => d.PersonId == person.Id).ToList() ?? new List<EducationDocument>();
+
+                    if (personDocs.Any())
+                    {
+                        AddParagraph(body, $"Документы об образовании ({personDocs.Count}):", true, 13);
+
+                        Table table = AddTable(body);
+
+                        string[] headers = { "Тип документа", "Уровень образования", "Серия", "Номер", "Дата выдачи", "Специальность", "Год окончания" };
+                        TableRow headerRow = new TableRow();
+                        foreach (var header in headers)
+                        {
+                            headerRow.Append(CreateTableCell(header, true));
+                        }
+                        table.Append(headerRow);
+
+                        foreach (var doc in personDocs)
+                        {
+                            TableRow row = new TableRow();
+                            row.Append(CreateTableCell(doc.DocType ?? "-"));
+                            row.Append(CreateTableCell(doc.EducationLevel ?? "-"));
+                            row.Append(CreateTableCell(doc.DocSeries ?? "-"));
+                            row.Append(CreateTableCell(doc.DocNumber ?? "-"));
+                            row.Append(CreateTableCell(doc.IssueDate?.ToShortDateString() ?? "-"));
+                            row.Append(CreateTableCell(doc.SpecialtyName ?? "-"));
+                            row.Append(CreateTableCell(doc.GraduationYear?.ToString() ?? "-"));
+                            table.Append(row);
+                        }
+
+                        body.Append(table);
+                    }
+                    else
+                    {
+                        AddParagraph(body, "Документы об образовании: нет документов", false, 12);
+                    }
+
+                    AddParagraph(body, "", false, 12); // Разделитель между людьми
+                    AddParagraph(body, "─────────────────────────────────────────────────────", false, 12);
+                    AddParagraph(body, "", false, 12);
+                }
+
+                mainPart.Document.Save();
+            }
+        }
+
+        /// <summary>
+        /// Экспорт людей с их документами об образовании в Excel
+        /// </summary>
+        private void ExportPeopleWithEducationDocumentsToExcel(string filePath, List<PersonViewModel> people, List<EducationDocument> allDocuments)
+        {
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Люди с документами");
+
+                // Заголовок отчета
+                worksheet.Cell(1, 1).Value = "Отчет по людям с документами об образовании";
+                worksheet.Cell(1, 1).Style.Font.SetBold();
+                worksheet.Cell(1, 1).Style.Font.SetFontSize(16);
+
+                worksheet.Cell(2, 1).Value = $"Дата формирования: {DateTime.Now.ToShortDateString()}";
+                worksheet.Cell(3, 1).Value = $"Всего записей: {people.Count}";
+
+                // Заголовки таблицы - объединяем данные людей и документов
+                int headerRow = 5;
+                string[] headers = {
+                    "ФИО", "Роль", "Специальность", "Образование", "Год выпуска", "Группа",
+                    "Тип документа", "Уровень образования", "Серия", "Номер", "Дата выдачи",
+                    "Специальность (док)", "Год окончания (док)", "Форма обучения", "Источник финансирования"
+                };
+
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    var cell = worksheet.Cell(headerRow, i + 1);
+                    cell.Value = headers[i];
+                    cell.Style.Font.SetBold();
+                    cell.Style.Fill.BackgroundColor = XLColor.LightGray;
+                    cell.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+                }
+
+                // Данные
+                int dataRow = headerRow + 1;
+                foreach (var person in people)
+                {
+                    var personDocs = allDocuments?.Where(d => d.PersonId == person.Id).ToList() ?? new List<EducationDocument>();
+
+                    if (personDocs.Any())
+                    {
+                        foreach (var doc in personDocs)
+                        {
+                            worksheet.Cell(dataRow, 1).Value = person.FullName;
+                            worksheet.Cell(dataRow, 2).Value = person.Role;
+                            worksheet.Cell(dataRow, 3).Value = person.SpecialtyName ?? "-";
+                            worksheet.Cell(dataRow, 4).Value = person.EducationName ?? "-";
+                            worksheet.Cell(dataRow, 5).Value = person.GraduationYear?.ToString() ?? "-";
+                            worksheet.Cell(dataRow, 6).Value = person.GroupName ?? "-";
+
+                            worksheet.Cell(dataRow, 7).Value = doc.DocType ?? "-";
+                            worksheet.Cell(dataRow, 8).Value = doc.EducationLevel ?? "-";
+                            worksheet.Cell(dataRow, 9).Value = doc.DocSeries ?? "-";
+                            worksheet.Cell(dataRow, 10).Value = doc.DocNumber ?? "-";
+                            worksheet.Cell(dataRow, 11).Value = doc.IssueDate?.ToShortDateString() ?? "-";
+                            worksheet.Cell(dataRow, 12).Value = doc.SpecialtyName ?? "-";
+                            worksheet.Cell(dataRow, 13).Value = doc.GraduationYear?.ToString() ?? "-";
+                            worksheet.Cell(dataRow, 14).Value = doc.StudyForm ?? "-";
+                            worksheet.Cell(dataRow, 15).Value = doc.FundingSource ?? "-";
+
+                            dataRow++;
+                        }
+                    }
+                    else
+                    {
+                        // Человек без документов - одна строка с прочерками в полях документов
+                        worksheet.Cell(dataRow, 1).Value = person.FullName;
+                        worksheet.Cell(dataRow, 2).Value = person.Role;
+                        worksheet.Cell(dataRow, 3).Value = person.SpecialtyName ?? "-";
+                        worksheet.Cell(dataRow, 4).Value = person.EducationName ?? "-";
+                        worksheet.Cell(dataRow, 5).Value = person.GraduationYear?.ToString() ?? "-";
+                        worksheet.Cell(dataRow, 6).Value = person.GroupName ?? "-";
+
+                        for (int col = 7; col <= headers.Length; col++)
+                        {
+                            worksheet.Cell(dataRow, col).Value = "-";
+                        }
+
+                        dataRow++;
+                    }
+                }
+
+                // Автоподбор ширины колонок
+                worksheet.Columns().AdjustToContents();
+
+                // Границы для всей таблицы
+                var range = worksheet.Range(headerRow, 1, dataRow - 1, headers.Length);
+                range.Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
+                range.Style.Border.SetInsideBorder(XLBorderStyleValues.Thin);
+
+                workbook.SaveAs(filePath);
+            }
+        }
+
+        /// <summary>
+        /// Экспорт людей с их документами об образовании в PDF
+        /// </summary>
+        private void ExportPeopleWithEducationDocumentsToPdf(string filePath, List<PersonViewModel> people, List<EducationDocument> allDocuments)
+        {
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            PdfDocument.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(20);
+                    page.DefaultTextStyle(x => x.FontSize(10));
+
+                    // Заголовок
+                    page.Header().Column(col =>
+                    {
+                        col.Item()
+                            .Text("Отчет по людям с документами об образовании")
+                            .FontSize(16)
+                            .Bold()
+                            .AlignCenter();
+
+                        col.Item()
+                            .PaddingTop(10)
+                            .Text($"Дата формирования: {DateTime.Now.ToShortDateString()}")
+                            .FontSize(12);
+
+                        col.Item()
+                            .PaddingTop(5)
+                            .Text($"Всего записей: {people.Count}")
+                            .FontSize(12);
+                    });
+
+                    // Контент
+                    page.Content().PaddingVertical(20).Column(column =>
+                    {
+                        foreach (var person in people)
+                        {
+                            // Информация о человеке
+                            column.Item().PaddingBottom(5).Text(person.FullName).FontSize(12).Bold();
+                            column.Item().Text($"Роль: {person.Role}, Специальность: {person.SpecialtyName ?? "-"}, Группа: {person.GroupName ?? "-"}").FontSize(10);
+
+                            // Документы об образовании
+                            var personDocs = allDocuments?.Where(d => d.PersonId == person.Id).ToList() ?? new List<EducationDocument>();
+
+                            if (personDocs.Any())
+                            {
+                                column.Item().PaddingTop(5).Text($"Документы ({personDocs.Count}):").FontSize(11).Bold();
+
+                                column.Item().PaddingTop(5).Table(table =>
+                                {
+                                    table.ColumnsDefinition(cols =>
+                                    {
+                                        cols.RelativeColumn(1); // Тип
+                                        cols.RelativeColumn(1); // Уровень
+                                        cols.RelativeColumn(0.8f); // Серия
+                                        cols.RelativeColumn(1); // Номер
+                                        cols.RelativeColumn(1); // Дата
+                                        cols.RelativeColumn(1.5f); // Специальность
+                                        cols.RelativeColumn(0.8f); // Год
+                                    });
+
+                                    string[] headers = { "Тип", "Уровень", "Серия", "Номер", "Дата", "Специальность", "Год" };
+                                    foreach (var header in headers)
+                                    {
+                                        table.Cell().Element(CellStyle).Text(header);
+                                    }
+
+                                    foreach (var doc in personDocs)
+                                    {
+                                        table.Cell().Element(CellStyle).Text(doc.DocType ?? "-");
+                                        table.Cell().Element(CellStyle).Text(doc.EducationLevel ?? "-");
+                                        table.Cell().Element(CellStyle).Text(doc.DocSeries ?? "-");
+                                        table.Cell().Element(CellStyle).Text(doc.DocNumber ?? "-");
+                                        table.Cell().Element(CellStyle).Text(doc.IssueDate?.ToShortDateString() ?? "-");
+                                        table.Cell().Element(CellStyle).Text(doc.SpecialtyName ?? "-");
+                                        table.Cell().Element(CellStyle).Text(doc.GraduationYear?.ToString() ?? "-");
+                                    }
+                                });
+                            }
+                            else
+                            {
+                                column.Item().PaddingTop(5).Text("Нет документов об образовании").FontSize(10).Italic().FontColor(QuestPDF.Helpers.Placeholders.Color.Gray.Medium);
+                            }
+
+                            column.Item().PaddingTop(10).LineHorizontal(1).LineColor(QuestPDF.Helpers.Placeholders.Color.Gray.Light);
+                        }
+                    });
+
+                    // Нумерация страниц
+                    page.Footer()
+                        .AlignCenter()
+                        .Text(text =>
+                        {
+                            text.CurrentPageNumber();
+                            text.Span(" / ");
+                            text.TotalPages();
+                        });
+                });
+            })
+                .GeneratePdf(filePath);
+        }
+
     }
 }

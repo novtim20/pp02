@@ -42,12 +42,34 @@ namespace PP02.Label
             try
             {
                 var db = new DataProvider();
+
+                // Проверяем подключение к БД
+                string connectionString = Connect.Connect.GetConnectionString();
+                using (var connection = new MySql.Data.MySqlClient.MySqlConnection(connectionString))
+                {
+                    connection.Open();
+                    MessageBox.Show($"Успешное подключение к базе данных '{connection.Database}'",
+                        "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+
                 db.DataPeople(_connectionString);
+
+                if (DataProvider.PeopleVMList.Count == 0)
+                {
+                    MessageBox.Show("База данных пуста. Таблица persons не содержит записей.",
+                        "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+
                 DisplayResults(DataProvider.PeopleVMList);
+            }
+            catch (MySql.Data.MySqlClient.MySqlException ex)
+            {
+                MessageBox.Show($"Ошибка подключения к базе данных:\n{ex.Message}\n\nПроверьте:\n- Запущен ли MySQL сервер\n- Правильность логина/пароля\n- Существует ли база данных 'pp022'",
+                    "Ошибка подключения к БД", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка загрузки данных: {ex.Message}",
+                MessageBox.Show($"Ошибка загрузки данных:\n{ex.Message}\n\n{ex.StackTrace}",
                     "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

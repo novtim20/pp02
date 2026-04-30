@@ -627,19 +627,10 @@ namespace PP02.Label.Item
                 // Открываем страницу документов с фильтром по person_id
                 var documentsPage = new EducationDocumentsPage(_currentPerson.Id);
 
-                // Используем NavigationService для перехода
-                if (this.NavigationService != null)
+                // Используем MainWindow для навигации
+                if (System.Windows.Application.Current.MainWindow is MainWindow mainWindow)
                 {
-                    this.NavigationService.Navigate(documentsPage);
-                }
-                else
-                {
-                    // Если NavigationService недоступен, пробуем найти окно и изменить контент
-                    var window = System.Windows.Application.Current.MainWindow;
-                    if (window is MainWindow mainWindow)
-                    {
-                        mainWindow.MainFrame?.Navigate(documentsPage);
-                    }
+                    mainWindow.OpenPages(documentsPage);
                 }
             }
             catch (Exception ex)

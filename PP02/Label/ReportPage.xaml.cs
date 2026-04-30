@@ -24,6 +24,8 @@ namespace PP02.Label
     {
         private List<PersonViewModel> _allPeople;
         private List<PersonViewModel> _filteredPeople;
+        private List<EducationDocument> _allEducationDocuments;
+        private List<EducationDocument> _filteredEducationDocuments;
 
         // Списки для фильтров
         private List<string> _roles;
@@ -33,6 +35,8 @@ namespace PP02.Label
         private List<string> _socialStatuses;
         private List<string> _parties;
         private List<string> _groups;
+        private List<string> _docTypes;
+        private List<string> _educationLevels;
 
         public ReportPage()
         {
@@ -76,6 +80,10 @@ namespace PP02.Label
 
                 _roles = new List<string> { "Все", "Студент", "Преподаватель" };
 
+                // Списки для фильтров документов об образовании
+                _docTypes = new List<string> { "Все" };
+                _educationLevels = new List<string> { "Все" };
+
                 // Привязываем к ComboBox
                 CbRole.ItemsSource = _roles;
                 CbSpecialty.ItemsSource = _specialties;
@@ -106,6 +114,7 @@ namespace PP02.Label
             {
                 var dataProvider = new DataProvider();
                 _allPeople = dataProvider.GetPeople(); // Предполагается, что этот метод есть в DataProvider
+                _allEducationDocuments = dataProvider.GetEducationDocuments();
                 ApplyFilters();
             }
             catch (Exception ex)
@@ -147,6 +156,24 @@ namespace PP02.Label
 
                 return matchRole && matchSpecialty && matchEducation && matchOrigin && matchStatus && matchParty && matchGroup && matchName && matchDate;
             }).ToList();
+
+            // Фильтрация документов об образовании
+            if (_allEducationDocuments != null)
+            {
+                _filteredEducationDocuments = _allEducationDocuments.Where(d =>
+                {
+                    bool matchName = string.IsNullOrEmpty(nameFilter) ||
+                                     (!string.IsNullOrEmpty(d.RecipientLastName) && d.RecipientLastName.ToLower().Contains(nameFilter)) ||
+                                     (!string.IsNullOrEmpty(d.RecipientFirstName) && d.RecipientFirstName.ToLower().Contains(nameFilter)) ||
+                                     (!string.IsNullOrEmpty(d.PersonFullName) && d.PersonFullName.ToLower().Contains(nameFilter));
+                    bool matchDocType = true; // Можно добавить фильтр по типу документа
+                    bool matchEducationLevel = true; // Можно добавить фильтр по уровню образования
+                    bool matchDate = (!startYear.HasValue || (d.GraduationYear.HasValue && d.GraduationYear >= startYear.Value)) &&
+                                     (!endYear.HasValue || (d.GraduationYear.HasValue && d.GraduationYear <= endYear.Value));
+
+                    return matchName && matchDocType && matchEducationLevel && matchDate;
+                }).ToList();
+            }
 
             ResultsItemsControl.ItemsSource = _filteredPeople;
             LbCount.Text = $"Найдено записей: {_filteredPeople.Count}";
@@ -199,6 +226,7 @@ namespace PP02.Label
                 try
                 {
                     ExportToWord(saveFileDialog.FileName, _filteredPeople);
+                    ExportEducationDocumentsToWord(saveFileDialog.FileName.Replace(".docx", "_EducationDocuments.docx"), _filteredEducationDocuments);
                     MessageBox.Show("Отчет успешно создан!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
@@ -227,6 +255,7 @@ namespace PP02.Label
                 try
                 {
                     ExportToExcel(saveFileDialog.FileName, _filteredPeople);
+                    ExportEducationDocumentsToExcel(saveFileDialog.FileName.Replace(".xlsx", "_EducationDocuments.xlsx"), _filteredEducationDocuments);
                     MessageBox.Show("Отчет успешно создан!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
@@ -255,6 +284,7 @@ namespace PP02.Label
                 try
                 {
                     ExportToPdf(saveFileDialog.FileName, _filteredPeople);
+                    ExportEducationDocumentsToPdf(saveFileDialog.FileName.Replace(".pdf", "_EducationDocuments.pdf"), _filteredEducationDocuments);
                     MessageBox.Show("Отчет успешно создан!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
@@ -522,6 +552,203 @@ namespace PP02.Label
                 .BorderBottom(1)
                 .BorderColor(Colors.Grey.Lighten2)
                 .Padding(5);
+        }
+
+        // ============================================================================
+        // МЕТОДЫ ЭКСПОРТА ДОКУМЕНТОВ ОБ ОБРАЗОВАНИИ
+        // ============================================================================
+
+        private void ExportEducationDocumentsToWord(string filePath, List<EducationDocument> documents)
+        {
+            if (documents == null || !documents.Any()) return;
+
+            using (WordprocessingDocument wordDocument = WordprocessingDocument.Create(filePath, WordprocessingDocumentType.Document))
+            {
+                MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
+                mainPart.Document = new WordDocument();
+                Body body = mainPart.Document.AppendChild(new Body());
+
+                // Заголовок
+                AddParagraph(body, "Отчет по документам об образовании", true, 16);
+                AddParagraph(body, $"Дата формирования: {DateTime.Now.ToShortDateString()}", false, 12);
+                AddParagraph(body, $"Всего записей: {documents.Count}", false, 12);
+                AddParagraph(body, "", false, 12);
+
+                // Таблица
+                Table table = AddTable(body);
+
+                // Заголовки таблицы
+                string[] headers = { "ФИО получателя", "Тип документа", "Уровень образования", "Серия", "Номер", "Дата выдачи", "Специальность", "Год окончания" };
+                TableRow headerRow = new TableRow();
+                foreach (var header in headers)
+                {
+                    headerRow.Append(CreateTableCell(header, true));
+                }
+                table.Append(headerRow);
+
+                // Данные
+                foreach (var doc in documents)
+                {
+                    TableRow row = new TableRow();
+                    row.Append(CreateTableCell($"{doc.RecipientLastName} {doc.RecipientFirstName} {doc.RecipientMiddleName}"?.Trim() ?? "-"));
+                    row.Append(CreateTableCell(doc.DocType ?? "-"));
+                    row.Append(CreateTableCell(doc.EducationLevel ?? "-"));
+                    row.Append(CreateTableCell(doc.DocSeries ?? "-"));
+                    row.Append(CreateTableCell(doc.DocNumber ?? "-"));
+                    row.Append(CreateTableCell(doc.IssueDate?.ToShortDateString() ?? "-"));
+                    row.Append(CreateTableCell(doc.SpecialtyName ?? "-"));
+                    row.Append(CreateTableCell(doc.GraduationYear?.ToString() ?? "-"));
+                    table.Append(row);
+                }
+
+                body.Append(table);
+                mainPart.Document.Save();
+            }
+        }
+
+        private void ExportEducationDocumentsToExcel(string filePath, List<EducationDocument> documents)
+        {
+            if (documents == null || !documents.Any()) return;
+
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Документы об образовании");
+
+                // Заголовок отчета
+                worksheet.Cell(1, 1).Value = "Отчет по документам об образовании";
+                worksheet.Cell(1, 1).Style.Font.SetBold();
+                worksheet.Cell(1, 1).Style.Font.SetFontSize(16);
+
+                worksheet.Cell(2, 1).Value = $"Дата формирования: {DateTime.Now.ToShortDateString()}";
+                worksheet.Cell(3, 1).Value = $"Всего записей: {documents.Count}";
+
+                // Заголовки таблицы
+                int headerRow = 5;
+                string[] headers = { "ФИО получателя", "Тип документа", "Уровень образования", "Серия", "Номер", "Дата выдачи", "Специальность", "Год окончания", "Форма обучения", "Источник финансирования" };
+
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    var cell = worksheet.Cell(headerRow, i + 1);
+                    cell.Value = headers[i];
+                    cell.Style.Font.SetBold();
+                    cell.Style.Fill.BackgroundColor = XLColor.LightGray;
+                    cell.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+                }
+
+                // Данные
+                int dataRow = headerRow + 1;
+                foreach (var doc in documents)
+                {
+                    worksheet.Cell(dataRow, 1).Value = $"{doc.RecipientLastName} {doc.RecipientFirstName} {doc.RecipientMiddleName}".Trim();
+                    worksheet.Cell(dataRow, 2).Value = doc.DocType ?? "-";
+                    worksheet.Cell(dataRow, 3).Value = doc.EducationLevel ?? "-";
+                    worksheet.Cell(dataRow, 4).Value = doc.DocSeries ?? "-";
+                    worksheet.Cell(dataRow, 5).Value = doc.DocNumber ?? "-";
+                    worksheet.Cell(dataRow, 6).Value = doc.IssueDate?.ToShortDateString() ?? "-";
+                    worksheet.Cell(dataRow, 7).Value = doc.SpecialtyName ?? "-";
+                    worksheet.Cell(dataRow, 8).Value = doc.GraduationYear?.ToString() ?? "-";
+                    worksheet.Cell(dataRow, 9).Value = doc.StudyForm ?? "-";
+                    worksheet.Cell(dataRow, 10).Value = doc.FundingSource ?? "-";
+                    dataRow++;
+                }
+
+                // Автоподбор ширины колонок
+                worksheet.Columns().AdjustToContents();
+
+                // Границы для всей таблицы
+                var range = worksheet.Range(headerRow, 1, dataRow - 1, headers.Length);
+                range.Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
+                range.Style.Border.SetInsideBorder(XLBorderStyleValues.Thin);
+
+                workbook.SaveAs(filePath);
+            }
+        }
+
+        private void ExportEducationDocumentsToPdf(string filePath, List<EducationDocument> documents)
+        {
+            if (documents == null || !documents.Any()) return;
+
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            PdfDocument.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(20);
+                    page.DefaultTextStyle(x => x.FontSize(10));
+
+                    // Заголовок
+                    page.Header().Column(col =>
+                    {
+                        col.Item()
+                            .Text("Отчет по документам об образовании")
+                            .FontSize(16)
+                            .Bold()
+                            .AlignCenter();
+
+                        col.Item()
+                            .PaddingTop(10)
+                            .Text($"Дата формирования: {DateTime.Now.ToShortDateString()}")
+                            .FontSize(12);
+
+                        col.Item()
+                            .PaddingTop(5)
+                            .Text($"Всего записей: {documents.Count}")
+                            .FontSize(12);
+                    });
+
+                    // Таблица
+                    page.Content()
+                        .PaddingVertical(20)
+                        .Table(table =>
+                        {
+                            // Настройка колонок
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(2); // ФИО
+                                columns.RelativeColumn(1); // Тип
+                                columns.RelativeColumn(1); // Уровень
+                                columns.RelativeColumn(0.8f); // Серия
+                                columns.RelativeColumn(1); // Номер
+                                columns.RelativeColumn(1); // Дата
+                                columns.RelativeColumn(1.5f); // Специальность
+                                columns.RelativeColumn(0.8f); // Год
+                            });
+
+                            // Заголовки таблицы
+                            string[] headers = { "ФИО", "Тип", "Уровень", "Серия", "Номер", "Дата", "Специальность", "Год" };
+                            foreach (var header in headers)
+                            {
+                                table.Cell().Element(CellStyle).Text(header);
+                            }
+
+                            // Данные
+                            foreach (var doc in documents)
+                            {
+                                table.Cell().Element(CellStyle).Text($"{doc.RecipientLastName} {doc.RecipientFirstName}".Trim());
+                                table.Cell().Element(CellStyle).Text(doc.DocType ?? "-");
+                                table.Cell().Element(CellStyle).Text(doc.EducationLevel ?? "-");
+                                table.Cell().Element(CellStyle).Text(doc.DocSeries ?? "-");
+                                table.Cell().Element(CellStyle).Text(doc.DocNumber ?? "-");
+                                table.Cell().Element(CellStyle).Text(doc.IssueDate?.ToShortDateString() ?? "-");
+                                table.Cell().Element(CellStyle).Text(doc.SpecialtyName ?? "-");
+                                table.Cell().Element(CellStyle).Text(doc.GraduationYear?.ToString() ?? "-");
+                            }
+                        });
+
+                    // Нумерация страниц
+                    page.Footer()
+                        .AlignCenter()
+                        .Text(text =>
+                        {
+                            text.CurrentPageNumber();
+                            text.Span(" / ");
+                            text.TotalPages();
+                        });
+                });
+            })
+                .GeneratePdf(filePath);
         }
     }
 }

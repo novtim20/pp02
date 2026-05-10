@@ -364,7 +364,7 @@
 
                 <!-- 🔹 КНОПКИ ДЕЙСТВИЙ -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,20">
-                    <Button Content="🗂 Группы специальностей" Width="200" Height="45" FontSize="16" FontWeight="Bold"
+                    <Button Content="🗂 специальности" Width="200" Height="45" FontSize="16" FontWeight="Bold"
                             Background="#607D8B" Foreground="White" BorderThickness="0"
                             Margin="0,0,10,0" Cursor="Hand" Click="SpecialtyGroupsButton_Click"/>
                     <Button Content="📋 Документы" Width="150" Height="45" FontSize="16" FontWeight="Bold"

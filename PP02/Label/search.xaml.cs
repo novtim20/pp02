@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -21,6 +22,10 @@ namespace PP02.Label
         // 🔹 Результаты поиска
         private ObservableCollection<PersonViewModel> _searchResults;
 
+        // 🔹 Флаг загрузки данных
+        private bool _isLoading = false;
+        private bool _dataLoaded = false;
+
         public search()
         {
             InitializeComponent();
@@ -37,8 +42,13 @@ namespace PP02.Label
         }
 
         // === 🔹 ЗАГРУЗКА ВСЕЙ БАЗЫ ДАННЫХ ПРИ ОТКРЫТИИ ===
-        private void LoadAllPeople()
+        private async void LoadAllPeople()
         {
+            if (_isLoading || _dataLoaded)
+                return;
+
+            _isLoading = true;
+
             try
             {
                 var db = new DataProvider();
@@ -47,12 +57,13 @@ namespace PP02.Label
                 string connectionString = Connect.Connect.GetConnectionString();
                 using (var connection = new MySql.Data.MySqlClient.MySqlConnection(connectionString))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
                     MessageBox.Show($"Успешное подключение к базе данных '{connection.Database}'",
                         "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
-                db.DataPeople(_connectionString);
+                // Загружаем данные в фоновом режиме
+                await Task.Run(() => db.DataPeople(_connectionString));
 
                 if (DataProvider.PeopleVMList.Count == 0)
                 {
@@ -60,6 +71,7 @@ namespace PP02.Label
                         "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
 
+                _dataLoaded = true;
                 DisplayResults(DataProvider.PeopleVMList);
             }
             catch (MySql.Data.MySqlClient.MySqlException ex)
@@ -71,6 +83,10 @@ namespace PP02.Label
             {
                 MessageBox.Show($"Ошибка загрузки данных:\n{ex.Message}\n\n{ex.StackTrace}",
                     "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                _isLoading = false;
             }
         }
 
@@ -299,12 +315,6 @@ namespace PP02.Label
 
             if (ResultsCountText != null)
                 ResultsCountText.Text = $"{results.Count} записей";
-
-            if (results.Count == 0)
-            {
-                MessageBox.Show("По вашему запросу ничего не найдено",
-                    "Результаты", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
         }
 
         // === 🔹 КНОПКА "ОЧИСТИТЬ" ===

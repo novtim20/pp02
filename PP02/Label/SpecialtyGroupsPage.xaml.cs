@@ -130,6 +130,27 @@ SELECT LAST_INSERT_ID();";
             NewGroupNameTextBox.Focus();
         }
 
+        // Обработчик изменения выбранной специальности в ComboBox группы
+        private void NewGroupSpecialtyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (NewGroupSpecialtyComboBox.SelectedItem is Specialty selectedSpecialty)
+                {
+                    // Автоматически подставляем сокращённое имя из специальности
+                    if (!string.IsNullOrEmpty(selectedSpecialty.ShortName))
+                    {
+                        NewGroupShortNameTextBox2.Text = selectedSpecialty.ShortName;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при автозаполнении сокращения: {ex.Message}",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         // Очистка полей группы (учебной)
         private void ClearGroupFields()
         {

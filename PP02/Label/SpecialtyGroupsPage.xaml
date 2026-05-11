@@ -301,7 +301,8 @@
                                     <TextBlock Text="Специальность *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                     <ComboBox x:Name="NewGroupSpecialtyComboBox" Height="35"
                                               BorderBrush="#DDD" BorderThickness="1"
-                                              DisplayMemberPath="Name" SelectedValuePath="Id"/>
+                                              DisplayMemberPath="Name" SelectedValuePath="Id"
+                                              SelectionChanged="NewGroupSpecialtyComboBox_SelectionChanged"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,0,0,10">

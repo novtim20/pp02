@@ -21,6 +21,14 @@ namespace PP02.Classes.Specialties
         // Для отображения в ComboBox
         public override string ToString()
         {
+            // Получаем год добавления из первой специальности в группе
+            int? year = Specialties.FirstOrDefault()?.ValidFrom?.Year;
+
+            if (year.HasValue)
+            {
+                return $"{year.Value}";
+            }
+
             return !string.IsNullOrEmpty(ShortName) ? $"{Name} [{ShortName}]" : Name;
         }
     }

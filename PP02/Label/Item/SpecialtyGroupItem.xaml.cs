@@ -50,8 +50,19 @@ namespace PP02.Label.Item
         {
             if (_currentGroup == null) return;
 
-            // Краткий вид
-            TxtGroupName.Text = _currentGroup.Name;
+            // Получаем год добавления из первой специальности в группе
+            int? year = _currentGroup.Specialties.FirstOrDefault()?.ValidFrom?.Year;
+
+            // Краткий вид - отображаем год вместо названия группы
+            if (year.HasValue)
+            {
+                TxtGroupName.Text = year.Value.ToString();
+            }
+            else
+            {
+                TxtGroupName.Text = _currentGroup.Name;
+            }
+
             TxtSpecialtiesCount.Text = $"Специальностей: {_currentGroup.Specialties.Count}";
 
             // Загружаем список специальностей в DataGrid

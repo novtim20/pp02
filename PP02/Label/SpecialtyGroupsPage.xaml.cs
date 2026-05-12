@@ -527,7 +527,7 @@ SELECT LAST_INSERT_ID();";
                 using (var command = new MySqlCommand(sql, connection))
                 {
                     command.Parameters.AddWithValue("@code", NewGroupCodeTextBox.Text.Trim());
-                    command.Parameters.AddWithValue("@data", (object?)dataValue ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@data", dataValue.HasValue ? (object)dataValue.Value : DBNull.Value);
                     command.Parameters.AddWithValue("@specialty_id", NewGroupSpecialtyComboBox.SelectedValue);
                     command.Parameters.AddWithValue("@is_active", NewGroupIsActiveCheckBox.IsChecked == true);
 
@@ -602,7 +602,7 @@ WHERE id = @id";
                 using (var command = new MySqlCommand(sql, connection))
                 {
                     command.Parameters.AddWithValue("@code", NewGroupCodeTextBox.Text.Trim());
-                    command.Parameters.AddWithValue("@data", (object?)dataValue ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@data", dataValue.HasValue ? (object)dataValue.Value : DBNull.Value);
                     command.Parameters.AddWithValue("@specialty_id", NewGroupSpecialtyComboBox.SelectedValue);
                     command.Parameters.AddWithValue("@is_active", NewGroupIsActiveCheckBox.IsChecked == true);
                     command.Parameters.AddWithValue("@id", groupId);

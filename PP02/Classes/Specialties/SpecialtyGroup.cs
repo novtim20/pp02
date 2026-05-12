@@ -12,7 +12,7 @@ namespace PP02.Classes.Specialties
     public class SpecialtyGroup
     {
         public int Id { get; set; }
-        public string Name { get; set; }           // Название группы специальностей
+        public string Name { get; set; } = "";           // Название группы специальностей
 
         // Список специальностей, принадлежащих этой группе
         public List<Specialty> Specialties { get; set; } = new List<Specialty>();

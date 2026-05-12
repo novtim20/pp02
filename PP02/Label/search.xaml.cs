@@ -140,7 +140,7 @@ namespace PP02.Label
 
                 // 🔹 Группа - выпадающий список
                 GroupComboBox.ItemsSource = new List<Group>
-                    { new Group { Id = -1, Code = "Все", ShortName = "", Name = "Все", SpecialtyId = -1, IsActive = true, SpecialtyName = "" } }
+                    { new Group { Id = -1, Code = "Все", Data = null, SpecialtyId = -1, IsActive = true, SpecialtyName = "" } }
                     .Concat(DataProvider.GroupList)
                     .ToList();
                 GroupComboBox.SelectedIndex = 0;
@@ -442,7 +442,7 @@ namespace PP02.Label
 
                 // Обновляем ComboBox
                 GroupComboBox.ItemsSource = new List<Group>
-                    { new Group { Id = -1, Code = "Все", ShortName = "", Name = "Все", SpecialtyId = -1, IsActive = true, SpecialtyName = "" } }
+                    { new Group { Id = -1, Code = "Все", Data = null, SpecialtyId = -1, IsActive = true, SpecialtyName = "" } }
                     .Concat(DataProvider.GroupList)
                     .ToList();
 

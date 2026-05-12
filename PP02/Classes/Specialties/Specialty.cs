@@ -34,15 +34,14 @@ namespace PP02.Classes.Specialties
     {
         public int Id { get; set; }
         public string Code { get; set; }           // Код группы: РП-01-1
-        public string ShortName { get; set; }      // Сокращение: РП
-        public string Name { get; set; }           // Отображаемое название
+        public int? Data { get; set; }             // Год добавления группы
         public int SpecialtyId { get; set; }       // Ссылка на специальность
         public bool IsActive { get; set; }         // Статус активности
 
         // Для отображения в ComboBox
         public override string ToString()
         {
-            return $"{Code} [{ShortName}]";
+            return Data.HasValue ? $"{Code} ({Data.Value})" : Code;
         }
 
         // Название специальности для отображения в списке групп

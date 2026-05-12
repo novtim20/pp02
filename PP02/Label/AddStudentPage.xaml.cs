@@ -94,7 +94,7 @@ namespace PP02.Label
 
                 // Группа - выпадающий список
                 GroupComboBox.ItemsSource = new List<PP02.Classes.Specialties.Group>
-                    { new PP02.Classes.Specialties.Group { Id = 0, Code = "", ShortName = "", Name = "(не выбрано)", SpecialtyId = 0, IsActive = true, SpecialtyName = "" } }
+                    { new PP02.Classes.Specialties.Group { Id = 0, Code = "", Data = null, SpecialtyId = 0, IsActive = true, SpecialtyName = "" } }
                     .Concat(DataProvider.GroupList)
                     .ToList();
                 GroupComboBox.SelectedValuePath = "Id";
@@ -135,7 +135,7 @@ namespace PP02.Label
 
                 // Обновляем ComboBox
                 GroupComboBox.ItemsSource = new List<PP02.Classes.Specialties.Group>
-                    { new PP02.Classes.Specialties.Group { Id = 0, Code = "", ShortName = "", Name = "(не выбрано)", SpecialtyId = 0, IsActive = true, SpecialtyName = "" } }
+                    { new PP02.Classes.Specialties.Group { Id = 0, Code = "", Data = null, SpecialtyId = 0, IsActive = true, SpecialtyName = "" } }
                     .Concat(DataProvider.GroupList)
                     .ToList();
 

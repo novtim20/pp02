@@ -206,7 +206,7 @@ SELECT LAST_INSERT_ID();";
                             }
                         }
 
-                        var groupDisplayName = !string.IsNullOrEmpty(selectedGroup.SpecialtyName) ? selectedGroup.SpecialtyName : selectedGroup.Code;
+                        var groupDisplayName = selectedGroup.ToString();
                         MessageBox.Show($"Специальность \"{specialty.Name}\" успешно привязана к группе \"{groupDisplayName}\"",
                             "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
 
@@ -638,7 +638,7 @@ WHERE id = @id";
                     _isEditingGroup = true;
                     _editingGroupId = group.Id;
 
-                    var displayName = !string.IsNullOrEmpty(group.SpecialtyName) ? group.SpecialtyName : group.Code;
+                    var displayName = group.ToString();
                     MessageBox.Show($"Редактирование группы \"{displayName}\".\nЗаполните поля и нажмите \"Сохранить группу\".",
                         "Редактирование", MessageBoxButton.OK, MessageBoxImage.Information);
 
@@ -667,8 +667,8 @@ WHERE id = @id";
                         return;
                     }
 
-                    // Используем Code и SpecialtyName для отображения вместо Name
-                    var displayName = !string.IsNullOrEmpty(group.SpecialtyName) ? group.SpecialtyName : group.Code;
+                    // Используем ToString() для отображения вместо Name
+                    var displayName = group.ToString();
 
                     var result = MessageBox.Show(
                         $"Вы уверены, что хотите удалить группу \"{displayName}\"?\n\n" +

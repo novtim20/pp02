@@ -227,8 +227,7 @@ namespace PP02.Connect
                     var group = new SpecialtyGroup
                     {
                         Id = reader.GetInt32(0),
-                        Name = GetStringOrNull(reader, 1),
-                        ShortName = null
+                        Name = GetStringOrNull(reader, 1)
                     };
 
                     // Загружаем специальности для этой группы

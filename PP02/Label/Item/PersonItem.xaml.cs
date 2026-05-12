@@ -134,8 +134,7 @@ namespace PP02.Label.Item
                 return;
 
             var foundGroup = DataProvider.GroupList.FirstOrDefault(g =>
-                g.Code.Equals(CmbGroup.Text, StringComparison.OrdinalIgnoreCase) ||
-                g.ShortName.Equals(CmbGroup.Text, StringComparison.OrdinalIgnoreCase));
+                g.Code.Equals(CmbGroup.Text, StringComparison.OrdinalIgnoreCase));
 
             if (foundGroup != null)
             {

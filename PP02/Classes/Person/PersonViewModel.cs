@@ -37,7 +37,7 @@ namespace PP02.Classes.Person
         public string SocialOriginName { get; set; }
         public string SocialStatusName { get; set; }
         public string PartyName { get; set; }
-        public string GroupShortName { get; set; }         // 🔹 Краткое название группы (short_name)
+        public string GroupData { get; set; }            // 🔹 Год добавления группы (data)
 
         // ========================================
         // ДОПОЛНИТЕЛЬНЫЕ ДАННЫЕ

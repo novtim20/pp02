@@ -275,7 +275,7 @@ namespace PP02.Connect
         {
             GroupList.Clear();
 
-            const string sql = @"SELECT g.id, g.code, g.short_name, g.name, g.specialty_id, g.is_active, s.name as specialty_name
+            const string sql = @"SELECT g.id, g.code, g.data, g.specialty_id, g.is_active, s.name as specialty_name
                                  FROM `groups` g
                                  LEFT JOIN specialties s ON g.specialty_id = s.id
                                  ORDER BY g.code";
@@ -290,11 +290,10 @@ namespace PP02.Connect
                     {
                         Id = reader.GetInt32(0),
                         Code = reader.GetString(1),
-                        ShortName = GetStringOrNull(reader, 2),
-                        Name = GetStringOrNull(reader, 3),
-                        SpecialtyId = reader.GetInt32(4),
-                        IsActive = reader.GetBoolean(5),
-                        SpecialtyName = GetStringOrNull(reader, 6)
+                        Data = reader.IsDBNull(2) ? (int?)null : reader.GetInt32(2),
+                        SpecialtyId = reader.GetInt32(3),
+                        IsActive = reader.GetBoolean(4),
+                        SpecialtyName = GetStringOrNull(reader, 5)
                     });
                 }
             }
@@ -313,10 +312,10 @@ namespace PP02.Connect
             }
 
             // Используем LIKE поиск по таблице groups
-            const string sql = @"SELECT g.id, g.code, g.short_name, g.name, g.specialty_id, g.is_active, s.name as specialty_name
+            const string sql = @"SELECT g.id, g.code, g.data, g.specialty_id, g.is_active, s.name as specialty_name
                                  FROM `groups` g
                                  LEFT JOIN specialties s ON g.specialty_id = s.id
-                                 WHERE g.code LIKE @search OR g.short_name LIKE @search OR g.name LIKE @search
+                                 WHERE g.code LIKE @search
                                  ORDER BY g.code";
 
             using (var connection = GetConnection(connectionString))
@@ -331,11 +330,10 @@ namespace PP02.Connect
                         {
                             Id = reader.GetInt32(0),
                             Code = reader.GetString(1),
-                            ShortName = GetStringOrNull(reader, 2),
-                            Name = GetStringOrNull(reader, 3),
-                            SpecialtyId = reader.GetInt32(4),
-                            IsActive = reader.GetBoolean(5),
-                            SpecialtyName = GetStringOrNull(reader, 6)
+                            Data = reader.IsDBNull(2) ? (int?)null : reader.GetInt32(2),
+                            SpecialtyId = reader.GetInt32(3),
+                            IsActive = reader.GetBoolean(4),
+                            SpecialtyName = GetStringOrNull(reader, 5)
                         });
                     }
                 }

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -523,6 +524,64 @@ namespace PP02.Label
         }
 
         /// <summary>
+        /// Сокращение документа - отображение только необходимых столбцов
+        /// </summary>
+        private void ShortDocumentButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Список полей для сокращённого режима импорта документов
+            var shortDocumentFields = new HashSet<string>
+            {
+                "doc_series",              // Серия документа
+                "doc_number",              // Номер документа
+                "issue_date",              // Дата выдачи
+                "reg_number",              // Регистрационный номер
+                "specialty_code",          // Код профессии, специальности
+                "specialty_name",          // Наименование профессии, специальности
+                "qualification_name",      // Наименование квалификации
+                "enrollment_year",         // Год поступления
+                "graduation_year",         // Год окончания
+                "recipient_last_name",     // Фамилия получателя
+                "recipient_first_name",    // Имя получателя
+                "recipient_middle_name",   // Отчество получателя
+                "recipient_birth_date",    // Дата рождения получателя
+                "recipient_gender"         // Пол получателя
+            };
+
+            int mappedCount = 0;
+            foreach (var mapping in _mappings)
+            {
+                if (shortDocumentFields.Contains(mapping.DatabaseField))
+                {
+                    mapping.UseForImport = true;
+
+                    // Пытаемся найти совпадение по имени
+                    var matchedColumn = _excelColumns.FirstOrDefault(col =>
+                        col.ToLower().Contains(GetSearchKey(mapping.DatabaseField).Split(' ').FirstOrDefault(k => !string.IsNullOrEmpty(k)) ?? "") ||
+                        GetSearchKey(mapping.DatabaseField).Split(' ').Any(k => !string.IsNullOrEmpty(k) && col.ToLower().Contains(k)));
+
+                    if (matchedColumn != null && string.IsNullOrEmpty(mapping.ExcelColumn))
+                    {
+                        mapping.ExcelColumn = matchedColumn;
+
+                        // Обновляем пример
+                        if (_excelData.Count > 0 && _excelData[0].ContainsKey(matchedColumn))
+                        {
+                            mapping.SampleValue = _excelData[0][matchedColumn];
+                        }
+                    }
+                    mappedCount++;
+                }
+                else
+                {
+                    mapping.UseForImport = false;
+                }
+            }
+
+            MappingStatusText.Text = $"✅ Режим сокращения документа: {mappedCount} полей активно";
+            UpdatePreview();
+        }
+
+        /// <summary>
         /// Сброс настроек маппинга
         /// </summary>
         private void ResetMappingButton_Click(object sender, RoutedEventArgs e)
@@ -549,9 +608,20 @@ namespace PP02.Label
             if (mapping == null) return;
 
             int index = _mappings.IndexOf(mapping);
-            if (index > 0)
+            // Ищем предыдущий видимый элемент
+            int targetIndex = -1;
+            for (int i = index - 1; i >= 0; i--)
             {
-                _mappings.Move(index, index - 1);
+                if (_mappings[i].UseForImport)
+                {
+                    targetIndex = i;
+                    break;
+                }
+            }
+
+            if (targetIndex >= 0)
+            {
+                _mappings.Move(index, targetIndex);
             }
         }
 
@@ -565,9 +635,20 @@ namespace PP02.Label
             if (mapping == null) return;
 
             int index = _mappings.IndexOf(mapping);
-            if (index >= 0 && index < _mappings.Count - 1)
+            // Ищем следующий видимый элемент
+            int targetIndex = -1;
+            for (int i = index + 1; i < _mappings.Count; i++)
             {
-                _mappings.Move(index, index + 1);
+                if (_mappings[i].UseForImport)
+                {
+                    targetIndex = i;
+                    break;
+                }
+            }
+
+            if (targetIndex >= 0 && targetIndex < _mappings.Count)
+            {
+                _mappings.Move(index, targetIndex);
             }
         }
 

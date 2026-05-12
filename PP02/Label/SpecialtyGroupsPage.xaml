@@ -285,19 +285,13 @@
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,0,10">
-                                    <TextBlock Text="Сокращение *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
-                                    <TextBox x:Name="NewGroupShortNameTextBox2" Height="35" Padding="8,0,0,0"
+                                    <TextBlock Text="Год добавления" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
+                                    <TextBox x:Name="NewGroupDataTextBox" Height="35" Padding="8,0,0,0"
                                              BorderBrush="#DDD" BorderThickness="1"
-                                             ToolTip="Например: РП"/>
+                                             ToolTip="Например: 2024"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,10">
-                                    <TextBlock Text="Отображаемое название *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
-                                    <TextBox x:Name="NewGroupNameTextBox2" Height="35" Padding="8,0,0,0"
-                                             BorderBrush="#DDD" BorderThickness="1"/>
-                                </StackPanel>
-
-                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,0,10">
                                     <TextBlock Text="Специальность *" FontSize="12" Margin="0,0,0,5" Foreground="#555"/>
                                     <ComboBox x:Name="NewGroupSpecialtyComboBox" Height="35"
                                               BorderBrush="#DDD" BorderThickness="1"

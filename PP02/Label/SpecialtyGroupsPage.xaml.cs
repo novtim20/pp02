@@ -137,16 +137,12 @@ SELECT LAST_INSERT_ID();";
             {
                 if (NewGroupSpecialtyComboBox.SelectedItem is Specialty selectedSpecialty)
                 {
-                    // Автоматически подставляем сокращённое имя из специальности
-                    if (!string.IsNullOrEmpty(selectedSpecialty.ShortName))
-                    {
-                        NewGroupShortNameTextBox2.Text = selectedSpecialty.ShortName;
-                    }
+                    // Автозаполнение больше не используется, так как ShortName удалён
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при автозаполнении сокращения: {ex.Message}",
+                MessageBox.Show($"Ошибка при автозаполнении: {ex.Message}",
                     "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -155,8 +151,7 @@ SELECT LAST_INSERT_ID();";
         private void ClearGroupFields()
         {
             NewGroupCodeTextBox.Clear();
-            NewGroupShortNameTextBox2.Clear();
-            NewGroupNameTextBox2.Clear();
+            NewGroupDataTextBox.Clear();
             NewGroupSpecialtyComboBox.SelectedIndex = -1;
             NewGroupIsActiveCheckBox.IsChecked = true;
             NewGroupCodeTextBox.Focus();
@@ -211,7 +206,8 @@ SELECT LAST_INSERT_ID();";
                             }
                         }
 
-                        MessageBox.Show($"Специальность \"{specialty.Name}\" успешно привязана к группе \"{selectedGroup.Name}\"",
+                        var groupDisplayName = !string.IsNullOrEmpty(selectedGroup.SpecialtyName) ? selectedGroup.SpecialtyName : selectedGroup.Code;
+                        MessageBox.Show($"Специальность \"{specialty.Name}\" успешно привязана к группе \"{groupDisplayName}\"",
                             "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
 
                         // Перезагружаем данные для обновления отображения
@@ -487,20 +483,28 @@ WHERE id = @id";
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(NewGroupShortNameTextBox2.Text))
+            // Проверка года добавления (Data)
+            int? dataValue = null;
+            if (!string.IsNullOrWhiteSpace(NewGroupDataTextBox.Text))
             {
-                MessageBox.Show("Введите сокращение группы", "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                NewGroupShortNameTextBox2.Focus();
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(NewGroupNameTextBox2.Text))
-            {
-                MessageBox.Show("Введите отображаемое название группы", "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                NewGroupNameTextBox2.Focus();
-                return;
+                if (int.TryParse(NewGroupDataTextBox.Text.Trim(), out int dataYear))
+                {
+                    if (dataYear < 1900 || dataYear > DateTime.Now.Year + 10)
+                    {
+                        MessageBox.Show($"Год должен быть в диапазоне от 1900 до {DateTime.Now.Year + 10}", "Ошибка",
+                            MessageBoxButton.OK, MessageBoxImage.Warning);
+                        NewGroupDataTextBox.Focus();
+                        return;
+                    }
+                    dataValue = dataYear;
+                }
+                else
+                {
+                    MessageBox.Show("Год должен быть числом", "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    NewGroupDataTextBox.Focus();
+                    return;
+                }
             }
 
             if (NewGroupSpecialtyComboBox.SelectedValue == null)
@@ -516,22 +520,21 @@ WHERE id = @id";
                 connection.Open();
 
                 const string sql = @"
-INSERT INTO `groups` (code, short_name, name, specialty_id, is_active)
-VALUES (@code, @short_name, @name, @specialty_id, @is_active);
+INSERT INTO `groups` (code, data, specialty_id, is_active)
+VALUES (@code, @data, @specialty_id, @is_active);
 SELECT LAST_INSERT_ID();";
 
                 using (var command = new MySqlCommand(sql, connection))
                 {
                     command.Parameters.AddWithValue("@code", NewGroupCodeTextBox.Text.Trim());
-                    command.Parameters.AddWithValue("@short_name", NewGroupShortNameTextBox2.Text.Trim());
-                    command.Parameters.AddWithValue("@name", NewGroupNameTextBox2.Text.Trim());
+                    command.Parameters.AddWithValue("@data", (object?)dataValue ?? DBNull.Value);
                     command.Parameters.AddWithValue("@specialty_id", NewGroupSpecialtyComboBox.SelectedValue);
                     command.Parameters.AddWithValue("@is_active", NewGroupIsActiveCheckBox.IsChecked == true);
 
                     var result = command.ExecuteScalar();
                     int newId = Convert.ToInt32(result);
 
-                    MessageBox.Show($"Группа \"{NewGroupNameTextBox2.Text}\" успешно добавлена!\nID: {newId}",
+                    MessageBox.Show($"Группа \"{NewGroupCodeTextBox.Text.Trim()}\" успешно добавлена!\nID: {newId}",
                         "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
@@ -552,20 +555,28 @@ SELECT LAST_INSERT_ID();";
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(NewGroupShortNameTextBox2.Text))
+            // Проверка года добавления (Data)
+            int? dataValue = null;
+            if (!string.IsNullOrWhiteSpace(NewGroupDataTextBox.Text))
             {
-                MessageBox.Show("Введите сокращение группы", "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                NewGroupShortNameTextBox2.Focus();
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(NewGroupNameTextBox2.Text))
-            {
-                MessageBox.Show("Введите отображаемое название группы", "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                NewGroupNameTextBox2.Focus();
-                return;
+                if (int.TryParse(NewGroupDataTextBox.Text.Trim(), out int dataYear))
+                {
+                    if (dataYear < 1900 || dataYear > DateTime.Now.Year + 10)
+                    {
+                        MessageBox.Show($"Год должен быть в диапазоне от 1900 до {DateTime.Now.Year + 10}", "Ошибка",
+                            MessageBoxButton.OK, MessageBoxImage.Warning);
+                        NewGroupDataTextBox.Focus();
+                        return;
+                    }
+                    dataValue = dataYear;
+                }
+                else
+                {
+                    MessageBox.Show("Год должен быть числом", "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    NewGroupDataTextBox.Focus();
+                    return;
+                }
             }
 
             if (NewGroupSpecialtyComboBox.SelectedValue == null)
@@ -583,8 +594,7 @@ SELECT LAST_INSERT_ID();";
                 const string sql = @"
 UPDATE `groups`
 SET code = @code,
-    short_name = @short_name,
-    name = @name,
+    data = @data,
     specialty_id = @specialty_id,
     is_active = @is_active
 WHERE id = @id";
@@ -592,8 +602,7 @@ WHERE id = @id";
                 using (var command = new MySqlCommand(sql, connection))
                 {
                     command.Parameters.AddWithValue("@code", NewGroupCodeTextBox.Text.Trim());
-                    command.Parameters.AddWithValue("@short_name", NewGroupShortNameTextBox2.Text.Trim());
-                    command.Parameters.AddWithValue("@name", NewGroupNameTextBox2.Text.Trim());
+                    command.Parameters.AddWithValue("@data", (object?)dataValue ?? DBNull.Value);
                     command.Parameters.AddWithValue("@specialty_id", NewGroupSpecialtyComboBox.SelectedValue);
                     command.Parameters.AddWithValue("@is_active", NewGroupIsActiveCheckBox.IsChecked == true);
                     command.Parameters.AddWithValue("@id", groupId);
@@ -620,15 +629,17 @@ WHERE id = @id";
                 if (sender is Button button && button.Tag is Group group)
                 {
                     NewGroupCodeTextBox.Text = group.Code;
-                    NewGroupShortNameTextBox2.Text = group.ShortName;
-                    NewGroupNameTextBox2.Text = group.Name;
+                    // Заполняем поле Data (год добавления)
+                    NewGroupDataTextBox.Text = group.Data?.ToString();
+
                     NewGroupSpecialtyComboBox.SelectedValue = group.SpecialtyId;
                     NewGroupIsActiveCheckBox.IsChecked = group.IsActive;
 
                     _isEditingGroup = true;
                     _editingGroupId = group.Id;
 
-                    MessageBox.Show($"Редактирование группы \"{group.Name}\".\nЗаполните поля и нажмите \"Сохранить группу\".",
+                    var displayName = !string.IsNullOrEmpty(group.SpecialtyName) ? group.SpecialtyName : group.Code;
+                    MessageBox.Show($"Редактирование группы \"{displayName}\".\nЗаполните поля и нажмите \"Сохранить группу\".",
                         "Редактирование", MessageBoxButton.OK, MessageBoxImage.Information);
 
                     NewGroupCodeTextBox.Focus();
@@ -656,8 +667,11 @@ WHERE id = @id";
                         return;
                     }
 
+                    // Используем Code и SpecialtyName для отображения вместо Name
+                    var displayName = !string.IsNullOrEmpty(group.SpecialtyName) ? group.SpecialtyName : group.Code;
+
                     var result = MessageBox.Show(
-                        $"Вы уверены, что хотите удалить группу \"{group.Name}\"?\n\n" +
+                        $"Вы уверены, что хотите удалить группу \"{displayName}\"?\n\n" +
                         "Внимание: это действие нельзя отменить!",
                         "Подтверждение удаления",
                         MessageBoxButton.YesNo,

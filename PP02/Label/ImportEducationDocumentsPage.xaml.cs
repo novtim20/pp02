@@ -108,11 +108,16 @@ namespace PP02.Label
         // Предпросмотр данных
         private ObservableCollection<EducationDocPreviewItem> _previewItems = new ObservableCollection<EducationDocPreviewItem>();
 
+        // Флаг режима сокращения документа
+        private bool _isShortenedMode = true; // По умолчанию включён режим сокращения
+
         public ImportEducationDocumentsPage()
         {
             InitializeComponent();
             InitializeMappings();
             DataContext = this;
+            // Применяем режим сокращения при загрузке
+            ApplyShortenedMode();
         }
 
         /// <summary>
@@ -330,10 +335,8 @@ namespace PP02.Label
         }
 
         /// <summary>
-        /// Автоматическая настройка маппинга на основе имен столбцов
-        /// </summary>
-        /// <summary>
         /// Автоматическая настройка маппинга с приоритетом точных совпадений
+        /// Учитывает режим сокращения (если включён, то заполняются только поля из shortDocumentFields)
         /// </summary>
         private void AutoMapButton_Click(object sender, RoutedEventArgs e)
         {
@@ -344,12 +347,28 @@ namespace PP02.Label
                 return;
             }
 
+            // Список полей для сокращённого режима (если он включён)
+            var shortDocumentFields = new HashSet<string>
+            {
+                "doc_series", "doc_number", "issue_date", "reg_number",
+                "specialty_code", "specialty_name", "qualification_name",
+                "enrollment_year", "graduation_year",
+                "recipient_last_name", "recipient_first_name", "recipient_middle_name",
+                "recipient_birth_date", "recipient_gender"
+            };
+
             // Отслеживаем, какие столбцы Excel уже заняты
             var usedExcelColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             int mappedCount = 0;
 
             foreach (var mapping in _mappings)
             {
+                // Если включён режим сокращения, пропускаем поля, которые не входят в короткий список
+                if (_isShortenedMode && !shortDocumentFields.Contains(mapping.DatabaseField))
+                {
+                    continue;
+                }
+
                 // Пропускаем, если это поле уже замапплено вручную
                 if (!string.IsNullOrEmpty(mapping.ExcelColumn)) continue;
 
@@ -376,7 +395,9 @@ namespace PP02.Label
                 }
             }
 
-            MappingStatusText.Text = $"✅ Сопоставлено: {mappedCount} из {_databaseFields.Count}";
+            MappingStatusText.Text = _isShortenedMode
+                ? $"✅ Сопоставлено (режим сокращения): {mappedCount} из {shortDocumentFields.Count}"
+                : $"✅ Сопоставлено: {mappedCount} из {_databaseFields.Count}";
             UpdatePreview();
         }
 
@@ -524,9 +545,18 @@ namespace PP02.Label
         }
 
         /// <summary>
-        /// Сокращение документа - отображение только необходимых столбцов
+        /// Сокращение документа - отображение только необходимых столбцов (переключатель)
         /// </summary>
         private void ShortDocumentButton_Click(object sender, RoutedEventArgs e)
+        {
+            _isShortenedMode = !_isShortenedMode; // Переключаем режим
+            ApplyShortenedMode();
+        }
+
+        /// <summary>
+        /// Применение режима сокращения/полного отображения
+        /// </summary>
+        private void ApplyShortenedMode()
         {
             // Список полей для сокращённого режима импорта документов
             var shortDocumentFields = new HashSet<string>
@@ -550,34 +580,49 @@ namespace PP02.Label
             int mappedCount = 0;
             foreach (var mapping in _mappings)
             {
-                if (shortDocumentFields.Contains(mapping.DatabaseField))
+                if (_isShortenedMode)
                 {
-                    mapping.UseForImport = true;
-
-                    // Пытаемся найти совпадение по имени
-                    var matchedColumn = _excelColumns.FirstOrDefault(col =>
-                        col.ToLower().Contains(GetSearchKey(mapping.DatabaseField).Split(' ').FirstOrDefault(k => !string.IsNullOrEmpty(k)) ?? "") ||
-                        GetSearchKey(mapping.DatabaseField).Split(' ').Any(k => !string.IsNullOrEmpty(k) && col.ToLower().Contains(k)));
-
-                    if (matchedColumn != null && string.IsNullOrEmpty(mapping.ExcelColumn))
+                    // Режим сокращения: показываем только нужные поля
+                    if (shortDocumentFields.Contains(mapping.DatabaseField))
                     {
-                        mapping.ExcelColumn = matchedColumn;
+                        mapping.UseForImport = true;
 
-                        // Обновляем пример
-                        if (_excelData.Count > 0 && _excelData[0].ContainsKey(matchedColumn))
+                        // Пытаемся найти совпадение по имени, если ещё не назначено
+                        if (string.IsNullOrEmpty(mapping.ExcelColumn) && _excelColumns.Count > 0)
                         {
-                            mapping.SampleValue = _excelData[0][matchedColumn];
+                            var matchedColumn = _excelColumns.FirstOrDefault(col =>
+                                col.ToLower().Contains(GetSearchKey(mapping.DatabaseField).Split(' ').FirstOrDefault(k => !string.IsNullOrEmpty(k)) ?? "") ||
+                                GetSearchKey(mapping.DatabaseField).Split(' ').Any(k => !string.IsNullOrEmpty(k) && col.ToLower().Contains(k)));
+
+                            if (matchedColumn != null)
+                            {
+                                mapping.ExcelColumn = matchedColumn;
+
+                                // Обновляем пример
+                                if (_excelData.Count > 0 && _excelData[0].ContainsKey(matchedColumn))
+                                {
+                                    mapping.SampleValue = _excelData[0][matchedColumn];
+                                }
+                            }
                         }
+                        mappedCount++;
                     }
-                    mappedCount++;
+                    else
+                    {
+                        mapping.UseForImport = false;
+                    }
                 }
                 else
                 {
-                    mapping.UseForImport = false;
+                    // Полный режим: показываем все поля
+                    mapping.UseForImport = true;
+                    mappedCount++;
                 }
             }
 
-            MappingStatusText.Text = $"✅ Режим сокращения документа: {mappedCount} полей активно";
+            MappingStatusText.Text = _isShortenedMode
+                ? $"✅ Режим сокращения документа: {mappedCount} полей активно"
+                : $"✅ Полный режим: {mappedCount} полей активно";
             UpdatePreview();
         }
 
@@ -592,7 +637,10 @@ namespace PP02.Label
                 mapping.UseForImport = false;
                 mapping.SampleValue = "-";
             }
-            MappingStatusText.Text = "Настройки сброшены";
+            // Сбрасываем режим сокращения в исходное состояние (включён)
+            _isShortenedMode = true;
+            ApplyShortenedMode();
+            MappingStatusText.Text = "Настройки сброшены (режим сокращения включён)";
             PreviewDataGrid.ItemsSource = null;
             _previewItems.Clear();
             PreviewStatusText.Text = "Загрузите файл и настройте маппинг для просмотра";

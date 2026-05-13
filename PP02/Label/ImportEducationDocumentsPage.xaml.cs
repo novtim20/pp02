@@ -1718,11 +1718,12 @@ VALUES (@personId, @specialtyId)";
                 MessageBox.Show("Вы уже находитесь на странице импорта документов", "Информация",
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
+        }
 
-    /// <summary>
-    /// Класс для предпросмотра импортируемых данных
-    /// </summary>
-    public class EducationDocPreviewItem
+        /// <summary>
+        /// Класс для предпросмотра импортируемых данных
+        /// </summary>
+        public class EducationDocPreviewItem
         {
             public string RecipientLastName { get; set; }
             public string RecipientFirstName { get; set; }
@@ -1736,3 +1737,4 @@ VALUES (@personId, @specialtyId)";
             public string QualificationName { get; set; }
         }
     }
+}

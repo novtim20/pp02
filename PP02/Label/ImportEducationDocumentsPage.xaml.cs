@@ -870,6 +870,24 @@ namespace PP02.Label
 
                                         personId = CreateNewPerson(connection, lastName, firstName, middleName, snils, birthDateStr, gender, citizenship, transaction);
                                     }
+
+                                    // Если есть данные о специальности, привязываем её к студенту
+                                    if (personId.HasValue)
+                                    {
+                                        var specialtyCode = GetMappedValueInternal(rowData, mappingsCopy, "specialty_code");
+                                        var specialtyName = GetMappedValueInternal(rowData, mappingsCopy, "specialty_name");
+
+                                        if (!string.IsNullOrEmpty(specialtyCode) || !string.IsNullOrEmpty(specialtyName))
+                                        {
+                                            int? specialtyId = GetOrCreateSpecialty(connection, specialtyCode, specialtyName, transaction);
+
+                                            if (specialtyId.HasValue)
+                                            {
+                                                // Получаем или создаём запись academic_records для привязки специальности
+                                                EnsureAcademicRecordExists(connection, personId.Value, specialtyId, transaction);
+                                            }
+                                        }
+                                    }
                                 }
 
                                 if (InsertEducationDocument(connection, rowData, transaction, mappingsCopy, personId))
@@ -1009,6 +1027,122 @@ namespace PP02.Label
                 command.Parameters.Clear();
                 var result = command.ExecuteScalar();
                 return result != null ? (int?)Convert.ToInt32(result) : null;
+            }
+        }
+
+        /// <summary>
+        /// Получение или создание специальности по коду и наименованию
+        /// </summary>
+        private int? GetOrCreateSpecialty(MySqlConnection connection, string specialtyCode, string specialtyName, MySqlTransaction transaction)
+        {
+            // Пытаемся найти специальность по коду
+            if (!string.IsNullOrEmpty(specialtyCode))
+            {
+                const string sqlFindByCode = "SELECT id FROM specialties WHERE short_name = @code LIMIT 1";
+                using (var command = new MySqlCommand(sqlFindByCode, connection, transaction))
+                {
+                    command.Parameters.AddWithValue("@code", specialtyCode.Trim());
+                    var result = command.ExecuteScalar();
+                    if (result != null)
+                    {
+                        return Convert.ToInt32(result);
+                    }
+                }
+            }
+
+            // Пытаемся найти специальность по наименованию
+            if (!string.IsNullOrEmpty(specialtyName))
+            {
+                const string sqlFindByName = "SELECT id FROM specialties WHERE name = @name LIMIT 1";
+                using (var command = new MySqlCommand(sqlFindByName, connection, transaction))
+                {
+                    command.Parameters.AddWithValue("@name", specialtyName.Trim());
+                    var result = command.ExecuteScalar();
+                    if (result != null)
+                    {
+                        return Convert.ToInt32(result);
+                    }
+                }
+            }
+
+            // Если специальность не найдена, создаем новую
+            if (string.IsNullOrEmpty(specialtyCode) && string.IsNullOrEmpty(specialtyName))
+                return null;
+
+            try
+            {
+                const string sqlInsert = @"
+INSERT INTO specialties (name, short_name, active, data)
+VALUES (@name, @short_name, 1, @data);
+SELECT LAST_INSERT_ID();";
+
+                using (var command = new MySqlCommand(sqlInsert, connection, transaction))
+                {
+                    command.Parameters.AddWithValue("@name", (object)specialtyName?.Trim() ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@short_name", (object)specialtyCode?.Trim() ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@data", DateTime.Now);
+
+                    var result = command.ExecuteScalar();
+                    int newId = Convert.ToInt32(result);
+
+                    Console.WriteLine($"[INFO] Created new specialty: {specialtyName} [{specialtyCode}] with ID={newId}");
+                    return newId;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] Failed to create specialty '{specialtyName} [{specialtyCode}]': {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Получение или создание записи academic_records для привязки специальности к студенту
+        /// </summary>
+        private void EnsureAcademicRecordExists(MySqlConnection connection, int personId, int? specialtyId, MySqlTransaction transaction)
+        {
+            // Проверяем, существует ли уже запись academic_records для этого человека
+            const string sqlCheck = "SELECT id FROM academic_records WHERE person_id = @personId LIMIT 1";
+            int? academicRecordId = null;
+
+            using (var command = new MySqlCommand(sqlCheck, connection, transaction))
+            {
+                command.Parameters.AddWithValue("@personId", personId);
+                var result = command.ExecuteScalar();
+                if (result != null)
+                {
+                    academicRecordId = Convert.ToInt32(result);
+                }
+            }
+
+            if (academicRecordId.HasValue)
+            {
+                // Обновляем существующую запись
+                const string sqlUpdate = @"
+UPDATE academic_records
+SET specialty_id = @specialtyId
+WHERE id = @id";
+
+                using (var command = new MySqlCommand(sqlUpdate, connection, transaction))
+                {
+                    command.Parameters.AddWithValue("@specialtyId", (object)specialtyId ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@id", academicRecordId.Value);
+                    command.ExecuteNonQuery();
+                }
+            }
+            else
+            {
+                // Создаем новую запись
+                const string sqlInsert = @"
+INSERT INTO academic_records (person_id, specialty_id)
+VALUES (@personId, @specialtyId)";
+
+                using (var command = new MySqlCommand(sqlInsert, connection, transaction))
+                {
+                    command.Parameters.AddWithValue("@personId", personId);
+                    command.Parameters.AddWithValue("@specialtyId", (object)specialtyId ?? DBNull.Value);
+                    command.ExecuteNonQuery();
+                }
             }
         }
 

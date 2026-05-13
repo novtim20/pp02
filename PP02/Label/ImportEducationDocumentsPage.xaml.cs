@@ -1059,618 +1059,356 @@ namespace PP02.Label
                 Console.WriteLine($"[ERROR] SQL State: {ex.GetType().Name}");
                 throw;
             }
+        }
 
-            /// <summary>
-            /// Получение или создание специальности по коду и наименованию
-            /// </summary>
-            private int? GetOrCreateSpecialty(MySqlConnection connection, string specialtyCode, string specialtyName, MySqlTransaction transaction)
+        /// <summary>
+        /// Получение или создание специальности по коду и наименованию
+        /// </summary>
+        private int? GetOrCreateSpecialty(MySqlConnection connection, string specialtyCode, string specialtyName, MySqlTransaction transaction)
+        {
+            try
             {
-                try
+                // Формируем полное наименование специальности (код + наименование)
+                string fullSpecialtyName = null;
+                if (!string.IsNullOrEmpty(specialtyCode) && !string.IsNullOrEmpty(specialtyName))
                 {
-                    // Формируем полное наименование специальности (код + наименование)
-                    string fullSpecialtyName = null;
-                    if (!string.IsNullOrEmpty(specialtyCode) && !string.IsNullOrEmpty(specialtyName))
-                    {
-                        fullSpecialtyName = $"{specialtyCode.Trim()} {specialtyName.Trim()}";
-                    }
-                    else if (!string.IsNullOrEmpty(specialtyCode))
-                    {
-                        fullSpecialtyName = specialtyCode.Trim();
-                    }
-                    else if (!string.IsNullOrEmpty(specialtyName))
-                    {
-                        fullSpecialtyName = specialtyName.Trim();
-                    }
-
-                    Console.WriteLine($"[INFO] ========== GetOrCreateSpecialty START ==========");
-                    Console.WriteLine($"[INFO] Input parameters: code='{specialtyCode}', name='{specialtyName}'");
-                    Console.WriteLine($"[INFO] Full specialty name: '{fullSpecialtyName}'");
-                    Console.WriteLine($"[INFO] Connection state: {connection.State}");
-                    Console.WriteLine($"[INFO] Transaction state: {transaction?.Connection?.State ?? ConnectionState.Closed}");
-
-                    // Пытаемся найти специальность по полному наименованию (код + имя)
-                    if (!string.IsNullOrEmpty(fullSpecialtyName))
-                    {
-                        const string sqlFindByFullName = "SELECT id FROM specialties WHERE name = @name LIMIT 1";
-                        Console.WriteLine($"[DEBUG] Executing SQL (find by fullName): {sqlFindByFullName}");
-                        Console.WriteLine($"[DEBUG] Parameter @name = '{fullSpecialtyName}'");
-
-                        using (var command = new MySqlCommand(sqlFindByFullName, connection, transaction))
-                        {
-                            command.Parameters.AddWithValue("@name", fullSpecialtyName);
-                            try
-                            {
-                                var result = command.ExecuteScalar();
-                                if (result != null)
-                                {
-                                    Console.WriteLine($"[INFO] ✓ Found specialty by fullName '{fullSpecialtyName}' with ID={result}");
-                                    Console.WriteLine($"[INFO] ========== GetOrCreateSpecialty END (found by fullName) ==========");
-                                    return Convert.ToInt32(result);
-                                }
-                                else
-                                {
-                                    Console.WriteLine($"[INFO] Specialty not found by fullName '{fullSpecialtyName}'");
-                                }
-                            }
-                            catch (MySqlException mysqlEx)
-                            {
-                                Console.WriteLine($"[CRITICAL ERROR] MySQL error while finding specialty by fullName: {mysqlEx.Message}");
-                                Console.WriteLine($"[CRITICAL ERROR] MySQL error code: {mysqlEx.Number}");
-                                Console.WriteLine($"[CRITICAL ERROR] SQL State: {mysqlEx.SqlState}");
-                                Console.WriteLine($"[CRITICAL ERROR] Query: {sqlFindByFullName}");
-                                Console.WriteLine($"[CRITICAL ERROR] Parameter: @name = '{fullSpecialtyName}'");
-                                throw;
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"[CRITICAL ERROR] Unexpected error while finding specialty by fullName: {ex.Message}");
-                                Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
-                                Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
-                                throw;
-                            }
-                        }
-                    }
-
-                    // Пытаемся найти специальность только по коду (в short_name)
-                    if (!string.IsNullOrEmpty(specialtyCode))
-                    {
-                        const string sqlFindByCode = "SELECT id FROM specialties WHERE short_name = @code LIMIT 1";
-                        Console.WriteLine($"[DEBUG] Executing SQL (find by code): {sqlFindByCode}");
-                        Console.WriteLine($"[DEBUG] Parameter @code = '{specialtyCode.Trim()}'");
-
-                        using (var command = new MySqlCommand(sqlFindByCode, connection, transaction))
-                        {
-                            command.Parameters.AddWithValue("@code", specialtyCode.Trim());
-                            try
-                            {
-                                var result = command.ExecuteScalar();
-                                if (result != null)
-                                {
-                                    Console.WriteLine($"[INFO] ✓ Found specialty by code '{specialtyCode}' with ID={result}");
-                                    Console.WriteLine($"[INFO] ========== GetOrCreateSpecialty END (found by code) ==========");
-                                    return Convert.ToInt32(result);
-                                }
-                                else
-                                {
-                                    Console.WriteLine($"[INFO] Specialty not found by code '{specialtyCode}'");
-                                }
-                            }
-                            catch (MySqlException mysqlEx)
-                            {
-                                Console.WriteLine($"[CRITICAL ERROR] MySQL error while finding specialty by code: {mysqlEx.Message}");
-                                Console.WriteLine($"[CRITICAL ERROR] MySQL error code: {mysqlEx.Number}");
-                                Console.WriteLine($"[CRITICAL ERROR] SQL State: {mysqlEx.SqlState}");
-                                Console.WriteLine($"[CRITICAL ERROR] Query: {sqlFindByCode}");
-                                Console.WriteLine($"[CRITICAL ERROR] Parameter: @code = '{specialtyCode.Trim()}'");
-                                throw;
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"[CRITICAL ERROR] Unexpected error while finding specialty by code: {ex.Message}");
-                                Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
-                                Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
-                                throw;
-                            }
-                        }
-                    }
-
-                    // Пытаемся найти специальность только по наименованию
-                    if (!string.IsNullOrEmpty(specialtyName))
-                    {
-                        const string sqlFindByName = "SELECT id FROM specialties WHERE name = @name LIMIT 1";
-                        Console.WriteLine($"[DEBUG] Executing SQL (find by name): {sqlFindByName}");
-                        Console.WriteLine($"[DEBUG] Parameter @name = '{specialtyName.Trim()}'");
-
-                        using (var command = new MySqlCommand(sqlFindByName, connection, transaction))
-                        {
-                            command.Parameters.AddWithValue("@name", specialtyName.Trim());
-                            try
-                            {
-                                var result = command.ExecuteScalar();
-                                if (result != null)
-                                {
-                                    Console.WriteLine($"[INFO] ✓ Found specialty by name '{specialtyName}' with ID={result}");
-                                    Console.WriteLine($"[INFO] ========== GetOrCreateSpecialty END (found by name) ==========");
-                                    return Convert.ToInt32(result);
-                                }
-                                else
-                                {
-                                    Console.WriteLine($"[INFO] Specialty not found by name '{specialtyName}'");
-                                }
-                            }
-                            catch (MySqlException mysqlEx)
-                            {
-                                Console.WriteLine($"[CRITICAL ERROR] MySQL error while finding specialty by name: {mysqlEx.Message}");
-                                Console.WriteLine($"[CRITICAL ERROR] MySQL error code: {mysqlEx.Number}");
-                                Console.WriteLine($"[CRITICAL ERROR] SQL State: {mysqlEx.SqlState}");
-                                Console.WriteLine($"[CRITICAL ERROR] Query: {sqlFindByName}");
-                                Console.WriteLine($"[CRITICAL ERROR] Parameter: @name = '{specialtyName.Trim()}'");
-                                throw;
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"[CRITICAL ERROR] Unexpected error while finding specialty by name: {ex.Message}");
-                                Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
-                                Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
-                                throw;
-                            }
-                        }
-                    }
-
-                    // Если специальность не найдена, создаем новую
-                    if (string.IsNullOrEmpty(specialtyCode) && string.IsNullOrEmpty(specialtyName))
-                    {
-                        Console.WriteLine("[WARNING] Cannot create specialty: both code and name are empty");
-                        Console.WriteLine($"[INFO] ========== GetOrCreateSpecialty END (cannot create) ==========");
-                        return null;
-                    }
-
-                    try
-                    {
-                        const string sqlInsert = @"
-INSERT INTO specialties (name, short_name, active, data)
-VALUES (@name, @short_name, 1, @data);
-SELECT LAST_INSERT_ID();";
-
-                        Console.WriteLine($"[DEBUG] Executing SQL (insert): {sqlInsert.Replace("\n", " ")}");
-                        Console.WriteLine($"[DEBUG] Parameters: @name='{fullSpecialtyName}', @short_name='{specialtyCode?.Trim()}', @data={DateTime.Now}");
-
-                        using (var command = new MySqlCommand(sqlInsert, connection, transaction))
-                        {
-                            // В name записываем полное наименование (код + наименование)
-                            command.Parameters.AddWithValue("@name", (object)fullSpecialtyName ?? DBNull.Value);
-                            // В short_name записываем только код
-                            command.Parameters.AddWithValue("@short_name", (object)specialtyCode?.Trim() ?? DBNull.Value);
-                            command.Parameters.AddWithValue("@data", DateTime.Now);
-
-                            Console.WriteLine($"[DEBUG] About to execute INSERT command...");
-
-                            var result = command.ExecuteScalar();
-                            int newId = Convert.ToInt32(result);
-
-                            Console.WriteLine($"[INFO] ✓ Created new specialty: {fullSpecialtyName} [{specialtyCode}] with ID={newId}");
-                            Console.WriteLine($"[INFO] ========== GetOrCreateSpecialty END (created new) ==========");
-                            return newId;
-                        }
-                    }
-                    catch (MySqlException mysqlEx)
-                    {
-                        Console.WriteLine($"[CRITICAL ERROR] MySQL error while creating specialty: {mysqlEx.Message}");
-                        Console.WriteLine($"[CRITICAL ERROR] MySQL error code: {mysqlEx.Number}");
-                        Console.WriteLine($"[CRITICAL ERROR] SQL State: {mysqlEx.SqlState}");
-                        Console.WriteLine($"[CRITICAL ERROR] Query: {sqlInsert.Replace("\n", " ")}");
-                        Console.WriteLine($"[CRITICAL ERROR] Parameters: @name='{fullSpecialtyName}', @short_name='{specialtyCode?.Trim()}'");
-                        Console.WriteLine($"[CRITICAL ERROR] Stack trace: {mysqlEx.StackTrace}");
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"[CRITICAL ERROR] Unexpected error while creating specialty: {ex.Message}");
-                        Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
-                        Console.WriteLine($"[CRITICAL ERROR] Inner exception: {ex.InnerException?.Message}");
-                        Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
-                        throw;
-                    }
+                    fullSpecialtyName = $"{specialtyCode.Trim()} {specialtyName.Trim()}";
                 }
-                catch (Exception ex)
+                else if (!string.IsNullOrEmpty(specialtyCode))
                 {
-                    Console.WriteLine($"[CRITICAL ERROR] ========== GetOrCreateSpecialty FAILED ==========");
-                    Console.WriteLine($"[CRITICAL ERROR] GetOrCreateSpecialty failed: {ex.Message}");
-                    Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
-                    Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
-                    Console.WriteLine($"[CRITICAL ERROR] Inner exception: {ex.InnerException?.Message}");
-                    Console.WriteLine($"[CRITICAL ERROR] ========== GetOrCreateSpecialty END (failed) ==========");
-                    throw;
+                    fullSpecialtyName = specialtyCode.Trim();
                 }
-            }
-
-            /// <summary>
-            /// Получение или создание записи academic_records для привязки специальности к студенту
-            /// </summary>
-            private void EnsureAcademicRecordExists(MySqlConnection connection, int personId, int? specialtyId, MySqlTransaction transaction)
-            {
-                try
+                else if (!string.IsNullOrEmpty(specialtyName))
                 {
-                    Console.WriteLine($"[INFO] ========== EnsureAcademicRecordExists START ==========");
-                    Console.WriteLine($"[INFO] Input parameters: personId={personId}, specialtyId={specialtyId}");
-                    Console.WriteLine($"[INFO] Connection state: {connection.State}");
+                    fullSpecialtyName = specialtyName.Trim();
+                }
 
-                    // Проверяем, существует ли уже запись academic_records для этого человека
-                    const string sqlCheck = "SELECT id FROM academic_records WHERE person_id = @personId LIMIT 1";
-                    int? academicRecordId = null;
+                Console.WriteLine($"[INFO] ========== GetOrCreateSpecialty START ==========");
+                Console.WriteLine($"[INFO] Input parameters: code='{specialtyCode}', name='{specialtyName}'");
+                Console.WriteLine($"[INFO] Full specialty name: '{fullSpecialtyName}'");
+                Console.WriteLine($"[INFO] Connection state: {connection.State}");
+                Console.WriteLine($"[INFO] Transaction state: {transaction?.Connection?.State ?? ConnectionState.Closed}");
 
-                    Console.WriteLine($"[DEBUG] Executing SQL (check): {sqlCheck}");
-                    Console.WriteLine($"[DEBUG] Parameter @personId = {personId}");
+                // Пытаемся найти специальность по полному наименованию (код + имя)
+                if (!string.IsNullOrEmpty(fullSpecialtyName))
+                {
+                    const string sqlFindByFullName = "SELECT id FROM specialties WHERE name = @name LIMIT 1";
+                    Console.WriteLine($"[DEBUG] Executing SQL (find by fullName): {sqlFindByFullName}");
+                    Console.WriteLine($"[DEBUG] Parameter @name = '{fullSpecialtyName}'");
 
-                    using (var command = new MySqlCommand(sqlCheck, connection, transaction))
+                    using (var command = new MySqlCommand(sqlFindByFullName, connection, transaction))
                     {
-                        command.Parameters.AddWithValue("@personId", personId);
+                        command.Parameters.AddWithValue("@name", fullSpecialtyName);
                         try
                         {
                             var result = command.ExecuteScalar();
                             if (result != null)
                             {
-                                academicRecordId = Convert.ToInt32(result);
-                                Console.WriteLine($"[INFO] ✓ Found existing academic_record with ID={academicRecordId} for personId={personId}");
+                                Console.WriteLine($"[INFO] ✓ Found specialty by fullName '{fullSpecialtyName}' with ID={result}");
+                                Console.WriteLine($"[INFO] ========== GetOrCreateSpecialty END (found by fullName) ==========");
+                                return Convert.ToInt32(result);
                             }
                             else
                             {
-                                Console.WriteLine($"[INFO] No existing academic_record found for personId={personId}");
+                                Console.WriteLine($"[INFO] Specialty not found by fullName '{fullSpecialtyName}'");
                             }
                         }
                         catch (MySqlException mysqlEx)
                         {
-                            Console.WriteLine($"[CRITICAL ERROR] MySQL error while checking academic_records: {mysqlEx.Message}");
+                            Console.WriteLine($"[CRITICAL ERROR] MySQL error while finding specialty by fullName: {mysqlEx.Message}");
                             Console.WriteLine($"[CRITICAL ERROR] MySQL error code: {mysqlEx.Number}");
                             Console.WriteLine($"[CRITICAL ERROR] SQL State: {mysqlEx.SqlState}");
-                            Console.WriteLine($"[CRITICAL ERROR] Query: {sqlCheck}");
-                            Console.WriteLine($"[CRITICAL ERROR] Parameter: @personId = {personId}");
+                            Console.WriteLine($"[CRITICAL ERROR] Query: {sqlFindByFullName}");
+                            Console.WriteLine($"[CRITICAL ERROR] Parameter: @name = '{fullSpecialtyName}'");
                             throw;
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"[CRITICAL ERROR] Unexpected error while checking academic_records: {ex.Message}");
+                            Console.WriteLine($"[CRITICAL ERROR] Unexpected error while finding specialty by fullName: {ex.Message}");
                             Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
                             Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
                             throw;
                         }
                     }
+                }
 
-                    if (academicRecordId.HasValue)
+                // Пытаемся найти специальность только по коду (в short_name)
+                if (!string.IsNullOrEmpty(specialtyCode))
+                {
+                    const string sqlFindByCode = "SELECT id FROM specialties WHERE short_name = @code LIMIT 1";
+                    Console.WriteLine($"[DEBUG] Executing SQL (find by code): {sqlFindByCode}");
+                    Console.WriteLine($"[DEBUG] Parameter @code = '{specialtyCode.Trim()}'");
+
+                    using (var command = new MySqlCommand(sqlFindByCode, connection, transaction))
                     {
-                        // Обновляем существующую запись
-                        const string sqlUpdate = @"
-UPDATE academic_records
-SET specialty_id = @specialtyId
-WHERE id = @id";
-
-                        Console.WriteLine($"[DEBUG] Executing SQL (update): {sqlUpdate.Replace("\n", " ")}");
-                        Console.WriteLine($"[DEBUG] Parameters: @specialtyId={(object)specialtyId ?? DBNull.Value}, @id={academicRecordId.Value}");
-
-                        using (var command = new MySqlCommand(sqlUpdate, connection, transaction))
+                        command.Parameters.AddWithValue("@code", specialtyCode.Trim());
+                        try
                         {
-                            command.Parameters.AddWithValue("@specialtyId", (object)specialtyId ?? DBNull.Value);
-                            command.Parameters.AddWithValue("@id", academicRecordId.Value);
-                            try
+                            var result = command.ExecuteScalar();
+                            if (result != null)
                             {
-                                var rowsAffected = command.ExecuteNonQuery();
-                                Console.WriteLine($"[INFO] ✓ Updated academic_record ID={academicRecordId} with specialtyId={specialtyId}, rows affected={rowsAffected}");
-                                Console.WriteLine($"[INFO] ========== EnsureAcademicRecordExists END (updated) ==========");
-                            }
-                            catch (MySqlException mysqlEx)
-                            {
-                                Console.WriteLine($"[CRITICAL ERROR] MySQL error while updating academic_records: {mysqlEx.Message}");
-                                Console.WriteLine($"[CRITICAL ERROR] MySQL error code: {mysqlEx.Number}");
-                                Console.WriteLine($"[CRITICAL ERROR] SQL State: {mysqlEx.SqlState}");
-                                Console.WriteLine($"[CRITICAL ERROR] Query: {sqlUpdate.Replace("\n", " ")}");
-                                Console.WriteLine($"[CRITICAL ERROR] Parameters: @specialtyId={(object)specialtyId ?? DBNull.Value}, @id={academicRecordId.Value}");
-                                throw;
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"[CRITICAL ERROR] Unexpected error while updating academic_records: {ex.Message}");
-                                Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
-                                Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
-                                throw;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Создаем новую запись
-                        const string sqlInsert = @"
-INSERT INTO academic_records (person_id, specialty_id)
-VALUES (@personId, @specialtyId)";
-
-                        Console.WriteLine($"[DEBUG] Executing SQL (insert): {sqlInsert.Replace("\n", " ")}");
-                        Console.WriteLine($"[DEBUG] Parameters: @personId={personId}, @specialtyId={(object)specialtyId ?? DBNull.Value}");
-
-                        using (var command = new MySqlCommand(sqlInsert, connection, transaction))
-                        {
-                            command.Parameters.AddWithValue("@personId", personId);
-                            command.Parameters.AddWithValue("@specialtyId", (object)specialtyId ?? DBNull.Value);
-                            try
-                            {
-                                var rowsAffected = command.ExecuteNonQuery();
-                                Console.WriteLine($"[INFO] ✓ Inserted new academic_record for personId={personId}, specialtyId={specialtyId}, rows affected={rowsAffected}");
-                                Console.WriteLine($"[INFO] ========== EnsureAcademicRecordExists END (inserted) ==========");
-                            }
-                            catch (MySqlException mysqlEx)
-                            {
-                                Console.WriteLine($"[CRITICAL ERROR] MySQL error while inserting academic_records: {mysqlEx.Message}");
-                                Console.WriteLine($"[CRITICAL ERROR] MySQL error code: {mysqlEx.Number}");
-                                Console.WriteLine($"[CRITICAL ERROR] SQL State: {mysqlEx.SqlState}");
-                                Console.WriteLine($"[CRITICAL ERROR] Query: {sqlInsert.Replace("\n", " ")}");
-                                Console.WriteLine($"[CRITICAL ERROR] Parameters: @personId={personId}, @specialtyId={(object)specialtyId ?? DBNull.Value}");
-                                Console.WriteLine($"[CRITICAL ERROR] Possible cause: Column 'id' might not exist in academic_records table or wrong column name used");
-                                throw;
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"[CRITICAL ERROR] Unexpected error while inserting academic_records: {ex.Message}");
-                                Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
-                                Console.WriteLine($"[CRITICAL ERROR] Inner exception: {ex.InnerException?.Message}");
-                                Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
-                                throw;
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[CRITICAL ERROR] ========== EnsureAcademicRecordExists FAILED ==========");
-                    Console.WriteLine($"[CRITICAL ERROR] EnsureAcademicRecordExists failed: {ex.Message}");
-                    Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
-                    Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
-                    Console.WriteLine($"[CRITICAL ERROR] Inner exception: {ex.InnerException?.Message}");
-                    Console.WriteLine($"[CRITICAL ERROR] ========== EnsureAcademicRecordExists END (failed) ==========");
-                    throw;
-                }
-            }
-
-            /// <summary>
-            /// Проверка на дубликат по серии и номеру документа
-            /// </summary>
-            private bool IsDuplicate(MySqlConnection connection, string docSeries, string docNumber, MySqlTransaction transaction)
-            {
-                try
-                {
-                    const string sql = "SELECT COUNT(*) FROM education_documents WHERE doc_series = @series AND doc_number = @number";
-                    using (var command = new MySqlCommand(sql, connection, transaction))
-                    {
-                        command.Parameters.AddWithValue("@series", docSeries);
-                        command.Parameters.AddWithValue("@number", docNumber);
-                        var count = Convert.ToInt32(command.ExecuteScalar());
-                        Console.WriteLine($"[INFO] IsDuplicate check: series='{docSeries}', number='{docNumber}', count={count}");
-                        return count > 0;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[ERROR] IsDuplicate failed: {ex.Message}");
-                    Console.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
-                    throw;
-                }
-            }
-
-            /// <summary>
-            /// Поиск ID лица по ФИО
-            /// </summary>
-            private int? FindPersonId(MySqlConnection connection, string lastName, string firstName, string middleName, MySqlTransaction transaction)
-            {
-                try
-                {
-                    if (string.IsNullOrEmpty(lastName) && string.IsNullOrEmpty(firstName))
-                    {
-                        Console.WriteLine("[WARNING] FindPersonId: both lastName and firstName are empty");
-                        return null;
-                    }
-
-                    Console.WriteLine($"[INFO] FindPersonId called: lastName='{lastName}', firstName='{firstName}', middleName='{middleName}'");
-
-                    var sql = "SELECT id FROM persons WHERE 1=1";
-                    if (!string.IsNullOrEmpty(lastName))
-                        sql += " AND full_name LIKE @lastName";
-                    if (!string.IsNullOrEmpty(firstName))
-                        sql += " AND full_name LIKE @firstName";
-
-                    using (var command = new MySqlCommand(sql, connection, transaction))
-                    {
-                        if (!string.IsNullOrEmpty(lastName))
-                            command.Parameters.AddWithValue("@lastName", $"%{lastName}%");
-                        if (!string.IsNullOrEmpty(firstName))
-                            command.Parameters.AddWithValue("@firstName", $"%{firstName}%");
-
-                        var result = command.ExecuteScalar();
-                        var personId = result != null ? (int?)Convert.ToInt32(result) : null;
-
-                        if (personId.HasValue)
-                        {
-                            Console.WriteLine($"[INFO] Found person with ID={personId} for name='{lastName} {firstName}'");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"[INFO] Person not found for name='{lastName} {firstName}'");
-                        }
-
-                        return personId;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[ERROR] FindPersonId failed: {ex.Message}");
-                    Console.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
-                    throw;
-                }
-            }
-
-            /// <summary>
-            /// Валидация строки данных
-            /// </summary>
-            private bool ValidateRowData(Dictionary<string, string> rowData, List<EducationDocMappingInfo> mappingsCopy)
-            {
-                var docSeries = GetMappedValueInternal(rowData, mappingsCopy, "doc_series");
-                var docNumber = GetMappedValueInternal(rowData, mappingsCopy, "doc_number");
-
-                if (string.IsNullOrEmpty(docSeries) || string.IsNullOrEmpty(docNumber))
-                    return false;
-
-                var issueDateStr = GetMappedValueInternal(rowData, mappingsCopy, "issue_date");
-                if (!string.IsNullOrEmpty(issueDateStr))
-                {
-                    if (!DateTime.TryParse(issueDateStr, out _))
-                        return false;
-                }
-
-                return true;
-            }
-
-            /// <summary>
-            /// Вставка записи об образовательном документе
-            /// </summary>
-            private bool InsertEducationDocument(MySqlConnection connection, Dictionary<string, string> rowData,
-                MySqlTransaction transaction, List<EducationDocMappingInfo> mappingsCopy, int? personId)
-            {
-                try
-                {
-                    Console.WriteLine($"[INFO] ========== InsertEducationDocument START ==========");
-                    Console.WriteLine($"[INFO] Input parameters: personId={personId}, rowData count={rowData.Count}");
-
-                    var fields = new List<string>();
-                    var parameters = new List<string>();
-                    var parameterValues = new Dictionary<string, object>();
-
-                    if (personId.HasValue)
-                    {
-                        fields.Add("person_id");
-                        parameters.Add("@person_id");
-                        parameterValues["@person_id"] = personId.Value;
-                        Console.WriteLine($"[DEBUG] Added person_id parameter: {personId.Value}");
-                    }
-
-                    foreach (var mapping in mappingsCopy)
-                    {
-                        if (mapping.DatabaseField == "person_id") continue;
-
-                        var value = GetMappedValueInternal(rowData, mappingsCopy, mapping.DatabaseField);
-                        if (!string.IsNullOrEmpty(value))
-                        {
-                            fields.Add(mapping.DatabaseField);
-                            parameters.Add("@" + mapping.DatabaseField);
-
-                            var paramName = "@" + mapping.DatabaseField;
-                            object paramValue = value;
-
-                            if (mapping.DatabaseField.EndsWith("_date") && DateTime.TryParse(value, out DateTime dateValue))
-                            {
-                                paramValue = dateValue;
-                                Console.WriteLine($"[DEBUG] Parameter {paramName} (date): {dateValue}");
-                            }
-                            else if (mapping.DatabaseField.EndsWith("_year") && int.TryParse(value, out int yearValue))
-                            {
-                                paramValue = yearValue;
-                                Console.WriteLine($"[DEBUG] Parameter {paramName} (year): {yearValue}");
-                            }
-                            else if (mapping.DatabaseField.EndsWith("_confirmed"))
-                            {
-                                // Обработка текстовых значений для полей подтверждения
-                                var normalizedValue = value.Trim().ToLower();
-                                if (normalizedValue == "да" || normalizedValue == "yes" || normalizedValue == "1" || normalizedValue == "true")
-                                    paramValue = true;
-                                else if (normalizedValue == "нет" || normalizedValue == "no" || normalizedValue == "0" || normalizedValue == "false" || normalizedValue == "")
-                                    paramValue = false;
-                                else if (int.TryParse(value, out int confirmedValue))
-                                    paramValue = confirmedValue == 1;
-                                else
-                                    paramValue = false; // По умолчанию false для непонятных значений
-                                Console.WriteLine($"[DEBUG] Parameter {paramName} (confirmed): {paramValue}");
-                            }
-                            else if (mapping.DatabaseField == "study_duration_years" && decimal.TryParse(value, out decimal durationValue))
-                            {
-                                paramValue = durationValue;
-                                Console.WriteLine($"[DEBUG] Parameter {paramName} (duration): {durationValue}");
-                            }
-                            else if (mapping.DatabaseField == "has_target_contract")
-                            {
-                                // Обработка текстовых значений для поля договора
-                                var normalizedValue = value.Trim().ToLower();
-                                if (normalizedValue == "да" || normalizedValue == "yes" || normalizedValue == "1" || normalizedValue == "true")
-                                    paramValue = true;
-                                else if (normalizedValue == "нет" || normalizedValue == "no" || normalizedValue == "0" || normalizedValue == "false" || normalizedValue == "")
-                                    paramValue = false;
-                                else if (int.TryParse(value, out int contractValue))
-                                    paramValue = contractValue == 1;
-                                else
-                                    paramValue = false; // По умолчанию false
-                                Console.WriteLine($"[DEBUG] Parameter {paramName} (contract): {paramValue}");
-                            }
-                            else if (mapping.DatabaseField.Contains("ogrn"))
-                            {
-                                // Обрезка ОГРН до 15 символов (максимальная длина ОГРН/ОГРНИП)
-                                var cleanedValue = value.Trim().Replace(" ", "").Replace("-", "");
-                                if (cleanedValue.Length > 15)
-                                    cleanedValue = cleanedValue.Substring(0, 15);
-                                paramValue = cleanedValue;
-                                Console.WriteLine($"[DEBUG] Parameter {paramName} (ogrn): {cleanedValue}");
-                            }
-                            else if (mapping.DatabaseField.Contains("kpp"))
-                            {
-                                // Обрезка КПП до 9 символов
-                                var cleanedValue = value.Trim().Replace(" ", "").Replace("-", "");
-                                if (cleanedValue.Length > 9)
-                                    cleanedValue = cleanedValue.Substring(0, 9);
-                                paramValue = cleanedValue;
-                                Console.WriteLine($"[DEBUG] Parameter {paramName} (kpp): {cleanedValue}");
+                                Console.WriteLine($"[INFO] ✓ Found specialty by code '{specialtyCode}' with ID={result}");
+                                Console.WriteLine($"[INFO] ========== GetOrCreateSpecialty END (found by code) ==========");
+                                return Convert.ToInt32(result);
                             }
                             else
                             {
-                                Console.WriteLine($"[DEBUG] Parameter {paramName}: {paramValue}");
+                                Console.WriteLine($"[INFO] Specialty not found by code '{specialtyCode}'");
                             }
-
-                            parameterValues[paramName] = paramValue;
-                        }
-                    }
-
-                    if (fields.Count == 0)
-                    {
-                        Console.WriteLine("[WARNING] No fields to insert, returning false");
-                        Console.WriteLine($"[INFO] ========== InsertEducationDocument END (no fields) ==========");
-                        return false;
-                    }
-
-                    var sql = $"INSERT INTO education_documents ({string.Join(", ", fields)}) VALUES ({string.Join(", ", parameters)})";
-
-                    Console.WriteLine($"[DEBUG] Executing SQL: {sql}");
-                    Console.WriteLine($"[DEBUG] Total parameters: {parameterValues.Count}");
-                    Console.WriteLine($"[DEBUG] Fields: {string.Join(", ", fields)}");
-
-                    using (var command = new MySqlCommand(sql, connection, transaction))
-                    {
-                        foreach (var param in parameterValues)
-                        {
-                            command.Parameters.AddWithValue(param.Key, param.Value);
-                        }
-
-                        try
-                        {
-                            var rowsAffected = command.ExecuteNonQuery();
-                            Console.WriteLine($"[INFO] ✓ Inserted education document, rows affected={rowsAffected}");
-                            Console.WriteLine($"[INFO] ========== InsertEducationDocument END (success) ==========");
-                            return true;
                         }
                         catch (MySqlException mysqlEx)
                         {
-                            Console.WriteLine($"[CRITICAL ERROR] MySQL error while inserting education document: {mysqlEx.Message}");
+                            Console.WriteLine($"[CRITICAL ERROR] MySQL error while finding specialty by code: {mysqlEx.Message}");
                             Console.WriteLine($"[CRITICAL ERROR] MySQL error code: {mysqlEx.Number}");
                             Console.WriteLine($"[CRITICAL ERROR] SQL State: {mysqlEx.SqlState}");
-                            Console.WriteLine($"[CRITICAL ERROR] Query: {sql}");
-                            Console.WriteLine($"[CRITICAL ERROR] Parameters: {string.Join(", ", parameterValues.Select(kv => $"{kv.Key}={kv.Value}"))}");
-                            Console.WriteLine($"[CRITICAL ERROR] Possible cause: Unknown column 'id' or other column name mismatch in education_documents table");
+                            Console.WriteLine($"[CRITICAL ERROR] Query: {sqlFindByCode}");
+                            Console.WriteLine($"[CRITICAL ERROR] Parameter: @code = '{specialtyCode.Trim()}'");
                             throw;
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"[CRITICAL ERROR] Unexpected error while inserting education document: {ex.Message}");
+                            Console.WriteLine($"[CRITICAL ERROR] Unexpected error while finding specialty by code: {ex.Message}");
+                            Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
+                            Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
+                            throw;
+                        }
+                    }
+                }
+
+                // Пытаемся найти специальность только по наименованию
+                if (!string.IsNullOrEmpty(specialtyName))
+                {
+                    const string sqlFindByName = "SELECT id FROM specialties WHERE name = @name LIMIT 1";
+                    Console.WriteLine($"[DEBUG] Executing SQL (find by name): {sqlFindByName}");
+                    Console.WriteLine($"[DEBUG] Parameter @name = '{specialtyName.Trim()}'");
+
+                    using (var command = new MySqlCommand(sqlFindByName, connection, transaction))
+                    {
+                        command.Parameters.AddWithValue("@name", specialtyName.Trim());
+                        try
+                        {
+                            var result = command.ExecuteScalar();
+                            if (result != null)
+                            {
+                                Console.WriteLine($"[INFO] ✓ Found specialty by name '{specialtyName}' with ID={result}");
+                                Console.WriteLine($"[INFO] ========== GetOrCreateSpecialty END (found by name) ==========");
+                                return Convert.ToInt32(result);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"[INFO] Specialty not found by name '{specialtyName}'");
+                            }
+                        }
+                        catch (MySqlException mysqlEx)
+                        {
+                            Console.WriteLine($"[CRITICAL ERROR] MySQL error while finding specialty by name: {mysqlEx.Message}");
+                            Console.WriteLine($"[CRITICAL ERROR] MySQL error code: {mysqlEx.Number}");
+                            Console.WriteLine($"[CRITICAL ERROR] SQL State: {mysqlEx.SqlState}");
+                            Console.WriteLine($"[CRITICAL ERROR] Query: {sqlFindByName}");
+                            Console.WriteLine($"[CRITICAL ERROR] Parameter: @name = '{specialtyName.Trim()}'");
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[CRITICAL ERROR] Unexpected error while finding specialty by name: {ex.Message}");
+                            Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
+                            Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
+                            throw;
+                        }
+                    }
+                }
+
+                // Если специальность не найдена, создаем новую
+                if (string.IsNullOrEmpty(specialtyCode) && string.IsNullOrEmpty(specialtyName))
+                {
+                    Console.WriteLine("[WARNING] Cannot create specialty: both code and name are empty");
+                    Console.WriteLine($"[INFO] ========== GetOrCreateSpecialty END (cannot create) ==========");
+                    return null;
+                }
+
+                try
+                {
+                    const string sqlInsert = @"
+INSERT INTO specialties (name, short_name, active, data)
+VALUES (@name, @short_name, 1, @data);
+SELECT LAST_INSERT_ID();";
+
+                    Console.WriteLine($"[DEBUG] Executing SQL (insert): {sqlInsert.Replace("\n", " ")}");
+                    Console.WriteLine($"[DEBUG] Parameters: @name='{fullSpecialtyName}', @short_name='{specialtyCode?.Trim()}', @data={DateTime.Now}");
+
+                    using (var command = new MySqlCommand(sqlInsert, connection, transaction))
+                    {
+                        // В name записываем полное наименование (код + наименование)
+                        command.Parameters.AddWithValue("@name", (object)fullSpecialtyName ?? DBNull.Value);
+                        // В short_name записываем только код
+                        command.Parameters.AddWithValue("@short_name", (object)specialtyCode?.Trim() ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@data", DateTime.Now);
+
+                        Console.WriteLine($"[DEBUG] About to execute INSERT command...");
+
+                        var result = command.ExecuteScalar();
+                        int newId = Convert.ToInt32(result);
+
+                        Console.WriteLine($"[INFO] ✓ Created new specialty: {fullSpecialtyName} [{specialtyCode}] with ID={newId}");
+                        Console.WriteLine($"[INFO] ========== GetOrCreateSpecialty END (created new) ==========");
+                        return newId;
+                    }
+                }
+                catch (MySqlException mysqlEx)
+                {
+                    Console.WriteLine($"[CRITICAL ERROR] MySQL error while creating specialty: {mysqlEx.Message}");
+                    Console.WriteLine($"[CRITICAL ERROR] MySQL error code: {mysqlEx.Number}");
+                    Console.WriteLine($"[CRITICAL ERROR] SQL State: {mysqlEx.SqlState}");
+                    Console.WriteLine($"[CRITICAL ERROR] Query: {sqlInsert.Replace("\n", " ")}");
+                    Console.WriteLine($"[CRITICAL ERROR] Parameters: @name='{fullSpecialtyName}', @short_name='{specialtyCode?.Trim()}'");
+                    Console.WriteLine($"[CRITICAL ERROR] Stack trace: {mysqlEx.StackTrace}");
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[CRITICAL ERROR] Unexpected error while creating specialty: {ex.Message}");
+                    Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
+                    Console.WriteLine($"[CRITICAL ERROR] Inner exception: {ex.InnerException?.Message}");
+                    Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CRITICAL ERROR] ========== GetOrCreateSpecialty FAILED ==========");
+                Console.WriteLine($"[CRITICAL ERROR] GetOrCreateSpecialty failed: {ex.Message}");
+                Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
+                Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
+                Console.WriteLine($"[CRITICAL ERROR] Inner exception: {ex.InnerException?.Message}");
+                Console.WriteLine($"[CRITICAL ERROR] ========== GetOrCreateSpecialty END (failed) ==========");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Получение или создание записи academic_records для привязки специальности к студенту
+        /// </summary>
+        private void EnsureAcademicRecordExists(MySqlConnection connection, int personId, int? specialtyId, MySqlTransaction transaction)
+        {
+            try
+            {
+                Console.WriteLine($"[INFO] ========== EnsureAcademicRecordExists START ==========");
+                Console.WriteLine($"[INFO] Input parameters: personId={personId}, specialtyId={specialtyId}");
+                Console.WriteLine($"[INFO] Connection state: {connection.State}");
+
+                // Проверяем, существует ли уже запись academic_records для этого человека
+                const string sqlCheck = "SELECT id FROM academic_records WHERE person_id = @personId LIMIT 1";
+                int? academicRecordId = null;
+
+                Console.WriteLine($"[DEBUG] Executing SQL (check): {sqlCheck}");
+                Console.WriteLine($"[DEBUG] Parameter @personId = {personId}");
+
+                using (var command = new MySqlCommand(sqlCheck, connection, transaction))
+                {
+                    command.Parameters.AddWithValue("@personId", personId);
+                    try
+                    {
+                        var result = command.ExecuteScalar();
+                        if (result != null)
+                        {
+                            academicRecordId = Convert.ToInt32(result);
+                            Console.WriteLine($"[INFO] ✓ Found existing academic_record with ID={academicRecordId} for personId={personId}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[INFO] No existing academic_record found for personId={personId}");
+                        }
+                    }
+                    catch (MySqlException mysqlEx)
+                    {
+                        Console.WriteLine($"[CRITICAL ERROR] MySQL error while checking academic_records: {mysqlEx.Message}");
+                        Console.WriteLine($"[CRITICAL ERROR] MySQL error code: {mysqlEx.Number}");
+                        Console.WriteLine($"[CRITICAL ERROR] SQL State: {mysqlEx.SqlState}");
+                        Console.WriteLine($"[CRITICAL ERROR] Query: {sqlCheck}");
+                        Console.WriteLine($"[CRITICAL ERROR] Parameter: @personId = {personId}");
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[CRITICAL ERROR] Unexpected error while checking academic_records: {ex.Message}");
+                        Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
+                        Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
+                        throw;
+                    }
+                }
+
+                if (academicRecordId.HasValue)
+                {
+                    // Обновляем существующую запись
+                    const string sqlUpdate = @"
+UPDATE academic_records
+SET specialty_id = @specialtyId
+WHERE id = @id";
+
+                    Console.WriteLine($"[DEBUG] Executing SQL (update): {sqlUpdate.Replace("\n", " ")}");
+                    Console.WriteLine($"[DEBUG] Parameters: @specialtyId={(object)specialtyId ?? DBNull.Value}, @id={academicRecordId.Value}");
+
+                    using (var command = new MySqlCommand(sqlUpdate, connection, transaction))
+                    {
+                        command.Parameters.AddWithValue("@specialtyId", (object)specialtyId ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@id", academicRecordId.Value);
+                        try
+                        {
+                            var rowsAffected = command.ExecuteNonQuery();
+                            Console.WriteLine($"[INFO] ✓ Updated academic_record ID={academicRecordId} with specialtyId={specialtyId}, rows affected={rowsAffected}");
+                            Console.WriteLine($"[INFO] ========== EnsureAcademicRecordExists END (updated) ==========");
+                        }
+                        catch (MySqlException mysqlEx)
+                        {
+                            Console.WriteLine($"[CRITICAL ERROR] MySQL error while updating academic_records: {mysqlEx.Message}");
+                            Console.WriteLine($"[CRITICAL ERROR] MySQL error code: {mysqlEx.Number}");
+                            Console.WriteLine($"[CRITICAL ERROR] SQL State: {mysqlEx.SqlState}");
+                            Console.WriteLine($"[CRITICAL ERROR] Query: {sqlUpdate.Replace("\n", " ")}");
+                            Console.WriteLine($"[CRITICAL ERROR] Parameters: @specialtyId={(object)specialtyId ?? DBNull.Value}, @id={academicRecordId.Value}");
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[CRITICAL ERROR] Unexpected error while updating academic_records: {ex.Message}");
+                            Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
+                            Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
+                            throw;
+                        }
+                    }
+                }
+                else
+                {
+                    // Создаем новую запись
+                    const string sqlInsert = @"
+INSERT INTO academic_records (person_id, specialty_id)
+VALUES (@personId, @specialtyId)";
+
+                    Console.WriteLine($"[DEBUG] Executing SQL (insert): {sqlInsert.Replace("\n", " ")}");
+                    Console.WriteLine($"[DEBUG] Parameters: @personId={personId}, @specialtyId={(object)specialtyId ?? DBNull.Value}");
+
+                    using (var command = new MySqlCommand(sqlInsert, connection, transaction))
+                    {
+                        command.Parameters.AddWithValue("@personId", personId);
+                        command.Parameters.AddWithValue("@specialtyId", (object)specialtyId ?? DBNull.Value);
+                        try
+                        {
+                            var rowsAffected = command.ExecuteNonQuery();
+                            Console.WriteLine($"[INFO] ✓ Inserted new academic_record for personId={personId}, specialtyId={specialtyId}, rows affected={rowsAffected}");
+                            Console.WriteLine($"[INFO] ========== EnsureAcademicRecordExists END (inserted) ==========");
+                        }
+                        catch (MySqlException mysqlEx)
+                        {
+                            Console.WriteLine($"[CRITICAL ERROR] MySQL error while inserting academic_records: {mysqlEx.Message}");
+                            Console.WriteLine($"[CRITICAL ERROR] MySQL error code: {mysqlEx.Number}");
+                            Console.WriteLine($"[CRITICAL ERROR] SQL State: {mysqlEx.SqlState}");
+                            Console.WriteLine($"[CRITICAL ERROR] Query: {sqlInsert.Replace("\n", " ")}");
+                            Console.WriteLine($"[CRITICAL ERROR] Parameters: @personId={personId}, @specialtyId={(object)specialtyId ?? DBNull.Value}");
+                            Console.WriteLine($"[CRITICAL ERROR] Possible cause: Column 'id' might not exist in academic_records table or wrong column name used");
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[CRITICAL ERROR] Unexpected error while inserting academic_records: {ex.Message}");
                             Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
                             Console.WriteLine($"[CRITICAL ERROR] Inner exception: {ex.InnerException?.Message}");
                             Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
@@ -1678,63 +1416,325 @@ VALUES (@personId, @specialtyId)";
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[CRITICAL ERROR] ========== InsertEducationDocument FAILED ==========");
-                    Console.WriteLine($"[CRITICAL ERROR] InsertEducationDocument failed: {ex.Message}");
-                    Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
-                    Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
-                    Console.WriteLine($"[CRITICAL ERROR] Inner exception: {ex.InnerException?.Message}");
-                    Console.WriteLine($"[CRITICAL ERROR] Row data (first 10 items): {string.Join(", ", rowData.Select(kv => $"{kv.Key}={kv.Value}").Take(10))}");
-                    Console.WriteLine($"[CRITICAL ERROR] ========== InsertEducationDocument END (failed) ==========");
-                    MessageBox.Show($"Ошибка вставки записи: {ex.Message}\n\nПроверьте, что все поля существуют в таблице education_documents.\nДетали ошибки смотрите в консоли output.",
-                        "Ошибка импорта", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return false;
-                }
             }
-
-            /// <summary>
-            /// Отмена и переход назад
-            /// </summary>
-            private void CancelButton_Click(object sender, RoutedEventArgs e)
+            catch (Exception ex)
             {
-                NavigationService?.Navigate(new search());
-            }
-
-            /// <summary>
-            /// Переключение на импорт студентов
-            /// </summary>
-            private void ImportStudentsButton_Click(object sender, RoutedEventArgs e)
-            {
-                NavigationService?.Navigate(new ImportExcelPage());
-            }
-
-            /// <summary>
-            /// Переключение на импорт документов
-            /// </summary>
-            private void ImportDocumentsButton_Click(object sender, RoutedEventArgs e)
-            {
-                // Уже находимся на странице импорта документов
-                MessageBox.Show("Вы уже находитесь на странице импорта документов", "Информация",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                Console.WriteLine($"[CRITICAL ERROR] ========== EnsureAcademicRecordExists FAILED ==========");
+                Console.WriteLine($"[CRITICAL ERROR] EnsureAcademicRecordExists failed: {ex.Message}");
+                Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
+                Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
+                Console.WriteLine($"[CRITICAL ERROR] Inner exception: {ex.InnerException?.Message}");
+                Console.WriteLine($"[CRITICAL ERROR] ========== EnsureAcademicRecordExists END (failed) ==========");
+                throw;
             }
         }
 
         /// <summary>
-        /// Класс для предпросмотра импортируемых данных
+        /// Проверка на дубликат по серии и номеру документа
         /// </summary>
-        public class EducationDocPreviewItem
+        private bool IsDuplicate(MySqlConnection connection, string docSeries, string docNumber, MySqlTransaction transaction)
         {
-            public string RecipientLastName { get; set; }
-            public string RecipientFirstName { get; set; }
-            public string RecipientMiddleName { get; set; }
-            public string RecipientFullName => $"{RecipientLastName} {RecipientFirstName} {RecipientMiddleName}".Trim();
-            public string DocType { get; set; }
-            public string DocSeries { get; set; }
-            public string DocNumber { get; set; }
-            public string IssueDate { get; set; }
-            public string SpecialtyName { get; set; }
-            public string QualificationName { get; set; }
+            try
+            {
+                const string sql = "SELECT COUNT(*) FROM education_documents WHERE doc_series = @series AND doc_number = @number";
+                using (var command = new MySqlCommand(sql, connection, transaction))
+                {
+                    command.Parameters.AddWithValue("@series", docSeries);
+                    command.Parameters.AddWithValue("@number", docNumber);
+                    var count = Convert.ToInt32(command.ExecuteScalar());
+                    Console.WriteLine($"[INFO] IsDuplicate check: series='{docSeries}', number='{docNumber}', count={count}");
+                    return count > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] IsDuplicate failed: {ex.Message}");
+                Console.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
+                throw;
+            }
         }
+
+        /// <summary>
+        /// Поиск ID лица по ФИО
+        /// </summary>
+        private int? FindPersonId(MySqlConnection connection, string lastName, string firstName, string middleName, MySqlTransaction transaction)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(lastName) && string.IsNullOrEmpty(firstName))
+                {
+                    Console.WriteLine("[WARNING] FindPersonId: both lastName and firstName are empty");
+                    return null;
+                }
+
+                Console.WriteLine($"[INFO] FindPersonId called: lastName='{lastName}', firstName='{firstName}', middleName='{middleName}'");
+
+                var sql = "SELECT id FROM persons WHERE 1=1";
+                if (!string.IsNullOrEmpty(lastName))
+                    sql += " AND full_name LIKE @lastName";
+                if (!string.IsNullOrEmpty(firstName))
+                    sql += " AND full_name LIKE @firstName";
+
+                using (var command = new MySqlCommand(sql, connection, transaction))
+                {
+                    if (!string.IsNullOrEmpty(lastName))
+                        command.Parameters.AddWithValue("@lastName", $"%{lastName}%");
+                    if (!string.IsNullOrEmpty(firstName))
+                        command.Parameters.AddWithValue("@firstName", $"%{firstName}%");
+
+                    var result = command.ExecuteScalar();
+                    var personId = result != null ? (int?)Convert.ToInt32(result) : null;
+
+                    if (personId.HasValue)
+                    {
+                        Console.WriteLine($"[INFO] Found person with ID={personId} for name='{lastName} {firstName}'");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[INFO] Person not found for name='{lastName} {firstName}'");
+                    }
+
+                    return personId;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] FindPersonId failed: {ex.Message}");
+                Console.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Валидация строки данных
+        /// </summary>
+        private bool ValidateRowData(Dictionary<string, string> rowData, List<EducationDocMappingInfo> mappingsCopy)
+        {
+            var docSeries = GetMappedValueInternal(rowData, mappingsCopy, "doc_series");
+            var docNumber = GetMappedValueInternal(rowData, mappingsCopy, "doc_number");
+
+            if (string.IsNullOrEmpty(docSeries) || string.IsNullOrEmpty(docNumber))
+                return false;
+
+            var issueDateStr = GetMappedValueInternal(rowData, mappingsCopy, "issue_date");
+            if (!string.IsNullOrEmpty(issueDateStr))
+            {
+                if (!DateTime.TryParse(issueDateStr, out _))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Вставка записи об образовательном документе
+        /// </summary>
+        private bool InsertEducationDocument(MySqlConnection connection, Dictionary<string, string> rowData,
+            MySqlTransaction transaction, List<EducationDocMappingInfo> mappingsCopy, int? personId)
+        {
+            try
+            {
+                Console.WriteLine($"[INFO] ========== InsertEducationDocument START ==========");
+                Console.WriteLine($"[INFO] Input parameters: personId={personId}, rowData count={rowData.Count}");
+
+                var fields = new List<string>();
+                var parameters = new List<string>();
+                var parameterValues = new Dictionary<string, object>();
+
+                if (personId.HasValue)
+                {
+                    fields.Add("person_id");
+                    parameters.Add("@person_id");
+                    parameterValues["@person_id"] = personId.Value;
+                    Console.WriteLine($"[DEBUG] Added person_id parameter: {personId.Value}");
+                }
+
+                foreach (var mapping in mappingsCopy)
+                {
+                    if (mapping.DatabaseField == "person_id") continue;
+
+                    var value = GetMappedValueInternal(rowData, mappingsCopy, mapping.DatabaseField);
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        fields.Add(mapping.DatabaseField);
+                        parameters.Add("@" + mapping.DatabaseField);
+
+                        var paramName = "@" + mapping.DatabaseField;
+                        object paramValue = value;
+
+                        if (mapping.DatabaseField.EndsWith("_date") && DateTime.TryParse(value, out DateTime dateValue))
+                        {
+                            paramValue = dateValue;
+                            Console.WriteLine($"[DEBUG] Parameter {paramName} (date): {dateValue}");
+                        }
+                        else if (mapping.DatabaseField.EndsWith("_year") && int.TryParse(value, out int yearValue))
+                        {
+                            paramValue = yearValue;
+                            Console.WriteLine($"[DEBUG] Parameter {paramName} (year): {yearValue}");
+                        }
+                        else if (mapping.DatabaseField.EndsWith("_confirmed"))
+                        {
+                            // Обработка текстовых значений для полей подтверждения
+                            var normalizedValue = value.Trim().ToLower();
+                            if (normalizedValue == "да" || normalizedValue == "yes" || normalizedValue == "1" || normalizedValue == "true")
+                                paramValue = true;
+                            else if (normalizedValue == "нет" || normalizedValue == "no" || normalizedValue == "0" || normalizedValue == "false" || normalizedValue == "")
+                                paramValue = false;
+                            else if (int.TryParse(value, out int confirmedValue))
+                                paramValue = confirmedValue == 1;
+                            else
+                                paramValue = false; // По умолчанию false для непонятных значений
+                            Console.WriteLine($"[DEBUG] Parameter {paramName} (confirmed): {paramValue}");
+                        }
+                        else if (mapping.DatabaseField == "study_duration_years" && decimal.TryParse(value, out decimal durationValue))
+                        {
+                            paramValue = durationValue;
+                            Console.WriteLine($"[DEBUG] Parameter {paramName} (duration): {durationValue}");
+                        }
+                        else if (mapping.DatabaseField == "has_target_contract")
+                        {
+                            // Обработка текстовых значений для поля договора
+                            var normalizedValue = value.Trim().ToLower();
+                            if (normalizedValue == "да" || normalizedValue == "yes" || normalizedValue == "1" || normalizedValue == "true")
+                                paramValue = true;
+                            else if (normalizedValue == "нет" || normalizedValue == "no" || normalizedValue == "0" || normalizedValue == "false" || normalizedValue == "")
+                                paramValue = false;
+                            else if (int.TryParse(value, out int contractValue))
+                                paramValue = contractValue == 1;
+                            else
+                                paramValue = false; // По умолчанию false
+                            Console.WriteLine($"[DEBUG] Parameter {paramName} (contract): {paramValue}");
+                        }
+                        else if (mapping.DatabaseField.Contains("ogrn"))
+                        {
+                            // Обрезка ОГРН до 15 символов (максимальная длина ОГРН/ОГРНИП)
+                            var cleanedValue = value.Trim().Replace(" ", "").Replace("-", "");
+                            if (cleanedValue.Length > 15)
+                                cleanedValue = cleanedValue.Substring(0, 15);
+                            paramValue = cleanedValue;
+                            Console.WriteLine($"[DEBUG] Parameter {paramName} (ogrn): {cleanedValue}");
+                        }
+                        else if (mapping.DatabaseField.Contains("kpp"))
+                        {
+                            // Обрезка КПП до 9 символов
+                            var cleanedValue = value.Trim().Replace(" ", "").Replace("-", "");
+                            if (cleanedValue.Length > 9)
+                                cleanedValue = cleanedValue.Substring(0, 9);
+                            paramValue = cleanedValue;
+                            Console.WriteLine($"[DEBUG] Parameter {paramName} (kpp): {cleanedValue}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[DEBUG] Parameter {paramName}: {paramValue}");
+                        }
+
+                        parameterValues[paramName] = paramValue;
+                    }
+                }
+
+                if (fields.Count == 0)
+                {
+                    Console.WriteLine("[WARNING] No fields to insert, returning false");
+                    Console.WriteLine($"[INFO] ========== InsertEducationDocument END (no fields) ==========");
+                    return false;
+                }
+
+                var sql = $"INSERT INTO education_documents ({string.Join(", ", fields)}) VALUES ({string.Join(", ", parameters)})";
+
+                Console.WriteLine($"[DEBUG] Executing SQL: {sql}");
+                Console.WriteLine($"[DEBUG] Total parameters: {parameterValues.Count}");
+                Console.WriteLine($"[DEBUG] Fields: {string.Join(", ", fields)}");
+
+                using (var command = new MySqlCommand(sql, connection, transaction))
+                {
+                    foreach (var param in parameterValues)
+                    {
+                        command.Parameters.AddWithValue(param.Key, param.Value);
+                    }
+
+                    try
+                    {
+                        var rowsAffected = command.ExecuteNonQuery();
+                        Console.WriteLine($"[INFO] ✓ Inserted education document, rows affected={rowsAffected}");
+                        Console.WriteLine($"[INFO] ========== InsertEducationDocument END (success) ==========");
+                        return true;
+                    }
+                    catch (MySqlException mysqlEx)
+                    {
+                        Console.WriteLine($"[CRITICAL ERROR] MySQL error while inserting education document: {mysqlEx.Message}");
+                        Console.WriteLine($"[CRITICAL ERROR] MySQL error code: {mysqlEx.Number}");
+                        Console.WriteLine($"[CRITICAL ERROR] SQL State: {mysqlEx.SqlState}");
+                        Console.WriteLine($"[CRITICAL ERROR] Query: {sql}");
+                        Console.WriteLine($"[CRITICAL ERROR] Parameters: {string.Join(", ", parameterValues.Select(kv => $"{kv.Key}={kv.Value}"))}");
+                        Console.WriteLine($"[CRITICAL ERROR] Possible cause: Unknown column 'id' or other column name mismatch in education_documents table");
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[CRITICAL ERROR] Unexpected error while inserting education document: {ex.Message}");
+                        Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
+                        Console.WriteLine($"[CRITICAL ERROR] Inner exception: {ex.InnerException?.Message}");
+                        Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
+                        throw;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CRITICAL ERROR] ========== InsertEducationDocument FAILED ==========");
+                Console.WriteLine($"[CRITICAL ERROR] InsertEducationDocument failed: {ex.Message}");
+                Console.WriteLine($"[CRITICAL ERROR] Exception type: {ex.GetType().FullName}");
+                Console.WriteLine($"[CRITICAL ERROR] Stack trace: {ex.StackTrace}");
+                Console.WriteLine($"[CRITICAL ERROR] Inner exception: {ex.InnerException?.Message}");
+                Console.WriteLine($"[CRITICAL ERROR] Row data (first 10 items): {string.Join(", ", rowData.Select(kv => $"{kv.Key}={kv.Value}").Take(10))}");
+                Console.WriteLine($"[CRITICAL ERROR] ========== InsertEducationDocument END (failed) ==========");
+                MessageBox.Show($"Ошибка вставки записи: {ex.Message}\n\nПроверьте, что все поля существуют в таблице education_documents.\nДетали ошибки смотрите в консоли output.",
+                    "Ошибка импорта", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Отмена и переход назад
+        /// </summary>
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService?.Navigate(new search());
+        }
+
+        /// <summary>
+        /// Переключение на импорт студентов
+        /// </summary>
+        private void ImportStudentsButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService?.Navigate(new ImportExcelPage());
+        }
+
+        /// <summary>
+        /// Переключение на импорт документов
+        /// </summary>
+        private void ImportDocumentsButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Уже находимся на странице импорта документов
+            MessageBox.Show("Вы уже находитесь на странице импорта документов", "Информация",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+    }
+
+    /// <summary>
+    /// Класс для предпросмотра импортируемых данных
+    /// </summary>
+    public class EducationDocPreviewItem
+    {
+        public string RecipientLastName { get; set; }
+        public string RecipientFirstName { get; set; }
+        public string RecipientMiddleName { get; set; }
+        public string RecipientFullName => $"{RecipientLastName} {RecipientFirstName} {RecipientMiddleName}".Trim();
+        public string DocType { get; set; }
+        public string DocSeries { get; set; }
+        public string DocNumber { get; set; }
+        public string IssueDate { get; set; }
+        public string SpecialtyName { get; set; }
+        public string QualificationName { get; set; }
     }
 }

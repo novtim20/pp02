@@ -1035,7 +1035,37 @@ namespace PP02.Label
         /// </summary>
         private int? GetOrCreateSpecialty(MySqlConnection connection, string specialtyCode, string specialtyName, MySqlTransaction transaction)
         {
-            // Пытаемся найти специальность по коду
+            // Формируем полное наименование специальности (код + наименование)
+            string fullSpecialtyName = null;
+            if (!string.IsNullOrEmpty(specialtyCode) && !string.IsNullOrEmpty(specialtyName))
+            {
+                fullSpecialtyName = $"{specialtyCode.Trim()} {specialtyName.Trim()}";
+            }
+            else if (!string.IsNullOrEmpty(specialtyCode))
+            {
+                fullSpecialtyName = specialtyCode.Trim();
+            }
+            else if (!string.IsNullOrEmpty(specialtyName))
+            {
+                fullSpecialtyName = specialtyName.Trim();
+            }
+
+            // Пытаемся найти специальность по полному наименованию (код + имя)
+            if (!string.IsNullOrEmpty(fullSpecialtyName))
+            {
+                const string sqlFindByFullName = "SELECT id FROM specialties WHERE name = @name LIMIT 1";
+                using (var command = new MySqlCommand(sqlFindByFullName, connection, transaction))
+                {
+                    command.Parameters.AddWithValue("@name", fullSpecialtyName);
+                    var result = command.ExecuteScalar();
+                    if (result != null)
+                    {
+                        return Convert.ToInt32(result);
+                    }
+                }
+            }
+
+            // Пытаемся найти специальность только по коду (в short_name)
             if (!string.IsNullOrEmpty(specialtyCode))
             {
                 const string sqlFindByCode = "SELECT id FROM specialties WHERE short_name = @code LIMIT 1";
@@ -1050,7 +1080,7 @@ namespace PP02.Label
                 }
             }
 
-            // Пытаемся найти специальность по наименованию
+            // Пытаемся найти специальность только по наименованию
             if (!string.IsNullOrEmpty(specialtyName))
             {
                 const string sqlFindByName = "SELECT id FROM specialties WHERE name = @name LIMIT 1";
@@ -1078,20 +1108,22 @@ SELECT LAST_INSERT_ID();";
 
                 using (var command = new MySqlCommand(sqlInsert, connection, transaction))
                 {
-                    command.Parameters.AddWithValue("@name", (object)specialtyName?.Trim() ?? DBNull.Value);
+                    // В name записываем полное наименование (код + наименование)
+                    command.Parameters.AddWithValue("@name", (object)fullSpecialtyName ?? DBNull.Value);
+                    // В short_name записываем только код
                     command.Parameters.AddWithValue("@short_name", (object)specialtyCode?.Trim() ?? DBNull.Value);
                     command.Parameters.AddWithValue("@data", DateTime.Now);
 
                     var result = command.ExecuteScalar();
                     int newId = Convert.ToInt32(result);
 
-                    Console.WriteLine($"[INFO] Created new specialty: {specialtyName} [{specialtyCode}] with ID={newId}");
+                    Console.WriteLine($"[INFO] Created new specialty: {fullSpecialtyName} [{specialtyCode}] with ID={newId}");
                     return newId;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[ERROR] Failed to create specialty '{specialtyName} [{specialtyCode}]': {ex.Message}");
+                Console.WriteLine($"[ERROR] Failed to create specialty '{fullSpecialtyName} [{specialtyCode}]': {ex.Message}");
                 return null;
             }
         }

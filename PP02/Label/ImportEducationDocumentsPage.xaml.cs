@@ -1226,13 +1226,13 @@ namespace PP02.Label
                     return null;
                 }
 
-                const string sqlInsert = @"
+                try
+                {
+                    const string sqlInsert = @"
 INSERT INTO specialties (name, short_name, active, data)
 VALUES (@name, @short_name, 1, @data);
 SELECT LAST_INSERT_ID();";
 
-                try
-                {
                     Console.WriteLine($"[DEBUG] Executing SQL (insert): {sqlInsert.Replace("\n", " ")}");
                     Console.WriteLine($"[DEBUG] Parameters: @name='{fullSpecialtyName}', @short_name='{specialtyCode?.Trim()}', @data={DateTime.Now}");
 
@@ -1297,7 +1297,7 @@ SELECT LAST_INSERT_ID();";
                 Console.WriteLine($"[INFO] Connection state: {connection.State}");
 
                 // Проверяем, существует ли уже запись academic_records для этого человека
-                const string sqlCheck = "SELECT id FROM academic_records WHERE person_id = @personId LIMIT 1";
+                const string sqlCheck = "SELECT person_id FROM academic_records WHERE person_id = @personId LIMIT 1";
                 int? academicRecordId = null;
 
                 Console.WriteLine($"[DEBUG] Executing SQL (check): {sqlCheck}");
@@ -1312,7 +1312,7 @@ SELECT LAST_INSERT_ID();";
                         if (result != null)
                         {
                             academicRecordId = Convert.ToInt32(result);
-                            Console.WriteLine($"[INFO] ✓ Found existing academic_record with ID={academicRecordId} for personId={personId}");
+                            Console.WriteLine($"[INFO] ✓ Found existing academic_record with person_id={academicRecordId} for personId={personId}");
                         }
                         else
                         {
@@ -1343,19 +1343,19 @@ SELECT LAST_INSERT_ID();";
                     const string sqlUpdate = @"
 UPDATE academic_records
 SET specialty_id = @specialtyId
-WHERE id = @id";
+WHERE person_id = @personId";
 
                     Console.WriteLine($"[DEBUG] Executing SQL (update): {sqlUpdate.Replace("\n", " ")}");
-                    Console.WriteLine($"[DEBUG] Parameters: @specialtyId={(object)specialtyId ?? DBNull.Value}, @id={academicRecordId.Value}");
+                    Console.WriteLine($"[DEBUG] Parameters: @specialtyId={(object)specialtyId ?? DBNull.Value}, @personId={academicRecordId.Value}");
 
                     using (var command = new MySqlCommand(sqlUpdate, connection, transaction))
                     {
                         command.Parameters.AddWithValue("@specialtyId", (object)specialtyId ?? DBNull.Value);
-                        command.Parameters.AddWithValue("@id", academicRecordId.Value);
+                        command.Parameters.AddWithValue("@personId", academicRecordId.Value);
                         try
                         {
                             var rowsAffected = command.ExecuteNonQuery();
-                            Console.WriteLine($"[INFO] ✓ Updated academic_record ID={academicRecordId} with specialtyId={specialtyId}, rows affected={rowsAffected}");
+                            Console.WriteLine($"[INFO] ✓ Updated academic_record person_id={academicRecordId} with specialtyId={specialtyId}, rows affected={rowsAffected}");
                             Console.WriteLine($"[INFO] ========== EnsureAcademicRecordExists END (updated) ==========");
                         }
                         catch (MySqlException mysqlEx)
@@ -1364,7 +1364,7 @@ WHERE id = @id";
                             Console.WriteLine($"[CRITICAL ERROR] MySQL error code: {mysqlEx.Number}");
                             Console.WriteLine($"[CRITICAL ERROR] SQL State: {mysqlEx.SqlState}");
                             Console.WriteLine($"[CRITICAL ERROR] Query: {sqlUpdate.Replace("\n", " ")}");
-                            Console.WriteLine($"[CRITICAL ERROR] Parameters: @specialtyId={(object)specialtyId ?? DBNull.Value}, @id={academicRecordId.Value}");
+                            Console.WriteLine($"[CRITICAL ERROR] Parameters: @specialtyId={(object)specialtyId ?? DBNull.Value}, @personId={academicRecordId.Value}");
                             throw;
                         }
                         catch (Exception ex)

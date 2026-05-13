@@ -40,14 +40,16 @@ namespace PP02.Label
         public string ExcelColumn
         {
             get => _excelColumn;
-            set { _excelColumn = value; OnPropertyChanged(nameof(ExcelColumn)); }
+            set { _excelColumn = value; OnPropertyChanged(nameof(ExcelColumn)); OnPropertyChanged(nameof(CanSelectColumn)); }
         }
 
         public bool UseForImport
         {
             get => _useForImport;
-            set { _useForImport = value; OnPropertyChanged(nameof(UseForImport)); }
+            set { _useForImport = value; OnPropertyChanged(nameof(UseForImport)); OnPropertyChanged(nameof(CanSelectColumn)); }
         }
+
+        public bool CanSelectColumn => UseForImport;
 
         public string SampleValue
         {
@@ -357,6 +359,23 @@ namespace PP02.Label
                 "recipient_birth_date", "recipient_gender"
             };
 
+            // Сначала сбрасываем все назначения Excel столбцов
+            foreach (var mapping in _mappings)
+            {
+                if (_isShortenedMode && !shortDocumentFields.Contains(mapping.DatabaseField))
+                {
+                    mapping.ExcelColumn = null;
+                    mapping.UseForImport = false;
+                    mapping.SampleValue = "-";
+                }
+                else
+                {
+                    mapping.ExcelColumn = null;
+                    mapping.UseForImport = true;
+                    mapping.SampleValue = "-";
+                }
+            }
+
             // Отслеживаем, какие столбцы Excel уже заняты
             var usedExcelColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             int mappedCount = 0;
@@ -368,9 +387,6 @@ namespace PP02.Label
                 {
                     continue;
                 }
-
-                // Пропускаем, если это поле уже замапплено вручную
-                if (!string.IsNullOrEmpty(mapping.ExcelColumn)) continue;
 
                 var searchKeys = GetSearchKey(mapping.DatabaseField)
                     .ToLower()
@@ -586,30 +602,14 @@ namespace PP02.Label
                     if (shortDocumentFields.Contains(mapping.DatabaseField))
                     {
                         mapping.UseForImport = true;
-
-                        // Пытаемся найти совпадение по имени, если ещё не назначено
-                        if (string.IsNullOrEmpty(mapping.ExcelColumn) && _excelColumns.Count > 0)
-                        {
-                            var matchedColumn = _excelColumns.FirstOrDefault(col =>
-                                col.ToLower().Contains(GetSearchKey(mapping.DatabaseField).Split(' ').FirstOrDefault(k => !string.IsNullOrEmpty(k)) ?? "") ||
-                                GetSearchKey(mapping.DatabaseField).Split(' ').Any(k => !string.IsNullOrEmpty(k) && col.ToLower().Contains(k)));
-
-                            if (matchedColumn != null)
-                            {
-                                mapping.ExcelColumn = matchedColumn;
-
-                                // Обновляем пример
-                                if (_excelData.Count > 0 && _excelData[0].ContainsKey(matchedColumn))
-                                {
-                                    mapping.SampleValue = _excelData[0][matchedColumn];
-                                }
-                            }
-                        }
                         mappedCount++;
                     }
                     else
                     {
                         mapping.UseForImport = false;
+                        // Очищаем выбранный столбец Excel для скрытых полей
+                        mapping.ExcelColumn = null;
+                        mapping.SampleValue = "-";
                     }
                 }
                 else
@@ -623,6 +623,10 @@ namespace PP02.Label
             MappingStatusText.Text = _isShortenedMode
                 ? $"✅ Режим сокращения документа: {mappedCount} полей активно"
                 : $"✅ Полный режим: {mappedCount} полей активно";
+
+            // Обновляем видимость строк в DataGrid
+            MappingDataGrid.Items.Refresh();
+
             UpdatePreview();
         }
 
@@ -640,6 +644,7 @@ namespace PP02.Label
             // Сбрасываем режим сокращения в исходное состояние (включён)
             _isShortenedMode = true;
             ApplyShortenedMode();
+            MappingDataGrid.Items.Refresh();
             MappingStatusText.Text = "Настройки сброшены (режим сокращения включён)";
             PreviewDataGrid.ItemsSource = null;
             _previewItems.Clear();
@@ -670,6 +675,7 @@ namespace PP02.Label
             if (targetIndex >= 0)
             {
                 _mappings.Move(index, targetIndex);
+                MappingDataGrid.Items.Refresh();
             }
         }
 
@@ -697,6 +703,7 @@ namespace PP02.Label
             if (targetIndex >= 0 && targetIndex < _mappings.Count)
             {
                 _mappings.Move(index, targetIndex);
+                MappingDataGrid.Items.Refresh();
             }
         }
 

@@ -4,6 +4,10 @@
              xmlns:local="clr-namespace:PP02"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <DropShadowEffect x:Key="DropShadowKey"
+                          ShadowDepth="2"
+                          BlurRadius="8"
+                          Opacity="0.3"
+                          Color="#000000"/>
     </Application.Resources>
 </Application>

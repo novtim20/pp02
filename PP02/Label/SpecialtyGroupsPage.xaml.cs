@@ -546,7 +546,7 @@ SELECT LAST_INSERT_ID();";
         // Обновление существующей группы
         private void UpdateGroup(int groupId)
         {
-            // Валидация
+            
             if (string.IsNullOrWhiteSpace(NewGroupCodeTextBox.Text))
             {
                 MessageBox.Show("Введите код группы", "Ошибка",
@@ -555,7 +555,7 @@ SELECT LAST_INSERT_ID();";
                 return;
             }
 
-            // Проверка года добавления (Data)
+            
             int? dataValue = null;
             if (!string.IsNullOrWhiteSpace(NewGroupDataTextBox.Text))
             {

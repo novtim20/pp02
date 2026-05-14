@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using PP02.Label;
@@ -20,10 +21,24 @@ namespace PP02.Label
         /// <summary>
         /// Загрузка списка студентов из базы данных
         /// </summary>
-        private void LoadStudents()
+        private async void LoadStudents()
         {
             try
             {
+                // Если список людей пуст, загружаем данные из базы данных
+                if (DataProvider.PeopleVMList.Count == 0)
+                {
+                    var db = new DataProvider();
+                    string connectionString = Connect.Connect.GetConnectionString();
+
+                    // Загружаем справочники и данные о людях
+                    await Task.Run(() =>
+                    {
+                        db.LoadAllDictionaries(connectionString);
+                        db.DataPeople(connectionString);
+                    });
+                }
+
                 // Получаем список всех студентов из DataProvider (фильтруем по роли "Студент")
                 var allPeople = DataProvider.PeopleVMList;
                 var students = allPeople.Where(p => p.Role == "Студент" || string.IsNullOrEmpty(p.Role)).ToList();

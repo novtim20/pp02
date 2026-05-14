@@ -235,6 +235,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Label\StudentsListPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -293,6 +297,9 @@
     </Compile>
     <Compile Include="Label\SpecialtyGroupsPage.xaml.cs">
       <DependentUpon>SpecialtyGroupsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Label\StudentsListPage.xaml.cs">
+      <DependentUpon>StudentsListPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

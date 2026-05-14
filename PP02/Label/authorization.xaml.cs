@@ -44,7 +44,7 @@ namespace PP02.Label
             {
                 MessageBox.Show("Успешный вход!", "Информация",
                     MessageBoxButton.OK, MessageBoxImage.Information);
-                MainWindow.init.OpenPages(new Label.search());
+                MainWindow.init.OpenPages(new Label.StudentsListPage());
 
                 // Здесь можно открыть главное окно:
                 // new MainWindow().Show();

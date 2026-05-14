@@ -1226,13 +1226,13 @@ namespace PP02.Label
                     return null;
                 }
 
-                try
-                {
-                    const string sqlInsert = @"
+                const string sqlInsert = @"
 INSERT INTO specialties (name, short_name, active, data)
 VALUES (@name, @short_name, 1, @data);
 SELECT LAST_INSERT_ID();";
 
+                try
+                {
                     Console.WriteLine($"[DEBUG] Executing SQL (insert): {sqlInsert.Replace("\n", " ")}");
                     Console.WriteLine($"[DEBUG] Parameters: @name='{fullSpecialtyName}', @short_name='{specialtyCode?.Trim()}', @data={DateTime.Now}");
 

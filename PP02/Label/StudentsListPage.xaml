@@ -17,14 +17,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- ЗАГОЛОВОК -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="📚 Списки студентов"
-                       FontSize="24" FontWeight="Bold" Foreground="#333"/>
-            <TextBlock Text="Выберите действие для работы со студентами"
-                       FontSize="14" Foreground="#666" Margin="0,5,0,0"/>
-        </StackPanel>
-
         <!-- КНОПКИ НАВИГАЦИИ -->
         <Border Grid.Row="1" Background="White" CornerRadius="5" Padding="20"
                 BorderBrush="#DDD" BorderThickness="1" Margin="0,0,0,20">

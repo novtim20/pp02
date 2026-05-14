@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using PP02.Label;
@@ -23,8 +24,9 @@ namespace PP02.Label
         {
             try
             {
-                // Получаем список всех студентов из DataProvider
-                var students = DataProvider.PeopleVMList;
+                // Получаем список всех студентов из DataProvider (фильтруем по роли "Студент")
+                var allPeople = DataProvider.PeopleVMList;
+                var students = allPeople.Where(p => p.Role == "Студент" || string.IsNullOrEmpty(p.Role)).ToList();
                 StudentsList.ItemsSource = students;
             }
             catch (Exception ex)

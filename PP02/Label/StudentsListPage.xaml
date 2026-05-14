@@ -18,63 +18,172 @@
         </Grid.RowDefinitions>
 
         <!-- КНОПКИ НАВИГАЦИИ -->
-        <Border Grid.Row="1" Background="White" CornerRadius="5" Padding="20"
-                BorderBrush="#DDD" BorderThickness="1" Margin="0,0,0,20">
+        <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="15"
+                BorderBrush="#E0E0E0" BorderThickness="0" Margin="0,0,0,20"
+                Effect="{StaticResource DropShadowKey}">
             <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
 
                 <!-- 🔹 Добавить студента -->
-                <Button Content="➕ Добавить студента"
-                        Width="200" Height="60"
+                <Button Content="➕ Добавить"
+                        Width="140" Height="40"
                         Background="#4CAF50" Foreground="White"
-                        FontWeight="Bold" FontSize="14"
-                        BorderThickness="0"
+                        FontWeight="SemiBold" FontSize="13"
+                        BorderThickness="0" Cursor="Hand"
                         Click="AddStudentButton_Click"
-                        Margin="10"/>
+                        Margin="6">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="6"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#43A047"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#388E3C"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
 
                 <!-- 🔹 Документы об образовании -->
-                <Button Content="📄 Документы об образовании"
-                        Width="200" Height="60"
+                <Button Content="📄 Документы"
+                        Width="140" Height="40"
                         Background="#2196F3" Foreground="White"
-                        FontWeight="Bold" FontSize="14"
-                        BorderThickness="0"
+                        FontWeight="SemiBold" FontSize="13"
+                        BorderThickness="0" Cursor="Hand"
                         Click="EducationDocumentsButton_Click"
-                        Margin="10"/>
+                        Margin="6">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="6"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#1E88E5"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#1976D2"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
 
                 <!-- 🔹 Импорт из Excel -->
-                <Button Content="📊 Импорт из Excel"
-                        Width="200" Height="60"
+                <Button Content="📊 Импорт Excel"
+                        Width="140" Height="40"
                         Background="#FF9800" Foreground="White"
-                        FontWeight="Bold" FontSize="14"
-                        BorderThickness="0"
+                        FontWeight="SemiBold" FontSize="13"
+                        BorderThickness="0" Cursor="Hand"
                         Click="ImportExcelButton_Click"
-                        Margin="10"/>
+                        Margin="6">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="6"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#FB8C00"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#F57C00"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
 
                 <!-- 🔹 Отчёты -->
                 <Button Content="📈 Отчёты"
-                        Width="200" Height="60"
+                        Width="140" Height="40"
                         Background="#9C27B0" Foreground="White"
-                        FontWeight="Bold" FontSize="14"
-                        BorderThickness="0"
+                        FontWeight="SemiBold" FontSize="13"
+                        BorderThickness="0" Cursor="Hand"
                         Click="ReportButton_Click"
-                        Margin="10"/>
+                        Margin="6">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="6"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#8E24AA"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#7B1FA2"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
 
                 <!-- 🔹 Специальности и группы -->
-                <Button Content="🎓 Специальности и группы"
-                        Width="200" Height="60"
+                <Button Content="🎓 Специальности"
+                        Width="140" Height="40"
                         Background="#00BCD4" Foreground="White"
-                        FontWeight="Bold" FontSize="14"
-                        BorderThickness="0"
+                        FontWeight="SemiBold" FontSize="13"
+                        BorderThickness="0" Cursor="Hand"
                         Click="SpecialtyGroupsButton_Click"
-                        Margin="10"/>
+                        Margin="6">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="6"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#00ACC1"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#0097A7"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
 
                 <!-- 🔹 Поиск -->
-                <Button Content="🔍 Поиск студентов"
-                        Width="200" Height="60"
+                <Button Content="🔍 Поиск"
+                        Width="140" Height="40"
                         Background="#E91E63" Foreground="White"
-                        FontWeight="Bold" FontSize="14"
-                        BorderThickness="0"
+                        FontWeight="SemiBold" FontSize="13"
+                        BorderThickness="0" Cursor="Hand"
                         Click="SearchButton_Click"
-                        Margin="10"/>
+                        Margin="6">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="6"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#D81B60"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#C2185B"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
 
             </WrapPanel>
         </Border>

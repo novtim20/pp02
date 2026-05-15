@@ -20,7 +20,9 @@ namespace PP02.Label
         private readonly string _connectionString = Connect.Connect.GetConnectionString();
 
         // 🔹 Результаты поиска
-        private ObservableCollection<PersonViewModel> _searchResults;
+        private List<PersonViewModel> _allSearchResults;
+        private int _currentPage = 1;
+        private const int PageSize = 100;
 
         // 🔹 Флаг загрузки данных
         private bool _isLoading = false;
@@ -308,13 +310,70 @@ namespace PP02.Label
         // === 🔹 ОТОБРАЖЕНИЕ РЕЗУЛЬТАТОВ ЧЕРЕЗ PersonItem ===
         private void DisplayResults(List<PersonViewModel> results)
         {
-            _searchResults = new ObservableCollection<PersonViewModel>(results);
+            _allSearchResults = results;
+            _currentPage = 1;
+            UpdatePageDisplay();
+        }
 
-            if (ResultsItemsControl != null)
-                ResultsItemsControl.ItemsSource = _searchResults;
+        // === 🔹 ОБНОВЛЕНИЕ ОТОБРАЖЕНИЯ СТРАНИЦЫ ===
+        private void UpdatePageDisplay()
+        {
+            if (_allSearchResults == null || _allSearchResults.Count == 0)
+            {
+                ResultsItemsControl.ItemsSource = null;
+                PageInfoText.Text = "Стр. 1/1";
+                PrevPageButton.IsEnabled = false;
+                NextPageButton.IsEnabled = false;
+                if (ResultsCountText != null)
+                    ResultsCountText.Text = "0 записей";
+                return;
+            }
+
+            int totalPages = (int)Math.Ceiling((double)_allSearchResults.Count / PageSize);
+            if (_currentPage > totalPages)
+                _currentPage = totalPages;
+            if (_currentPage < 1)
+                _currentPage = 1;
+
+            int startIndex = (_currentPage - 1) * PageSize;
+            int endIndex = Math.Min(startIndex + PageSize, _allSearchResults.Count);
+            int count = endIndex - startIndex;
+
+            var pageItems = new List<PersonViewModel>();
+            for (int i = startIndex; i < endIndex; i++)
+            {
+                pageItems.Add(_allSearchResults[i]);
+            }
+
+            ResultsItemsControl.ItemsSource = pageItems;
+            PageInfoText.Text = $"Стр. {_currentPage}/{totalPages}";
+            PrevPageButton.IsEnabled = _currentPage > 1;
+            NextPageButton.IsEnabled = _currentPage < totalPages;
 
             if (ResultsCountText != null)
-                ResultsCountText.Text = $"{results.Count} записей";
+                ResultsCountText.Text = $"{_allSearchResults.Count} записей";
+        }
+
+        // === 🔹 ПЕРЕКЛЮЧЕНИЕ СТРАНИЦ ===
+        private void PrevPage_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentPage > 1)
+            {
+                _currentPage--;
+                UpdatePageDisplay();
+                ResultsItemsControl.ScrollIntoView(ResultsItemsControl.Items[0]);
+            }
+        }
+
+        private void NextPage_Click(object sender, RoutedEventArgs e)
+        {
+            int totalPages = (int)Math.Ceiling((double)_allSearchResults.Count / PageSize);
+            if (_currentPage < totalPages)
+            {
+                _currentPage++;
+                UpdatePageDisplay();
+                ResultsItemsControl.ScrollIntoView(ResultsItemsControl.Items[0]);
+            }
         }
 
         // === 🔹 КНОПКА "ОЧИСТИТЬ" ===
@@ -497,19 +556,22 @@ namespace PP02.Label
         // === 🔹 ОБРАБОТЧИК УДАЛЕНИЯ СТУДЕНТА ИЗ PersonItem ===
         private void PersonItem_PersonDeleted(object sender, int personId)
         {
-            // Удаляем из ObservableCollection
-            var personToRemove = _searchResults?.FirstOrDefault(p => p.Id == personId);
-            if (personToRemove != null)
-            {
-                _searchResults.Remove(personToRemove);
-                ResultsCountText.Text = $"{_searchResults.Count} записей";
-            }
-
-            // Также удаляем из общего списка DataProvider.PeopleVMList
+            // Удаляем из общего списка DataProvider.PeopleVMList
             var dbPerson = DataProvider.PeopleVMList.FirstOrDefault(p => p.Id == personId);
             if (dbPerson != null)
             {
                 DataProvider.PeopleVMList.Remove(dbPerson);
+            }
+
+            // Также удаляем из текущего списка результатов
+            if (_allSearchResults != null)
+            {
+                var personToRemove = _allSearchResults.FirstOrDefault(p => p.Id == personId);
+                if (personToRemove != null)
+                {
+                    _allSearchResults.Remove(personToRemove);
+                    UpdatePageDisplay();
+                }
             }
 
             MessageBox.Show("Список студентов обновлён", "Информация",

@@ -466,18 +466,57 @@
                         </Grid>
                     </Border>
 
-                    <!-- Пустой ItemsControl (заполняется из БД) -->
-                    <!-- Пустой ItemsControl (заполняется из БД) -->
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                        <ItemsControl x:Name="ResultsItemsControl" Margin="10">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <!-- 🔹 ПОДКЛЮЧЕНИЕ PersonItem С ПЕРЕДАЧЕЙ ДАННЫХ -->
-                                    <local1:PersonItem PersonData="{Binding}" Margin="0,0,0,10"
-                                                       PersonDeleted="PersonItem_PersonDeleted"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Disabled">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Пагинация -->
+                            <Border Grid.Row="0" Background="#F5F5F5" Padding="10" Margin="0,0,0,10" CornerRadius="5">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0" Text="{Binding ElementName=ResultsItemsControl, Path=Tag, StringFormat='{}Показано {0} из {1} записей'}"
+                                               VerticalAlignment="Center" Margin="0,0,15,0" Foreground="#666"/>
+
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="◀ Пред." Width="80" Height="30" Margin="0,0,5,0"
+                                                Click="PrevPage_Click" x:Name="PrevPageButton"/>
+                                        <TextBlock x:Name="PageInfoText" Text="Стр. 1/1"
+                                                   VerticalAlignment="Center" Margin="10,0,10,0" MinWidth="80" TextAlignment="Center"/>
+                                        <Button Content="След. ▶" Width="80" Height="30" Margin="5,0,0,0"
+                                                Click="NextPage_Click" x:Name="NextPageButton"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- ListBox с виртуализацией -->
+                            <ListBox Grid.Row="1" x:Name="ResultsItemsControl"
+                                     BorderThickness="0" Background="Transparent"
+                                     ScrollViewer.CanContentScroll="True"
+                                     VirtualizingPanel.IsVirtualizing="True"
+                                     VirtualizingPanel.VirtualizationMode="Recycling"
+                                     ScrollViewer.IsDeferredScrollingEnabled="True">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel/>
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <local1:PersonItem PersonData="{Binding}" Margin="0,0,0,10"
+                                                           PersonDeleted="PersonItem_PersonDeleted"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
                     </ScrollViewer>
                 </Grid>
             </Border>

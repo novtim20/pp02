@@ -318,12 +318,18 @@ namespace PP02.Label
         // === 🔹 ОБНОВЛЕНИЕ ОТОБРАЖЕНИЯ СТРАНИЦЫ ===
         private void UpdatePageDisplay()
         {
+            if (ResultsItemsControl == null)
+                return;
+
             if (_allSearchResults == null || _allSearchResults.Count == 0)
             {
                 ResultsItemsControl.ItemsSource = null;
-                PageInfoText.Text = "Стр. 1/1";
-                PrevPageButton.IsEnabled = false;
-                NextPageButton.IsEnabled = false;
+                if (PageInfoText != null)
+                    PageInfoText.Text = "Стр. 1/1";
+                if (PrevPageButton != null)
+                    PrevPageButton.IsEnabled = false;
+                if (NextPageButton != null)
+                    NextPageButton.IsEnabled = false;
                 if (ResultsCountText != null)
                     ResultsCountText.Text = "0 записей";
                 return;
@@ -337,7 +343,6 @@ namespace PP02.Label
 
             int startIndex = (_currentPage - 1) * PageSize;
             int endIndex = Math.Min(startIndex + PageSize, _allSearchResults.Count);
-            int count = endIndex - startIndex;
 
             var pageItems = new List<PersonViewModel>();
             for (int i = startIndex; i < endIndex; i++)
@@ -346,9 +351,13 @@ namespace PP02.Label
             }
 
             ResultsItemsControl.ItemsSource = pageItems;
-            PageInfoText.Text = $"Стр. {_currentPage}/{totalPages}";
-            PrevPageButton.IsEnabled = _currentPage > 1;
-            NextPageButton.IsEnabled = _currentPage < totalPages;
+
+            if (PageInfoText != null)
+                PageInfoText.Text = $"Стр. {_currentPage}/{totalPages}";
+            if (PrevPageButton != null)
+                PrevPageButton.IsEnabled = _currentPage > 1;
+            if (NextPageButton != null)
+                NextPageButton.IsEnabled = _currentPage < totalPages;
 
             if (ResultsCountText != null)
                 ResultsCountText.Text = $"{_allSearchResults.Count} записей";

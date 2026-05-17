@@ -241,17 +241,17 @@ namespace PP02.Label
                     : null,
                 Nationality = NationalityTextBox?.Text?.Trim() ?? "",
                 BirthYear = BirthYearTextBox?.Text?.Trim() ?? "",
-                PartyId = PartyComboBox?.SelectedValue != null && (PartyComboBox?.SelectedValue as Party)?.Id != -1
-                    ? (PartyComboBox?.SelectedValue as Party)?.Id
+                PartyId = PartyComboBox?.SelectedItem != null && (PartyComboBox?.SelectedItem as Party)?.Id != -1
+                    ? (PartyComboBox?.SelectedItem as Party)?.Id
                     : (int?)null,
                 BirthPlace = BirthPlaceTextBox?.Text?.Trim() ?? "",
-                EducationId = EducationComboBox?.SelectedValue != null && (EducationComboBox?.SelectedValue as Education)?.Id != -1
-                    ? (EducationComboBox?.SelectedValue as Education)?.Id
+                EducationId = EducationComboBox?.SelectedItem != null && (EducationComboBox?.SelectedItem as Education)?.Id != -1
+                    ? (EducationComboBox?.SelectedItem as Education)?.Id
                     : (int?)null,
                 SocialPosition = SocialPositionTextBox?.Text?.Trim() ?? "",
                 LastWorkplace = LastWorkplaceTextBox?.Text?.Trim() ?? "",
-                SocialOriginId = SocialOriginComboBox?.SelectedValue != null && (SocialOriginComboBox?.SelectedValue as SocialOrigin)?.Id != -1
-                    ? (SocialOriginComboBox?.SelectedValue as SocialOrigin)?.Id
+                SocialOriginId = SocialOriginComboBox?.SelectedItem != null && (SocialOriginComboBox?.SelectedItem as SocialOrigin)?.Id != -1
+                    ? (SocialOriginComboBox?.SelectedItem as SocialOrigin)?.Id
                     : (int?)null,
                 Address = AddressTextBox?.Text?.Trim() ?? "",
                 DiplomaDateStart = DiplomaStartDatePicker?.SelectedDate,

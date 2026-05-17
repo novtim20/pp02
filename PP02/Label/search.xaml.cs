@@ -286,12 +286,12 @@ namespace PP02.Label
                 (string.IsNullOrEmpty(c.Gender) || p.Gender == c.Gender) &&
                 (string.IsNullOrEmpty(c.Nationality) || SafeContains(p.Nationality, c.Nationality)) &&
                 (string.IsNullOrEmpty(c.BirthYear) || (p.BirthYear.HasValue && p.BirthYear.Value.ToString().Contains(c.BirthYear))) &&
-                (c.PartyId == null || c.PartyId == -1 || p.PartyId == c.PartyId) &&
+                (!c.PartyId.HasValue || c.PartyId == -1 || (p.PartyId.HasValue && p.PartyId.Value == c.PartyId.Value)) &&
                 (string.IsNullOrEmpty(c.BirthPlace) || SafeContains(p.BirthPlace, c.BirthPlace)) &&
-                (c.EducationId == null || c.EducationId == -1 || p.EducationId == c.EducationId) &&
+                (!c.EducationId.HasValue || c.EducationId == -1 || (p.EducationId.HasValue && p.EducationId.Value == c.EducationId.Value)) &&
                 (string.IsNullOrEmpty(c.SocialPosition) || SafeContains(p.SocialStatusName, c.SocialPosition)) &&
                 (string.IsNullOrEmpty(c.LastWorkplace) || SafeContains(p.WorkAfter, c.LastWorkplace)) &&
-                (c.SocialOriginId == null || c.SocialOriginId == -1 || p.SocialOriginId == c.SocialOriginId) &&
+                (!c.SocialOriginId.HasValue || c.SocialOriginId == -1 || (p.SocialOriginId.HasValue && p.SocialOriginId.Value == c.SocialOriginId.Value)) &&
                 (string.IsNullOrEmpty(c.Address) || SafeContains(p.Address, c.Address)) &&
                 (!c.DiplomaDateStart.HasValue || (p.DiplomaDate.HasValue && p.DiplomaDate.Value >= c.DiplomaDateStart.Value)) &&
                 (!c.SearchByDiplomaPeriod || !c.DiplomaDateEnd.HasValue || (p.DiplomaDate.HasValue && p.DiplomaDate.Value <= c.DiplomaDateEnd.Value)) &&
@@ -302,8 +302,10 @@ namespace PP02.Label
         // === 🔹 БЕЗОПАСНЫЙ ПОИСК ПОДСТРОКИ (совместимость с C# 7.3) ===
         private bool SafeContains(string source, string value)
         {
-            if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(value))
+            if (string.IsNullOrEmpty(value))
                 return true;
+            if (string.IsNullOrEmpty(source))
+                return false;
             return source.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 

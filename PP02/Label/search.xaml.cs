@@ -241,12 +241,18 @@ namespace PP02.Label
                     : null,
                 Nationality = NationalityTextBox?.Text?.Trim() ?? "",
                 BirthYear = BirthYearTextBox?.Text?.Trim() ?? "",
-                PartyId = (PartyComboBox?.SelectedValue as Party)?.Id,
+                PartyId = PartyComboBox?.SelectedValue != null && (PartyComboBox?.SelectedValue as Party)?.Id != -1
+                    ? (PartyComboBox?.SelectedValue as Party)?.Id
+                    : (int?)null,
                 BirthPlace = BirthPlaceTextBox?.Text?.Trim() ?? "",
-                EducationId = (EducationComboBox?.SelectedValue as Education)?.Id,
+                EducationId = EducationComboBox?.SelectedValue != null && (EducationComboBox?.SelectedValue as Education)?.Id != -1
+                    ? (EducationComboBox?.SelectedValue as Education)?.Id
+                    : (int?)null,
                 SocialPosition = SocialPositionTextBox?.Text?.Trim() ?? "",
                 LastWorkplace = LastWorkplaceTextBox?.Text?.Trim() ?? "",
-                SocialOriginId = (SocialOriginComboBox?.SelectedValue as SocialOrigin)?.Id,
+                SocialOriginId = SocialOriginComboBox?.SelectedValue != null && (SocialOriginComboBox?.SelectedValue as SocialOrigin)?.Id != -1
+                    ? (SocialOriginComboBox?.SelectedValue as SocialOrigin)?.Id
+                    : (int?)null,
                 Address = AddressTextBox?.Text?.Trim() ?? "",
                 DiplomaDateStart = DiplomaStartDatePicker?.SelectedDate,
                 SearchByDiplomaPeriod = DiplomaPeriodCheckBox?.IsChecked == true,
@@ -286,12 +292,15 @@ namespace PP02.Label
                 (string.IsNullOrEmpty(c.Gender) || p.Gender == c.Gender) &&
                 (string.IsNullOrEmpty(c.Nationality) || SafeContains(p.Nationality, c.Nationality)) &&
                 (string.IsNullOrEmpty(c.BirthYear) || (p.BirthYear.HasValue && p.BirthYear.Value.ToString().Contains(c.BirthYear))) &&
-                (!c.PartyId.HasValue || c.PartyId == -1 || (p.PartyId.HasValue && p.PartyId.Value == c.PartyId.Value)) &&
+                // Партийность: если выбрано конкретное значение, то должны быть совпадения по ID
+                (!c.PartyId.HasValue || (p.PartyId.HasValue && p.PartyId.Value == c.PartyId.Value)) &&
                 (string.IsNullOrEmpty(c.BirthPlace) || SafeContains(p.BirthPlace, c.BirthPlace)) &&
-                (!c.EducationId.HasValue || c.EducationId == -1 || (p.EducationId.HasValue && p.EducationId.Value == c.EducationId.Value)) &&
+                // Образование: если выбрано конкретное значение, то должны быть совпадения по ID
+                (!c.EducationId.HasValue || (p.EducationId.HasValue && p.EducationId.Value == c.EducationId.Value)) &&
                 (string.IsNullOrEmpty(c.SocialPosition) || SafeContains(p.SocialStatusName, c.SocialPosition)) &&
                 (string.IsNullOrEmpty(c.LastWorkplace) || SafeContains(p.WorkAfter, c.LastWorkplace)) &&
-                (!c.SocialOriginId.HasValue || c.SocialOriginId == -1 || (p.SocialOriginId.HasValue && p.SocialOriginId.Value == c.SocialOriginId.Value)) &&
+                // Соц. происхождение: если выбрано конкретное значение, то должны быть совпадения по ID
+                (!c.SocialOriginId.HasValue || (p.SocialOriginId.HasValue && p.SocialOriginId.Value == c.SocialOriginId.Value)) &&
                 (string.IsNullOrEmpty(c.Address) || SafeContains(p.Address, c.Address)) &&
                 (!c.DiplomaDateStart.HasValue || (p.DiplomaDate.HasValue && p.DiplomaDate.Value >= c.DiplomaDateStart.Value)) &&
                 (!c.SearchByDiplomaPeriod || !c.DiplomaDateEnd.HasValue || (p.DiplomaDate.HasValue && p.DiplomaDate.Value <= c.DiplomaDateEnd.Value)) &&

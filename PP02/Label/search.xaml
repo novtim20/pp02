@@ -56,8 +56,8 @@
                                       BorderBrush="#DDD" BorderThickness="1"
                                       SelectionChanged="FilterComboBox_SelectionChanged">
                                 <ComboBoxItem Content="Все" IsSelected="True"/>
-                                <ComboBoxItem Content="Да"/>
-                                <ComboBoxItem Content="Нет"/>
+                                <ComboBoxItem Content="Студент"/>
+                                <ComboBoxItem Content="Преподаватель"/>
                             </ComboBox>
                         </StackPanel>
 
@@ -207,8 +207,8 @@
                                     <ComboBox x:Name="GenderComboBox" Height="35" BorderBrush="#DDD" BorderThickness="1"
                                               SelectionChanged="FilterComboBox_SelectionChanged">
                                         <ComboBoxItem Content="Все" IsSelected="True"/>
-                                        <ComboBoxItem Content="М"/>
-                                        <ComboBoxItem Content="Ж"/>
+                                        <ComboBoxItem Content="Мужской"/>
+                                        <ComboBoxItem Content="Женский"/>
                                     </ComboBox>
                                 </StackPanel>
 

@@ -278,7 +278,7 @@ namespace PP02.Label
         // === 🔹 ФИЛЬТРАЦИЯ СПИСКА ===
         private List<PersonViewModel> FilterPeople(List<PersonViewModel> source, SearchCriteria c)
         {
-            return source.Where(p =>
+            var filtered = source.Where(p =>
                 (string.IsNullOrEmpty(c.FullName) || SafeContains(p.FullName, c.FullName)) &&
                 (!c.IsStudent.HasValue || (c.IsStudent.Value && p.Role == "Студент") || (!c.IsStudent.Value && p.Role != "Студент")) &&
                 // Фильтрация по группе: по ID из ComboBox или по тексту
@@ -306,6 +306,33 @@ namespace PP02.Label
                 (!c.SearchByDiplomaPeriod || !c.DiplomaDateEnd.HasValue || (p.DiplomaDate.HasValue && p.DiplomaDate.Value <= c.DiplomaDateEnd.Value)) &&
                 (string.IsNullOrEmpty(c.Source) || SafeContains(p.Source, c.Source))
             ).ToList();
+
+            // 🔹 Сортировка: записи, начинающиеся с поискового запроса, идут первыми
+            if (!string.IsNullOrEmpty(c.FullName))
+            {
+                filtered = filtered.OrderBy(p =>
+                {
+                    // Если ФИО начинается с поискового запроса - приоритет 0
+                    // Если содержит поисковый запрос - приоритет 1
+                    // Иначе - приоритет 2
+                    if (StartsWithSearch(p.FullName, c.FullName))
+                        return 0;
+                    else
+                        return 1;
+                }).ThenBy(p => p.FullName).ToList();
+            }
+
+            return filtered;
+        }
+
+        // === 🔹 ПРОВЕРКА: НАЧИНАЕТСЯ ЛИ СТРОКА С ПОИСКОВОГО ЗАПРОСА ===
+        private bool StartsWithSearch(string source, string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return true;
+            if (string.IsNullOrEmpty(source))
+                return false;
+            return source.StartsWith(value, StringComparison.OrdinalIgnoreCase);
         }
 
         // === 🔹 БЕЗОПАСНЫЙ ПОИСК ПОДСТРОКИ (совместимость с C# 7.3) ===

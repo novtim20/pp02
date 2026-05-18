@@ -917,7 +917,7 @@ INSERT INTO social_profiles (
         }
 
         /// <summary>
-        /// Внутренний метод получения ID из справочника
+        /// Внутренний метод получения ID из справочника (создает новую запись если не найдена)
         /// </summary>
         private int? GetDictionaryIdInternal(MySqlConnection connection, string tableName, string columnName, string name, MySqlTransaction transaction)
         {
@@ -932,8 +932,29 @@ INSERT INTO social_profiles (
                     Console.WriteLine($"[DEBUG] Looking up {tableName}.name='{name}'");
                     var result = command.ExecuteScalar();
                     var id = result != null ? (int?)Convert.ToInt32(result) : null;
-                    Console.WriteLine($"[DEBUG] Found {tableName}.id={id} for name='{name}'");
-                    return id;
+
+                    if (id.HasValue)
+                    {
+                        Console.WriteLine($"[DEBUG] Found {tableName}.id={id} for name='{name}'");
+                        return id;
+                    }
+
+                    // Если не найдено, создаем новую запись
+                    Console.WriteLine($"[INFO] {tableName}.name='{name}' not found, creating new record...");
+                    var insertSql = $"INSERT INTO {tableName} (name) VALUES (@name)";
+                    using (var insertCommand = new MySqlCommand(insertSql, connection, transaction))
+                    {
+                        insertCommand.Parameters.AddWithValue("@name", name);
+                        insertCommand.ExecuteNonQuery();
+
+                        // Получаем новый ID
+                        insertCommand.CommandText = "SELECT LAST_INSERT_ID()";
+                        insertCommand.Parameters.Clear();
+                        var newId = insertCommand.ExecuteScalar();
+                        var resultId = newId != null ? (int?)Convert.ToInt32(newId) : null;
+                        Console.WriteLine($"[INFO] Created {tableName}.name='{name}' with ID {resultId}");
+                        return resultId;
+                    }
                 }
             }
             catch (Exception ex)
@@ -966,7 +987,7 @@ INSERT INTO social_profiles (
         }
 
         /// <summary>
-        /// Внутренний метод получения ID специальности
+        /// Внутренний метод получения ID специальности (создает новую запись если не найдена)
         /// </summary>
         private int? GetSpecialtyIdInternal(MySqlConnection connection, string specialtyName, MySqlTransaction transaction)
         {
@@ -981,8 +1002,32 @@ INSERT INTO social_profiles (
                     Console.WriteLine($"[DEBUG] Looking up specialties for '{specialtyName}'");
                     var result = command.ExecuteScalar();
                     var id = result != null ? (int?)Convert.ToInt32(result) : null;
-                    Console.WriteLine($"[DEBUG] Found specialties.id={id} for name='{specialtyName}'");
-                    return id;
+
+                    if (id.HasValue)
+                    {
+                        Console.WriteLine($"[DEBUG] Found specialties.id={id} for name='{specialtyName}'");
+                        return id;
+                    }
+
+                    // Если не найдено, создаем новую запись
+                    Console.WriteLine($"[INFO] Specialties '{specialtyName}' not found, creating new record...");
+                    const string insertSql = @"INSERT INTO specialties (name, short_name, active, data, group_id)
+                                               VALUES (@name, @short_name, 1, @data, NULL)";
+                    using (var insertCommand = new MySqlCommand(insertSql, connection, transaction))
+                    {
+                        insertCommand.Parameters.AddWithValue("@name", specialtyName);
+                        insertCommand.Parameters.AddWithValue("@short_name", specialtyName);
+                        insertCommand.Parameters.AddWithValue("@data", DateTime.Now);
+                        insertCommand.ExecuteNonQuery();
+
+                        // Получаем новый ID
+                        insertCommand.CommandText = "SELECT LAST_INSERT_ID()";
+                        insertCommand.Parameters.Clear();
+                        var newId = insertCommand.ExecuteScalar();
+                        var resultId = newId != null ? (int?)Convert.ToInt32(newId) : null;
+                        Console.WriteLine($"[INFO] Created specialties.name='{specialtyName}' with ID {resultId}");
+                        return resultId;
+                    }
                 }
             }
             catch (Exception ex)

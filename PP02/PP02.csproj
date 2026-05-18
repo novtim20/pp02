@@ -207,6 +207,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Label\ImportErrorsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Label\ImportExcelPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -276,6 +280,9 @@
     </Compile>
     <Compile Include="Label\ImportEducationDocumentsPage.xaml.cs">
       <DependentUpon>ImportEducationDocumentsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Label\ImportErrorsWindow.xaml.cs">
+      <DependentUpon>ImportErrorsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Label\ImportExcelPage.xaml.cs">
       <DependentUpon>ImportExcelPage.xaml</DependentUpon>

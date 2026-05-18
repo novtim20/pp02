@@ -19,6 +19,18 @@ using PP02.Classes.Person;
 namespace PP02.Label
 {
     /// <summary>
+    /// Информация об ошибке импорта
+    /// </summary>
+    public class ImportErrorInfo
+    {
+        public int RowNumber { get; set; }
+        public string FullName { get; set; }
+        public string ErrorMessage { get; set; }
+        public string ErrorDetails { get; set; }
+        public Dictionary<string, string> RowData { get; set; }
+    }
+
+    /// <summary>
     /// Модель для настройки маппинга столбцов Excel на поля БД
     /// </summary>
     public class ColumnMapping : INotifyPropertyChanged
@@ -74,6 +86,20 @@ namespace PP02.Label
     }
 
     /// <summary>
+    /// Класс для предпросмотра импортируемых данных
+    /// </summary>
+    public class ImportPreviewItem
+    {
+        public string FullName { get; set; }
+        public string Role { get; set; }
+        public string GroupName { get; set; }
+        public string SpecialtyName { get; set; }
+        public string GraduationYear { get; set; }
+        public string Gender { get; set; }
+        public string BirthYear { get; set; }
+    }
+
+    /// <summary>
     /// Страница импорта данных студентов из Excel с гибкой настройкой маппинга
     /// </summary>
     public partial class ImportExcelPage : Page
@@ -103,6 +129,10 @@ namespace PP02.Label
 
         // Предпросмотр данных
         private ObservableCollection<ImportPreviewItem> _previewItems = new ObservableCollection<ImportPreviewItem>();
+
+        // Список ошибок импорта
+        private ObservableCollection<ImportErrorInfo> _importErrors = new ObservableCollection<ImportErrorInfo>();
+        public ObservableCollection<ImportErrorInfo> ImportErrors => _importErrors;
 
         public ImportExcelPage()
         {
@@ -533,6 +563,9 @@ namespace PP02.Label
             bool skipDuplicates = SkipDuplicatesCheckBox.IsChecked == true;
             bool validateData = ValidateDataCheckBox.IsChecked == true;
 
+            // Очищаем список ошибок перед новым импортом
+            _importErrors.Clear();
+
             try
             {
                 ImportProgressBar.Visibility = Visibility.Visible;
@@ -542,6 +575,7 @@ namespace PP02.Label
                 int importedCount = 0;
                 int skippedCount = 0;
                 int errorCount = 0;
+                var errorsList = new List<ImportErrorInfo>();
 
                 await Task.Run(() =>
                 {
@@ -555,11 +589,11 @@ namespace PP02.Label
                             for (int i = 0; i < excelDataCopy.Count; i++)
                             {
                                 var rowData = excelDataCopy[i];
+                                var fullName = GetMappedValueInternal(rowData, mappingsCopy, "full_name");
 
                                 // Проверка на дубликаты
                                 if (skipDuplicates)
                                 {
-                                    var fullName = GetMappedValueInternal(rowData, mappingsCopy, "full_name");
                                     if (!string.IsNullOrEmpty(fullName) && IsDuplicate(connection, fullName, transaction))
                                     {
                                         skippedCount++;
@@ -573,18 +607,35 @@ namespace PP02.Label
                                     if (!ValidateRowData(rowData, mappingsCopy))
                                     {
                                         errorCount++;
+                                        errorsList.Add(new ImportErrorInfo
+                                        {
+                                            RowNumber = i + 2, // +2 т.к. первая строка заголовок
+                                            FullName = fullName ?? "(не указано)",
+                                            ErrorMessage = "Ошибка валидации данных",
+                                            ErrorDetails = "Проверьте корректность ФИО, года рождения и года выпуска",
+                                            RowData = rowData
+                                        });
                                         continue;
                                     }
                                 }
 
                                 // Вставка записи
-                                if (InsertPerson(connection, rowData, transaction, mappingsCopy))
+                                var insertResult = InsertPersonWithErrors(connection, rowData, transaction, mappingsCopy);
+                                if (insertResult.Success)
                                 {
                                     importedCount++;
                                 }
                                 else
                                 {
                                     errorCount++;
+                                    errorsList.Add(new ImportErrorInfo
+                                    {
+                                        RowNumber = i + 2,
+                                        FullName = fullName ?? "(не указано)",
+                                        ErrorMessage = insertResult.ErrorMessage,
+                                        ErrorDetails = insertResult.ErrorDetails,
+                                        RowData = rowData
+                                    });
                                 }
 
                                 // Обновление прогресса
@@ -613,14 +664,31 @@ namespace PP02.Label
                     }
                 });
 
-                MessageBox.Show(
-                    $"Импорт завершен!\n\n✅ Успешно импортировано: {importedCount}\n⚠️ Пропущено (дубликаты): {skippedCount}\n❌ Ошибки: {errorCount}",
-                    "Результат импорта",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                // Добавляем ошибки в ObservableCollection для отображения
+                foreach (var error in errorsList)
+                {
+                    _importErrors.Add(error);
+                }
 
-                // Переход на страницу поиска
-                NavigationService?.Navigate(new search());
+                // Показываем окно с результатами и возможностью просмотра ошибок
+                var resultMessage = $"Импорт завершен!\n\n✅ Успешно импортировано: {importedCount}\n⚠️ Пропущено (дубликаты): {skippedCount}\n❌ Ошибки: {errorCount}";
+
+                if (errorCount > 0)
+                {
+                    resultMessage += "\n\n⚠️ Нажмите ОК для просмотра деталей ошибок.";
+                    MessageBox.Show(resultMessage, "Результат импорта", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                    // Открываем окно с ошибками
+                    var errorsWindow = new ImportErrorsWindow(_importErrors);
+                    errorsWindow.Owner = Application.Current.MainWindow;
+                    errorsWindow.ShowDialog();
+                }
+                else
+                {
+                    MessageBox.Show(resultMessage, "Результат импорта", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // Переход на страницу поиска только если нет ошибок
+                    NavigationService?.Navigate(new search());
+                }
             }
             catch (Exception ex)
             {
@@ -718,25 +786,27 @@ namespace PP02.Label
         }
 
         /// <summary>
-        /// Вставка записи о человеке в базу (использует глобальные маппинги из UI потока)
+        /// Результат вставки записи с информацией об ошибке
         /// </summary>
-        private bool InsertPerson(MySqlConnection connection, Dictionary<string, string> rowData, MySqlTransaction transaction)
+        public class InsertResult
         {
-            return InsertPersonInternal(connection, rowData, transaction, null);
+            public bool Success { get; set; }
+            public string ErrorMessage { get; set; }
+            public string ErrorDetails { get; set; }
         }
 
         /// <summary>
-        /// Вставка записи о человеке в базу с использованием копии маппингов (для фонового потока)
+        /// Вставка записи о человеке в базу с возвратом информации об ошибке (для фонового потока)
         /// </summary>
-        private bool InsertPerson(MySqlConnection connection, Dictionary<string, string> rowData, MySqlTransaction transaction, List<ColumnMappingInfo> mappingsCopy)
+        private InsertResult InsertPersonWithErrors(MySqlConnection connection, Dictionary<string, string> rowData, MySqlTransaction transaction, List<ColumnMappingInfo> mappingsCopy)
         {
             return InsertPersonInternal(connection, rowData, transaction, mappingsCopy);
         }
 
         /// <summary>
-        /// Внутренний метод вставки записи
+        /// Внутренний метод вставки записи с возвратом результата
         /// </summary>
-        private bool InsertPersonInternal(MySqlConnection connection, Dictionary<string, string> rowData, MySqlTransaction transaction, List<ColumnMappingInfo> mappingsCopy)
+        private InsertResult InsertPersonInternal(MySqlConnection connection, Dictionary<string, string> rowData, MySqlTransaction transaction, List<ColumnMappingInfo> mappingsCopy)
         {
             try
             {
@@ -860,7 +930,7 @@ INSERT INTO social_profiles (
                     }
                 }
 
-                return true;
+                return new InsertResult { Success = true };
             }
             catch (Exception ex)
             {
@@ -872,7 +942,12 @@ INSERT INTO social_profiles (
                 {
                     Console.WriteLine($"[ERROR] InnerException: {ex.InnerException.Message}");
                 }
-                return false;
+                return new InsertResult
+                {
+                    Success = false,
+                    ErrorMessage = $"Ошибка БД: {ex.GetType().Name}",
+                    ErrorDetails = ex.Message
+                };
             }
         }
 
@@ -1245,19 +1320,5 @@ VALUES (@code, @short_name, @name, @specialty_id, 1)";
         {
             NavigationService?.Navigate(new ImportEducationDocumentsPage());
         }
-    }
-
-    /// <summary>
-    /// Класс для предпросмотра импортируемых данных
-    /// </summary>
-    public class ImportPreviewItem
-    {
-        public string FullName { get; set; }
-        public string Role { get; set; }
-        public string GroupName { get; set; }
-        public string SpecialtyName { get; set; }
-        public string GraduationYear { get; set; }
-        public string Gender { get; set; }
-        public string BirthYear { get; set; }
     }
 }
